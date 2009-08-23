@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="app_name">Anstop</string>
+<string name="reset">Reset</string>
+<string name="settings">Settings</string>
+<string name="reset_during_count">Cannot reset during count!</string>
+<string name="hour"> hour(s)</string>
+<string name="motion_checkbox">Use motion sensor to start and stop</string>
+<string name="restart">Please restart the Anstop, to make the changes effect</string>
+<string name="refresh">Refresh</string>
+<string name="refresh_during_count">Cannot refresh during count!</string>
+<string name="lap">Lap!</string>
+<string name="laps">Laps:</string>
+<string name="about">About</string>
+<string name="lap_mode">Lap Mode</string>
+<string name="stop">Stopping Watch</string>
+<string name="countdown">Countdown</string>
+<string name="about_dialog">Anstop v1.01, a small application to stop and countdown time.\nCopyright (C) 2009 by MJ &lt;anstop.googlecode.com&gt;</string>
+
+<string name="save">Save</string>
+<string name="load">Load</string>
+<string name="save_dialog">Please give in a name to save the results</string>
+<string name="no_entry">No Entrys!</string>
+<string name="delete">Delete</string>
+<string name="export">Export ...</string>
+<string name="export_succes">Saved sucessfully on SD Card!</string>
+<string name="export_fail">Exporting failed!</string>
+<string name="export_all">Export all ...</string>
+<string name="mode_was">Mode was: </string>
+<string name="start_time">Start Time was:</string>
+<string name="vibrate_checkbox">Vibrate when clicking on Buttons</string>
+<string name="saved_succes">Saved succesfully!</string>
+<string name="mode">Mode</string>
+<string name="cancel">Cancel</string>
+</resources>
