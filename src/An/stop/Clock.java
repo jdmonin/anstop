@@ -38,7 +38,11 @@ public class Clock {
 	clockThread threadS;
 	countDownThread threadC;
 	Anstop parent;
-	handler h;
+	dsechandler dsech;
+	sechandler sech;
+	minhandler minh;
+	hourhandler hourh;
+	
 	int dsec = 0;
 	int sec = 0;
 	int min = 0;
@@ -55,7 +59,10 @@ public class Clock {
 		nf.setMaximumIntegerDigits(2); // The maximum Digits required is 2
 
 
-		h = new handler();
+		dsech = new dsechandler();
+		sech = new sechandler();
+		minh = new minhandler();
+		hourh = new hourhandler();
 		
 	}
 	
@@ -108,22 +115,25 @@ public class Clock {
 				if(dsec == 10) {
 					sec++;
 					dsec = 0;
-				
+					sech.sendEmptyMessage(MAX_PRIORITY);
 				
 					if(sec == 60) {
 						min++;
 						sec = 0;
+						minh.sendEmptyMessage(MAX_PRIORITY);
 						
 						
 						if(min == 60) {
 							hour++;
 							min = 0;
+							hourh.sendEmptyMessage(MAX_PRIORITY);
+							minh.sendEmptyMessage(MAX_PRIORITY);
 						}
 					}
 				}
 				
 				
-				h.sendEmptyMessage(MAX_PRIORITY);
+				dsech.sendEmptyMessage(MAX_PRIORITY);
 				
 				try {
 					sleep(100);
@@ -161,18 +171,24 @@ public class Clock {
 							if(hour != 0) {
 								hour--;
 								min = 60;
+								hourh.sendEmptyMessage(MAX_PRIORITY);
+								minh.sendEmptyMessage(MAX_PRIORITY);
+								
 							}
 						}
 						
 						if(min != 0) {
 							min--;
 							sec = 60;
+							minh.sendEmptyMessage(MAX_PRIORITY);
 						}
+						
 					}					
 					
 					if(sec != 0) {
 						sec--;
 						dsec = 10;
+						sech.sendEmptyMessage(MAX_PRIORITY);
 					}
 										
 				}
@@ -180,7 +196,7 @@ public class Clock {
 				
 				
 				
-				h.sendEmptyMessage(MAX_PRIORITY);
+				dsech.sendEmptyMessage(MAX_PRIORITY);
 				
 				try {
 					sleep(100);
@@ -203,15 +219,34 @@ public class Clock {
 		
 	}
 	
-	private class handler extends Handler {
+	private class dsechandler extends Handler {
 		@Override
 		public void handleMessage (Message msg) {
 			parent.dsecondsView.setText("" + dsec);
+		}
+	}
+	
+	private class sechandler extends Handler {
+		@Override
+		public void handleMessage (Message msg) {
 			parent.secondsView.setText("" + nf.format(sec));
+		}
+	}
+	
+	private class minhandler extends Handler {
+		@Override
+		public void handleMessage (Message msg) {
 			parent.minView.setText("" + nf.format(min));
+		}
+	}
+	
+	private class hourhandler extends Handler {
+		@Override
+		public void handleMessage (Message msg) {
 			parent.hourView.setText("" + hour);
 		}
 	}
+	
 		
 	
 }
