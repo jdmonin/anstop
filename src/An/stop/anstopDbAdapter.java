@@ -82,6 +82,7 @@ public class anstopDbAdapter {
     	ContentValues cl = new ContentValues();
     	cl.put(KEY_TITLE, title);
     	cl.put(KEY_BODY, body);
+    	
     	return mDb.insert(DATABASE_TABLE, null, cl);
     	
     	

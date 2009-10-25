@@ -2,9 +2,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:key="first_preferencescreen">
     <CheckBoxPreference
-            android:key="use_motion_sensor"
-            android:title="Use motion sensor" />
+            android:key="use_motion_sensor" android:summary="@string/motion_checkbox" android:title="@string/motion_sensor"/>
      <CheckBoxPreference
-            android:key="vibrate"
-            android:title="Vibrate when clicking on Button" />
+            android:key="vibrate" android:summary="@string/vibrate_checkbox" android:title="@string/vibrate" android:defaultValue="true"/>
 </PreferenceScreen> 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="An.stop"
-      android:versionName="1.0" android:versionCode="04">
+      android:versionName="1.1 Beta 1" android:versionCode="05">
       
       <uses-permission android:name="android.permission.VIBRATE" />
       

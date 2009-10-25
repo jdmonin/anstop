@@ -38,6 +38,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -69,6 +70,7 @@ public class Anstop extends Activity {
 	private int current;
 	
 	private static final int ABOUT_DIALOG = 0;
+	private static final int SAVE_DIALOG = 1;
 	
 	private static final int SETTINGS_ACTIVITY = 0;
 	
@@ -97,6 +99,8 @@ public class Anstop extends Activity {
 	
 	AccelerometerListener al;
 	
+	anstopDbAdapter dbHelper;
+	
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -120,6 +124,9 @@ public class Anstop extends Activity {
         secondsView.setTextSize(VIEW_SIZE);
         minView.setTextSize(VIEW_SIZE);
         hourView.setTextSize(VIEW_SIZE - 30);
+        
+        dbHelper = new anstopDbAdapter(this);
+        dbHelper.open();
         
         //set the clock object
         clock = new Clock(this);
@@ -303,40 +310,7 @@ public class Anstop extends Activity {
         	return true;
         	
         case SAVE_ITEM:
-        	i.setClass(this, loadActivity.class);
-        	String body;
-        	switch(current) {
-			case LAP:
-				body = mContext.getResources().getString(R.string.mode_was) + " " 
-					+ mContext.getResources().getString(R.string.lap_mode) + "\n" 
-					+ hourView.getText().toString() + " " + mContext.getResources().getString(R.string.hour)
-					+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
-					+ ":" + dsecondsView.getText().toString() + "\n" + lapView.getText().toString();
-				break;
-			case COUNTDOWN:
-				body = mContext.getResources().getString(R.string.mode_was) + " " 
-					+ mContext.getResources().getString(R.string.countdown) + "\n" 
-					+ hourView.getText().toString() + " " + mContext.getResources().getString(R.string.hour)
-					+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
-					+ ":" + dsecondsView.getText().toString() + "\n" + mContext.getResources().getString(R.string.start_time)
-					+ "\n" + hourSpinner.getSelectedItemPosition() + " "
-					+ mContext.getResources().getString(R.string.hour) + "\n"
-					+ clock.nf.format(secSpinner.getSelectedItemPosition()) + ":" 
-					+ clock.nf.format(minSpinner.getSelectedItemPosition()) + ".0";
-				break;
-			case STOP:
-				body = mContext.getResources().getString(R.string.mode_was) + " " 
-					+ mContext.getResources().getString(R.string.stop) + "\n" 
-					+ hourView.getText().toString() + " " + mContext.getResources().getString(R.string.hour)
-					+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
-					+ ":" + dsecondsView.getText().toString();
-				break;
-			default:
-				body = "ModeError";
-				break;
-			}
-        	i.putExtra(anstopDbAdapter.KEY_BODY, body);
-        	startActivity(i);
+        	showDialog(SAVE_DIALOG);
         	return true;
         	
         case LOAD_ITEM:
@@ -367,9 +341,68 @@ public class Anstop extends Activity {
         	dialog = aboutBuilder.create();
         	break;
         	
-        default:
-    	   dialog = null;
-        }
+               
+        case SAVE_DIALOG:
+        	AlertDialog.Builder saveBuilder = new AlertDialog.Builder(this);
+        	saveBuilder.setTitle(R.string.save);
+        	saveBuilder.setMessage(R.string.save_dialog);
+        	final EditText input = new EditText(this);
+        	saveBuilder.setView(input);
+        	
+        	saveBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+		    			
+        				String body;
+		            	switch(current) {
+		    			case LAP:
+		    				body = mContext.getResources().getString(R.string.mode_was) + " " 
+		    					+ mContext.getResources().getString(R.string.lap_mode) + "\n" 
+		    					+ hourView.getText().toString() + " " + mContext.getResources().getString(R.string.hour)
+		    					+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
+		    					+ ":" + dsecondsView.getText().toString() + "\n" + lapView.getText().toString();
+		    				break;
+		    			case COUNTDOWN:
+		    				body = mContext.getResources().getString(R.string.mode_was) + " " 
+		    					+ mContext.getResources().getString(R.string.countdown) + "\n" 
+		    					+ hourView.getText().toString() + " " + mContext.getResources().getString(R.string.hour)
+		    					+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
+		    					+ ":" + dsecondsView.getText().toString() + "\n" + mContext.getResources().getString(R.string.start_time)
+		    					+ "\n" + hourSpinner.getSelectedItemPosition() + " "
+		    					+ mContext.getResources().getString(R.string.hour) + "\n"
+		    					+ clock.nf.format(secSpinner.getSelectedItemPosition()) + ":" 
+		    					+ clock.nf.format(minSpinner.getSelectedItemPosition()) + ".0";
+		    				break;
+		    			case STOP:
+		    				body = mContext.getResources().getString(R.string.mode_was) + " " 
+		    					+ mContext.getResources().getString(R.string.stop) + "\n" 
+		    					+ hourView.getText().toString() + " " + mContext.getResources().getString(R.string.hour)
+		    					+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
+		    					+ ":" + dsecondsView.getText().toString();
+		    				break;
+		    			default:
+		    				body = "ModeError";
+		    				break;
+		    			}
+        			
+        				
+		    			dbHelper.createNew(input.getText().toString(), body);
+		    			Toast toast = Toast.makeText(getApplicationContext(), R.string.saved_succes, Toast.LENGTH_SHORT);
+		    			toast.show();
+        			}
+        		});
+        	
+        	saveBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+	        			dialog.dismiss();
+        			}
+        		});
+        	saveBuilder.setCancelable(false);
+        	dialog = saveBuilder.create();
+        	break;
+        default: dialog = null;
+		}
+		
+		
         return dialog;
     }
 

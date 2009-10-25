@@ -16,11 +16,11 @@
 <string name="lap_mode">Lap Mode</string>
 <string name="stop">Stopping Watch</string>
 <string name="countdown">Countdown</string>
-<string name="about_dialog">Anstop v1.01, a small application to stop and countdown time.\nCopyright (C) 2009 by MJ &lt;anstop.googlecode.com&gt;</string>
+<string name="about_dialog">Anstop v1.1 Beta 1, a small application to stop and countdown time.\nCopyright (C) 2009 by MJ &lt;anstop.googlecode.com&gt;\nLicense is GPLv2 (http://www.gnu.org/licenses/gpl-2.0.html)</string>
 
 <string name="save">Save</string>
 <string name="load">Load</string>
-<string name="save_dialog">Please give in a name to save the results</string>
+<string name="save_dialog">Please enter a name to save the results</string>
 <string name="no_entry">No Entrys!</string>
 <string name="delete">Delete</string>
 <string name="export">Export ...</string>
@@ -29,8 +29,10 @@
 <string name="export_all">Export all ...</string>
 <string name="mode_was">Mode was: </string>
 <string name="start_time">Start Time was:</string>
-<string name="vibrate_checkbox">Vibrate when clicking on Buttons</string>
+<string name="vibrate_checkbox">Vibrate when clicking on Start or Stop</string>
 <string name="saved_succes">Saved succesfully!</string>
 <string name="mode">Mode</string>
 <string name="cancel">Cancel</string>
+<string name="vibrate">Vibrate</string>
+<string name="motion_sensor">Motion Sensor</string>
 </resources>
