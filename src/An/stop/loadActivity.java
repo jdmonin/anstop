@@ -25,6 +25,7 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -80,7 +81,7 @@ public class loadActivity extends ListActivity {
 	 @Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
-	    menu.add(MENU_DELETE, DELETE_ITEM, 0, R.string.delete);
+		menu.add(MENU_DELETE, DELETE_ITEM, 0, R.string.delete);
 	    menu.add(MENU_EXPORT, EXPORT_ITEM, 0, R.string.export);
 		
 	 }

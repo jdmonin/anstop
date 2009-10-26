@@ -93,6 +93,7 @@ public class Anstop extends Activity {
 	Spinner hourSpinner;
 	
 	MenuItem modeMenuItem;
+	MenuItem saveMenuItem;
 	
 	Context mContext;
 	Vibrator vib;
@@ -259,7 +260,7 @@ public class Anstop extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
     	
     	//Save & Load
-    	menu.add(MENU_SAVE, SAVE_ITEM, 0, R.string.save).setIcon(android.R.drawable.ic_menu_save);
+    	saveMenuItem = menu.add(MENU_SAVE, SAVE_ITEM, 0, R.string.save).setIcon(android.R.drawable.ic_menu_save);
     	menu.add(MENU_LOAD, LOAD_ITEM, 0, R.string.load).setIcon(android.R.drawable.ic_menu_upload);
     	
     	//Mode Submenu
@@ -270,8 +271,10 @@ public class Anstop extends Activity {
     	modeMenu.setGroupCheckable(MENU_MODE_GROUP, true, true);
     	modeMenuItem = modeMenu.getItem();
     	
-    	if(clock.isStarted)
+    	if(clock.isStarted) {
     		modeMenuItem.setEnabled(false);
+    		saveMenuItem.setEnabled(false);
+    	}
 
     	//Settings Menu
     	menu.add(MENU_SETTINGS, SETTINGS_ITEM, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
@@ -420,8 +423,10 @@ public class Anstop extends Activity {
     		
     		clock.count(); //start counting
     		
-    		if(modeMenuItem != null)
-    			modeMenuItem.setEnabled(!modeMenuItem.isEnabled());
+    		if(modeMenuItem != null) {
+    			modeMenuItem.setEnabled(!clock.isStarted);
+    			saveMenuItem.setEnabled(!clock.isStarted);
+    		}
     		
     		
     		if(vib != null)
