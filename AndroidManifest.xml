@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="An.stop"
-      android:versionName="1.1 Beta 1" android:versionCode="05">
+      android:versionName="1.1" android:versionCode="06">
       
       <uses-permission android:name="android.permission.VIBRATE" />
       
-    <application android:icon="@drawable/icon" android:label="@string/app_name" android:allowClearUserData="true" android:debuggable="true">
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:allowClearUserData="true" android:debuggable="false">
         <activity android:name=".Anstop"
                   android:label="@string/app_name" android:screenOrientation="portrait">
             <intent-filter>
