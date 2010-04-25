@@ -112,6 +112,7 @@ public class exportHelper {
 		return columns;
 	}
 	
+	//TODO this does not work !!
 	public boolean write(Cursor c) {
 		c.moveToFirst();
 		boolean val = true;

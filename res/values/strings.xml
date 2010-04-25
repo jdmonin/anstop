@@ -16,7 +16,7 @@
 <string name="lap_mode">Lap Mode</string>
 <string name="stop">Stopping Watch</string>
 <string name="countdown">Countdown</string>
-<string name="about_dialog">Anstop v1.1, a small application to stop and countdown time.\nCopyright (C) 2009 by MJ &lt;anstop.googlecode.com&gt;\nLicense is GPLv2 (http://www.gnu.org/licenses/gpl-2.0.html)\nFor the source code look at anstop.googlecode.com</string>
+<string name="about_dialog">Anstop v1.2, a small application to stop and countdown time.\nCopyright (C) 2009, 2010 MJ and Jeremy Monin &lt;anstop.googlecode.com&gt;\nLicense is GPLv2 (http://www.gnu.org/licenses/gpl-2.0.html)\nFor the source code look at anstop.googlecode.com</string>
 
 <string name="save">Save</string>
 <string name="load">Load</string>
