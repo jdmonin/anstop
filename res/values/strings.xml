@@ -10,7 +10,7 @@
 
 <string name="refresh">Refresh</string>
 <string name="refresh_during_count">Cannot refresh during count!</string>
-<string name="lap">Lap!</string>
+<string name="lap">-  Lap!  -</string>
 <string name="laps">Laps:</string>
 <string name="about">About</string>
 <string name="lap_mode">Lap Mode</string>
@@ -21,7 +21,7 @@
 <string name="save">Save</string>
 <string name="load">Load</string>
 <string name="save_dialog">Please enter a name to save the results</string>
-<string name="no_entry">No Entrys!</string>
+<string name="no_entry">No Entries!</string>
 <string name="delete">Delete</string>
 <string name="export">Export ...</string>
 <string name="export_succes">Saved sucessfully on SD Card!</string>
@@ -30,9 +30,15 @@
 <string name="mode_was">Mode was: </string>
 <string name="start_time">Start Time was:</string>
 <string name="vibrate_checkbox">Vibrate when clicking on Start or Stop</string>
-<string name="saved_succes">Saved succesfully!</string>
+<string name="saved_succes">Saved successfully!</string>
 <string name="mode">Mode</string>
 <string name="cancel">Cancel</string>
 <string name="vibrate">Vibrate</string>
 <string name="motion_sensor">Motion Sensor</string>
+<string name="send">Send...</string>
+<string name="startup_mode">Mode at Startup</string>
+<string-array name="modes_strings"><item>Stopwatch</item>
+<item>Countdown</item>
+<item>Lap Mode</item>
+</string-array>
 </resources>

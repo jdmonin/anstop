@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009 by mj   										   *
  *   fakeacc.mj@gmail.com  												   *
+ *   Portions of this file Copyright (C) 2010 Jeremy Monin jeremy@nand.net *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -28,6 +29,10 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * Shows a previously saved time in the database,
+ * with options to delete, export or send.
+ */
 public class showTimesActivity extends Activity {
 	
 	private static final int VIEW_SIZE = 30;
@@ -38,6 +43,9 @@ public class showTimesActivity extends Activity {
 	private static final int MENU_EXPORT = 14;
 	private static final int EXPORT_ITEM = 15;
 	
+	private static final int MENU_SEND = 16;
+	private static final int SEND_ITEM = 17;
+
 	private anstopDbAdapter dbHelper;
 	private Long mRowId;
 	TextView titleView;
@@ -77,6 +85,7 @@ public class showTimesActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
     	
     	menu.add(MENU_EXPORT, EXPORT_ITEM, 0, R.string.export).setIcon(android.R.drawable.ic_menu_share);
+    	menu.add(MENU_SEND, SEND_ITEM, 0, R.string.send).setIcon(android.R.drawable.ic_menu_send);
     	menu.add(MENU_DELETE, DELETE_ITEM, 0, R.string.delete).setIcon(android.R.drawable.ic_menu_delete);
     	
         return true;
@@ -106,6 +115,11 @@ public class showTimesActivity extends Activity {
 			
 			
 			return true;
+
+		case SEND_ITEM:
+	        Anstop.startSendMailIntent
+	        	(this, getResources().getString(R.string.app_name) + ": " + titleView.getText().toString(), bodyView.getText().toString());
+	    	return true;
 		}
 		
 		return false;

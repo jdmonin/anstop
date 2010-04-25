@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009 by mj   										   *
  *   fakeacc.mj@gmail.com  												   *
+ *   Portions of this file Copyright (C) 2010 Jeremy Monin jeremy@nand.net *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -43,6 +44,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * Anstop's main activity, showing the current clock, lap times, etc.
+ */
 public class Anstop extends Activity {
     
 	
@@ -63,10 +67,19 @@ public class Anstop extends Activity {
 	private static final int MENU_LOAD = 10;
 	private static final int LOAD_ITEM = 11;
 
+	private static final int MENU_SEND = 12;
+	private static final int SEND_ITEM = 13;
+
+	/** Stopwatch mode (and layout) */
 	private static final int STOP = 0;
+
+	/** Countdown mode (and layout) */
 	private static final int COUNTDOWN = 1;
+
+	/** Lap mode (and layout) */
 	private static final int LAP = 2;
-	
+
+	/** Current mode: {@link #STOP}, {@link #COUNTDOWN} or {@link #LAP}. */
 	private int current;
 	
 	private static final int ABOUT_DIALOG = 0;
@@ -141,16 +154,20 @@ public class Anstop extends Activity {
         
 
         mContext = getApplicationContext();
-               
-        //read Preferences
-        readSettings();
-        
+
         current = STOP;
-        
+
+        //read Preferences
+        readSettings(true);
+
     }
-    
-    private void readSettings() {
-    	
+
+    /**
+     * Read our settings, at startup or after calling the SettingsActivity.
+     * @param isStartup Are we just starting now, not already running?
+     */
+    private void readSettings(final boolean isStartup) {
+
     	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
     	if( settings.getBoolean("use_motion_sensor", false) ) {
         	al = new AccelerometerListener(this, clock);
@@ -165,8 +182,39 @@ public class Anstop extends Activity {
         	vib = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         else
         	vib = null;
+
+        // "mode" setting: Clock mode at startup; an int saved as string.
+        try
+        {
+	        int settingMode = Integer.parseInt(settings.getString("mode", "0")); // 0 == STOP
+	        switch (settingMode)
+	        {
+	        case STOP:
+	        	if (! clock.isStarted)
+	        	{
+	        		// we're already at this mode at startup
+	        		if (! isStartup)
+	        			stopwatch();
+	        	}
+	        	break;
+
+	        case COUNTDOWN:
+	        	if (! clock.isStarted)
+	        		countdown();
+	        	break;
+
+	        case LAP:
+	        	if (! clock.isStarted)
+	        		lap();
+	        	break;
+	        }
+        } catch (NumberFormatException e) {}
     }
-    
+
+    /**
+     * Set the layout to {@link #COUNTDOWN}, and
+     * inform clock class to count down now.
+     */
     public void countdown() {
     	
     	//set the Layout to the countdown layout
@@ -214,11 +262,16 @@ public class Anstop extends Activity {
         
         current = COUNTDOWN;
         
+    	clock.v = COUNTDOWN; //inform clock class to count down now
     }
-    
+
+    /**
+     * Set the layout to {@link #LAP}, and
+     * inform clock class to count laps now (same clock-action as STOP).
+     */
     public void lap() {
     	
-    	//set the Layout to the countdown layout
+    	//set the Layout to the lap-mode layout
     	setContentView(R.layout.lap);
     	
     	//set Views Buttons and Listeners for the new Layout
@@ -253,14 +306,26 @@ public class Anstop extends Activity {
         resetButton.setOnClickListener(new resetButtonListener());
         
         current = LAP;
-        
+
+        // From clock's point of view:
+    	clock.v = STOP; // lapmode behaves the same as stop
     }
-    
+
+    /**
+     * Set the mode to {@link #STOP}, and set layout to that normal layout.
+     */
+	private void stopwatch() {
+		onCreate(new Bundle()); //set layout to the normal Layout
+		clock.v = STOP; //inform clock class to stop time
+		current = STOP;
+	}
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
     	
-    	//Save & Load
+    	//Save Send & Load
     	saveMenuItem = menu.add(MENU_SAVE, SAVE_ITEM, 0, R.string.save).setIcon(android.R.drawable.ic_menu_save);
+    	menu.add(MENU_SEND, SEND_ITEM, 0, R.string.send).setIcon(android.R.drawable.ic_menu_send);
     	menu.add(MENU_LOAD, LOAD_ITEM, 0, R.string.load).setIcon(android.R.drawable.ic_menu_upload);
     	
     	//Mode Submenu
@@ -292,20 +357,19 @@ public class Anstop extends Activity {
         case SETTINGS_ITEM:
         	i.setClass(this, settingsActivity.class);
         	startActivityForResult(i, SETTINGS_ACTIVITY);
-        	readSettings();
+        	readSettings(false);
         	return true;
+
         case MODE_STOP:
-        	onCreate(new Bundle()); //set layout to the normal Layout
-        	clock.v = STOP; //inform clock class to stop time
+        	stopwatch();
             return true;
             
         case MODE_COUNTDOWN:
         	countdown(); //set the layout to the countdown Layout
-        	clock.v = COUNTDOWN; //inform clock class to count down now
         	return true;
+
         case MODE_LAP:
         	lap();
-        	clock.v = STOP; //lapmode is the same as stop
         	return true;
         	
         case ABOUT_ITEM:
@@ -316,6 +380,11 @@ public class Anstop extends Activity {
         	showDialog(SAVE_DIALOG);
         	return true;
         	
+        case SEND_ITEM:
+	        startSendMailIntent
+	            (this, getResources().getString(R.string.app_name) + ": " + currentModeAsString(), createBodyFromCurrent());
+        	return true;
+
         case LOAD_ITEM:
         	i.setClass(this, loadActivity.class);
         	startActivity(i);
@@ -325,7 +394,25 @@ public class Anstop extends Activity {
         }
         return false;
     }
-    
+
+    /**
+     * Start the appropriate intent for the user to send an E-Mail or SMS
+     * with these contents.
+     * @param caller  The calling activity; used to launch Send intent
+     * @param title Subject line for e-mail; if user has only SMS configured, this will be unused. 
+     * @param body  Body of e-mail
+     */
+	public static void startSendMailIntent(Activity caller, final String title, final String body) {
+		Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+		String[] empty_recipients = new String[]{ "" };
+		emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, empty_recipients);
+		emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, title);
+		emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, body);
+		emailIntent.setType("text/plain");
+		// use Chooser, in case multiple apps are installed
+		caller.startActivity(Intent.createChooser(emailIntent, caller.getResources().getString(R.string.send)));  
+	}
+
     @Override
     protected Dialog onCreateDialog(int id) {
         Dialog dialog;
@@ -355,43 +442,12 @@ public class Anstop extends Activity {
         	saveBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
         		public void onClick(DialogInterface dialog, int whichButton) {
 		    			
-        				String body;
-		            	switch(current) {
-		    			case LAP:
-		    				body = mContext.getResources().getString(R.string.mode_was) + " " 
-		    					+ mContext.getResources().getString(R.string.lap_mode) + "\n" 
-		    					+ hourView.getText().toString() + " " + mContext.getResources().getString(R.string.hour)
-		    					+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
-		    					+ ":" + dsecondsView.getText().toString() + "\n" + lapView.getText().toString();
-		    				break;
-		    			case COUNTDOWN:
-		    				body = mContext.getResources().getString(R.string.mode_was) + " " 
-		    					+ mContext.getResources().getString(R.string.countdown) + "\n" 
-		    					+ hourView.getText().toString() + " " + mContext.getResources().getString(R.string.hour)
-		    					+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
-		    					+ ":" + dsecondsView.getText().toString() + "\n" + mContext.getResources().getString(R.string.start_time)
-		    					+ "\n" + hourSpinner.getSelectedItemPosition() + " "
-		    					+ mContext.getResources().getString(R.string.hour) + "\n"
-		    					+ clock.nf.format(secSpinner.getSelectedItemPosition()) + ":" 
-		    					+ clock.nf.format(minSpinner.getSelectedItemPosition()) + ".0";
-		    				break;
-		    			case STOP:
-		    				body = mContext.getResources().getString(R.string.mode_was) + " " 
-		    					+ mContext.getResources().getString(R.string.stop) + "\n" 
-		    					+ hourView.getText().toString() + " " + mContext.getResources().getString(R.string.hour)
-		    					+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
-		    					+ ":" + dsecondsView.getText().toString();
-		    				break;
-		    			default:
-		    				body = "ModeError";
-		    				break;
-		    			}
-        			
-        				
+        				String body = createBodyFromCurrent();
 		    			dbHelper.createNew(input.getText().toString(), body);
 		    			Toast toast = Toast.makeText(getApplicationContext(), R.string.saved_succes, Toast.LENGTH_SHORT);
 		    			toast.show();
         			}
+
         		});
         	
         	saveBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -402,6 +458,7 @@ public class Anstop extends Activity {
         	saveBuilder.setCancelable(false);
         	dialog = saveBuilder.create();
         	break;
+
         default: dialog = null;
 		}
 		
@@ -410,10 +467,66 @@ public class Anstop extends Activity {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        	readSettings(); //only settingsactivty is started for result
+        	readSettings(false); // because only settingsactivity is started for
+        	// result, we can launch that without checking the parameters.
         }
 
+    /**
+     * Given the {@link #current current mode}, the name of that mode from resources.
+     * @return mode name, or if unknown mode, "(unknown)".
+     */
+    private String currentModeAsString() {
+    	int modus;
+    	switch(current) {
+		case LAP:
+			modus = R.string.lap_mode;  break;
+		case COUNTDOWN:
+			modus = R.string.countdown;  break;
+		case STOP:
+			modus = R.string.stop;  break;
+    	default:
+    		return "(unknown)";
+    	}
+    	return mContext.getResources().getString(modus);
+    }
 
+    /**
+     * Construct a string with the current mode, time, and laps (if applicable).
+     */
+	private String createBodyFromCurrent() {
+		String body;
+		switch(current) {
+		case LAP:
+			body = mContext.getResources().getString(R.string.mode_was) + " " 
+				+ mContext.getResources().getString(R.string.lap_mode) + "\n" 
+				+ hourView.getText().toString() + " " + mContext.getResources().getString(R.string.hour)
+				+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
+				+ ":" + dsecondsView.getText().toString() + "\n" + lapView.getText().toString();
+			break;
+		case COUNTDOWN:
+			body = mContext.getResources().getString(R.string.mode_was) + " " 
+				+ mContext.getResources().getString(R.string.countdown) + "\n" 
+				+ hourView.getText().toString() + " " + mContext.getResources().getString(R.string.hour)
+				+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
+				+ ":" + dsecondsView.getText().toString() + "\n" + mContext.getResources().getString(R.string.start_time)
+				+ "\n" + hourSpinner.getSelectedItemPosition() + " "
+				+ mContext.getResources().getString(R.string.hour) + "\n"
+				+ clock.nf.format(secSpinner.getSelectedItemPosition()) + ":" 
+				+ clock.nf.format(minSpinner.getSelectedItemPosition()) + ".0";
+			break;
+		case STOP:
+			body = mContext.getResources().getString(R.string.mode_was) + " " 
+				+ mContext.getResources().getString(R.string.stop) + "\n" 
+				+ hourView.getText().toString() + " " + mContext.getResources().getString(R.string.hour)
+				+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
+				+ ":" + dsecondsView.getText().toString();
+			break;
+		default:
+			body = "ModeError";
+			break;
+		}
+		return body;
+	}
 
     
     

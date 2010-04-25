@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009 by mj   										   *
  *   fakeacc.mj@gmail.com  												   *
+ *   Portions of this file Copyright (C) 2010 Jeremy Monin jeremy@nand.net *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -36,6 +37,10 @@ import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 
+/**
+ * Presents the list of previously saved times in the database,
+ * with options to view, delete, export or send.
+ */
 public class loadActivity extends ListActivity {
 	
 	private anstopDbAdapter dbHelper;
@@ -45,8 +50,10 @@ public class loadActivity extends ListActivity {
 	private static final int DELETE_ITEM = 13;
 	private static final int MENU_EXPORT = 14;
 	private static final int EXPORT_ITEM = 15;
-	//private static final int MENU_EXPORT_ALL = 16;
-	private static final int EXPORT_ALL_ITEM = 17;
+	private static final int MENU_SEND = 16;
+	private static final int SEND_ITEM = 17;
+	//private static final int MENU_EXPORT_ALL = 18;
+	private static final int EXPORT_ALL_ITEM = 19;
 	
 
 	
@@ -82,7 +89,7 @@ public class loadActivity extends ListActivity {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		menu.add(MENU_DELETE, DELETE_ITEM, 0, R.string.delete);
 	    menu.add(MENU_EXPORT, EXPORT_ITEM, 0, R.string.export);
-		
+	    menu.add(MENU_SEND, SEND_ITEM, 0, R.string.send);
 	 }
 	
 	@Override
@@ -118,6 +125,16 @@ public class loadActivity extends ListActivity {
 			toast.show();
     		
     		return true;
+
+    	case SEND_ITEM:
+	    	{
+	    		exportHelper seHelp = new exportHelper(this);
+	    		String[] columns = seHelp.getRow(info.id);
+	    		if (columns != null)
+	    	        Anstop.startSendMailIntent
+		            (this, getResources().getString(R.string.app_name) + ": " + columns[0], columns[1]);
+	    	}
+	    	return true;
 		}
 		return super.onContextItemSelected(item);
 	}

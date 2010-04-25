@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009 by mj   										   *
  *   fakeacc.mj@gmail.com  												   *
+ *   Portions of this file Copyright (C) 2010 Jeremy Monin jeremy@nand.net *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -27,6 +28,7 @@ import java.io.IOException;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.os.Environment;
 
 public class exportHelper {
@@ -37,7 +39,13 @@ public class exportHelper {
 	public exportHelper(Context context) {
 		this.mContext = context;
 	}
-	
+
+	/**
+	 * Create and write a file on external storage (SD-Card). 
+	 * @param title file's title; filename will be this + ".txt"
+	 * @param body  Contents of file
+	 * @return Success or failure
+	 */
 	public boolean write(String title, String body) {
 		
 		String storageState = Environment.getExternalStorageState();
@@ -64,20 +72,44 @@ public class exportHelper {
 		
 		
 	}
-	
+
+	/**
+	 * Export a saved record to disk.
+	 * @param rowId The record's _id
+	 * @return Success or failure
+	 */
 	public boolean write(long rowId) {
-		anstopDbAdapter dbHelper = new anstopDbAdapter(mContext);
-		dbHelper.open();
-		
-		Cursor time = dbHelper.fetch(rowId);
-		
-		boolean val = write(time.getString(time.getColumnIndexOrThrow(anstopDbAdapter.KEY_TITLE)), 
-				time.getString(time.getColumnIndexOrThrow(anstopDbAdapter.KEY_BODY)));
-		
-		dbHelper.close();
-		
+		String[] columns = getRow(rowId);
+		if (columns == null)
+			return false;
+		boolean val = write(columns[0], columns[1]);
 		return val;
 		
+	}
+
+	/**
+	 * Get this rowId's title and body from the database. 
+	 * @param rowId The _id of the record to retrieve
+	 * @return String[] with [0]=title, [1]=body, or null if not found.
+	 */
+	public String[] getRow(long rowId) {
+		anstopDbAdapter dbHelper = null;
+		String[] columns = null;
+		try {
+			dbHelper = new anstopDbAdapter(mContext);
+			dbHelper.open();
+			
+			Cursor time = dbHelper.fetch(rowId);
+			columns = new String[2];
+			columns[0] = time.getString(time.getColumnIndexOrThrow(anstopDbAdapter.KEY_TITLE));
+			columns[1] = time.getString(time.getColumnIndexOrThrow(anstopDbAdapter.KEY_BODY));
+			
+			dbHelper.close();
+		} catch (SQLException e) {
+			if (dbHelper != null)
+				dbHelper.close();
+		}
+		return columns;
 	}
 	
 	public boolean write(Cursor c) {

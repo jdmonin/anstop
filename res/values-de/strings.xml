@@ -9,7 +9,7 @@
 <string name="motion_checkbox">Beschleunigungssensor zum Starten und Stoppen benutzen</string>
 
 <string name="refresh">Erneuern</string>
-<string name="refresh_during_count">Kann nciht während des Zählens erneuern!</string>
+<string name="refresh_during_count">Kann nicht während des Zählens erneuern!</string>
 <string name="lap">Runde!</string>
 <string name="laps">Runden:</string>
 <string name="about">Über</string>
@@ -35,4 +35,10 @@
 <string name="cancel">Abbrechen</string>
 <string name="vibrate">Vibrieren</string>
 <string name="motion_sensor">Beschleunigungssensor</string>
+<string name="send">Senden...</string>
+<string name="startup_mode">Modus beim Start</string>
+<string-array name="modes_strings"><item>Stoppuhr</item>
+<item>Countdown</item>
+<item>Rundenmodus</item>
+</string-array>
 </resources>

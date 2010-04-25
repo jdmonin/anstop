@@ -5,4 +5,5 @@
             android:key="use_motion_sensor" android:summary="@string/motion_checkbox" android:title="@string/motion_sensor"/>
      <CheckBoxPreference
             android:key="vibrate" android:summary="@string/vibrate_checkbox" android:title="@string/vibrate" android:defaultValue="true"/>
+<ListPreference android:key="mode" android:title="@string/startup_mode" android:entryValues="@array/modes_ints" android:summary="@string/startup_mode" android:defaultValue="0" android:entries="@array/modes_strings"></ListPreference>
 </PreferenceScreen> 
