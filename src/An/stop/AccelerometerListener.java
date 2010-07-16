@@ -24,8 +24,6 @@ package An.stop;
 
 import java.util.List;
 
-
-import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -46,16 +44,16 @@ public class AccelerometerListener implements SensorEventListener {
 	private final int DATA_X = SensorManager.DATA_X;
 	private final int DATA_Y = SensorManager.DATA_Y;
 	private final int DATA_Z = SensorManager.DATA_Z;
-	private Clock clock;
+	private Anstop parent;
 	
-	public AccelerometerListener(Activity parent, Clock clock) {
+	public AccelerometerListener(Anstop parent) {
 		SensorManager sensorManager = (SensorManager) parent.getSystemService(Context.SENSOR_SERVICE);
 		this.sensorManager = sensorManager;
 		this.sensors = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
-		this.clock = clock;
 		if (sensors.size() > 0) {
             sensor = sensors.get(0);
         }
+		this.parent = parent;
 	}
 	public void start () {
 		if (sensor!=null)  {
@@ -91,7 +89,7 @@ public class AccelerometerListener implements SensorEventListener {
 			currenForce = Math.abs(current_x+current_y+current_z - last_x - last_y - last_z) / diffTime * 10000;
 			
 			if (currenForce > FORCE_THRESHOLD)				
-				clock.count(); //phone was has been shaken
+				parent.startCounting(); //phone has been shaken
 			
 			last_x = current_x;
 			last_y = current_y;

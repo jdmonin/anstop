@@ -91,7 +91,7 @@ public class Anstop extends Activity {
 	
 	private int laps = 1;
 	
-	Clock clock;
+	ClockService clock;
 	Button startButton;
 	Button resetButton;
 	Button refreshButton;
@@ -108,7 +108,7 @@ public class Anstop extends Activity {
 	MenuItem modeMenuItem;
 	MenuItem saveMenuItem;
 	
-	Context mContext;
+	static Context mContext;
 	Vibrator vib;
 	
 	AccelerometerListener al;
@@ -142,9 +142,6 @@ public class Anstop extends Activity {
         dbHelper = new anstopDbAdapter(this);
         dbHelper.open();
         
-        //set the clock object
-        clock = new Clock(this);
-        
         //set Buttons and Listeners
         startButton = (Button) findViewById(R.id.startButton);
         startButton.setOnClickListener(new startButtonListener());
@@ -170,7 +167,7 @@ public class Anstop extends Activity {
 
     	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
     	if( settings.getBoolean("use_motion_sensor", false) ) {
-        	al = new AccelerometerListener(this, clock);
+        	al = new AccelerometerListener(this);
         	al.start();
         }
         else {
@@ -444,8 +441,7 @@ public class Anstop extends Activity {
 		    			
         				String body = createBodyFromCurrent();
 		    			dbHelper.createNew(input.getText().toString(), body);
-		    			Toast toast = Toast.makeText(getApplicationContext(), R.string.saved_succes, Toast.LENGTH_SHORT);
-		    			toast.show();
+		    			showToast(R.string.saved_succes);
         			}
 
         		});
@@ -469,7 +465,7 @@ public class Anstop extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         	readSettings(false); // because only settingsactivity is started for
         	// result, we can launch that without checking the parameters.
-        }
+     }
 
     /**
      * Given the {@link #current current mode}, the name of that mode from resources.
@@ -528,25 +524,28 @@ public class Anstop extends Activity {
 		return body;
 	}
 
-    
+	public static void showToast(int id) {
+		Toast toast = Toast.makeText(mContext, id, Toast.LENGTH_SHORT);
+		toast.show();
+	}
+
+	public void startCounting() {
+		clock.count(); //start counting
+		
+		if(modeMenuItem != null) {
+			modeMenuItem.setEnabled(!clock.isStarted);
+			saveMenuItem.setEnabled(!clock.isStarted);
+		}
+		
+		
+		if(vib != null)
+			vib.vibrate(50);
+	}
     
     private class startButtonListener implements OnClickListener {
     	
     	public void onClick(View v) {
-    		
-    		clock.count(); //start counting
-    		
-    		if(modeMenuItem != null) {
-    			modeMenuItem.setEnabled(!clock.isStarted);
-    			saveMenuItem.setEnabled(!clock.isStarted);
-    		}
-    		
-    		
-    		if(vib != null)
-    			vib.vibrate(50);
-    		
-    		
-        	
+    		startCounting();
         }
     }
     
@@ -566,9 +565,7 @@ public class Anstop extends Activity {
     				lapView.setText(R.string.laps);
     		}    		
     		else {
-    			//Show error when currently counting
-    			Toast toast = Toast.makeText(mContext, R.string.reset_during_count, Toast.LENGTH_SHORT);
-    			toast.show();
+    			showToast(R.string.reset_during_count);
     		}
     	}
     }

@@ -33,7 +33,6 @@ import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 
@@ -112,17 +111,11 @@ public class loadActivity extends ListActivity {
 	        return true;
 	        
     	case EXPORT_ITEM:
-    		
-    		Toast toast;
     		exportHelper exHlp = new exportHelper(this);
-	        
-			
 			if(exHlp.write(info.id))
-				toast = Toast.makeText(this, R.string.export_succes, Toast.LENGTH_SHORT);
+				Anstop.showToast(R.string.export_succes);
 			else
-				toast = Toast.makeText(this, R.string.export_fail, Toast.LENGTH_SHORT);
-    		
-			toast.show();
+				Anstop.showToast(R.string.export_fail);
     		
     		return true;
 
@@ -153,15 +146,11 @@ public class loadActivity extends ListActivity {
 		case EXPORT_ALL_ITEM:
 			Cursor c = dbHelper.fetchAll();
 			
-			Toast toast;
-			
 			exportHelper exHlp = new exportHelper(this);
 			if(exHlp.write(c))
-				toast = Toast.makeText(this, R.string.export_succes, Toast.LENGTH_SHORT);
+				Anstop.showToast(R.string.export_succes);
 			else
-				toast = Toast.makeText(this, R.string.export_fail, Toast.LENGTH_SHORT);
-			
-			toast.show();
+				Anstop.showToast(R.string.export_fail);
 			
 			return true;
 		}

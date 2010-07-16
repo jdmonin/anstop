@@ -5,7 +5,7 @@
       
       <uses-permission android:name="android.permission.VIBRATE" />
       
-    <application android:icon="@drawable/icon" android:label="@string/app_name" android:allowClearUserData="true" android:debuggable="false">
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:allowClearUserData="true" android:debuggable="true">
         <activity android:name=".Anstop"
                   android:label="@string/app_name" android:screenOrientation="portrait">
             <intent-filter>
@@ -16,8 +16,14 @@
     <activity android:name="settingsActivity" android:launchMode="standard"></activity>
 <activity android:name="loadActivity"></activity>
 <activity android:name="showTimesActivity"></activity>
+
+
+
+<service android:name="ClockService"></service>
 </application>
     <uses-sdk android:minSdkVersion="3" />
+
+
 
 
 

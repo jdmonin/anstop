@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
+   
     <string name="app_name">Anstop</string>
 <string name="reset">Zurücksetzen</string>
 <string name="settings">Einstellungen</string>
@@ -42,3 +42,5 @@
 <item>Rundenmodus</item>
 </string-array>
 </resources>
+
+
