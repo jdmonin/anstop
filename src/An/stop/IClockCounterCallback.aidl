@@ -21,5 +21,8 @@
 package An.stop;
 
 oneway interface IClockCounterCallback {
-	void counterChanged();
+	void dsecChanged(int dsec);
+	void secChanged(int sec);
+	void minChanged(int min);
+	void hourChanged(int hour);
 }

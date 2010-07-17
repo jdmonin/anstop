@@ -129,6 +129,7 @@ public class Anstop extends Activity {
 			boundService = IClockCounter.Stub.asInterface(service);
 			try {
 				boundService.setMode(curMode);
+				boundService.registerCallback(callback);
 			} catch (RemoteException e) {
 				Log.d("onServiceConnected", e.getMessage());
 			}
@@ -147,6 +148,10 @@ public class Anstop extends Activity {
 		context = getApplicationContext();
 		dbHelper = new anstopDbAdapter(this);
 		dbHelper.open();
+		
+		nf = NumberFormat.getInstance();
+        nf.setMinimumIntegerDigits(2);  // The minimum Digits required is 2
+        nf.setMaximumIntegerDigits(2); // The maximum Digits required is 2
 		
 		clockServiceIntent = new Intent(this, ClockService.class);
 		bindService(clockServiceIntent, clockCounterCon,
@@ -585,6 +590,12 @@ public class Anstop extends Activity {
 
 		try {
 			boundService.setMode(curMode);
+			if(curMode == COUNTDOWN) {
+				boundService.setSeconds(secSpinner.getSelectedItemPosition());
+				boundService.setMinutes(minSpinner.getSelectedItemPosition());
+				boundService.setHours(hourSpinner.getSelectedItemPosition());
+			}
+			
 			if (modeMenuItem != null) {
 				modeMenuItem.setEnabled(!boundService.isStarted());
 				saveMenuItem.setEnabled(!boundService.isStarted());
@@ -673,5 +684,24 @@ public class Anstop extends Activity {
 				vib.vibrate(50);
 		}
 	}
+	
+	private IClockCounterCallback.Stub callback = new IClockCounterCallback.Stub() {
+
+		public void dsecChanged(int dsec) throws RemoteException {
+			dsecondsView.setText("" + dsec);	
+		}
+
+		public void hourChanged(int hour) throws RemoteException {
+			hourView.setText("" + hour);
+		}
+
+		public void minChanged(int min) throws RemoteException {
+			minView.setText("" + nf.format(min));
+		}
+
+		public void secChanged(int sec) throws RemoteException {
+			secondsView.setText("" + nf.format(sec));
+		}
+	};
 
 }

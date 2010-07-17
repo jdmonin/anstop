@@ -23,12 +23,14 @@ package An.stop;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.util.Log;
 
 public class ClockService extends Service {
 
@@ -46,6 +48,7 @@ public class ClockService extends Service {
 	int hour = 0;
 
 	private NotificationManager nManager;
+	Notification notifyDetails;
 	
 	private final RemoteCallbackList<IClockCounterCallback> callbacks = new RemoteCallbackList<IClockCounterCallback>();
 	
@@ -72,13 +75,24 @@ public class ClockService extends Service {
 		public boolean isStarted() throws RemoteException {
 			return isStarted;
 		}
+
+		public void setHours(int h) throws RemoteException {
+			hour = h;
+		}
+
+		public void setMinutes(int min) throws RemoteException {
+			ClockService.this.min = min;
+		}
+
+		public void setSeconds(int secs) throws RemoteException {
+			ClockService.this.sec = sec;
+		}
 	};
 
 	
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		
 		nManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 	}
 	
@@ -96,6 +110,8 @@ public class ClockService extends Service {
 	}
 	
 	public void count() {
+		
+		if(isStarted) return;
 				
 		if (curMode == STOP) {
 			timer.scheduleAtFixedRate(new TimerTask() {
@@ -114,7 +130,6 @@ public class ClockService extends Service {
 				}
 			}, 0, 100);
 		}
-
 	}
 
 	private void ClockCounter() {
@@ -140,7 +155,7 @@ public class ClockService extends Service {
 			}
 		}
 
-		// dsech.sendEmptyMessage(Thread.MAX_PRIORITY);
+		//send dsec
 	}
 
 	private void CountdownCounter() {

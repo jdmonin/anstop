@@ -26,6 +26,9 @@ interface IClockCounter {
 	int getMode();
 	void setMode(int mode);
 	boolean isStarted();
+	void setHours(int h);
+	void setMinutes(int min);
+	void setSeconds(int secs);
 	
 	void registerCallback(IClockCounterCallback cb);
     void unregisterCallback(IClockCounterCallback cb);
