@@ -20,7 +20,6 @@
 
 package An.stop;
 
-import java.text.NumberFormat;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -28,13 +27,15 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 public class ClockService extends Service {
 
 	private static final int STOP = 0;
 	// private static final int COUNTDOWN = 1;
 
-	public int v;
+	private int v;
 
 	public boolean isStarted = false;
 	Anstop parent;
@@ -45,8 +46,34 @@ public class ClockService extends Service {
 	int min = 0;
 	int hour = 0;
 
-	public NumberFormat nf;
 	private NotificationManager nManager;
+	
+	private final RemoteCallbackList<IClockCounterCallback> callbacks = new RemoteCallbackList<IClockCounterCallback>();
+	
+	private final IClockCounter.Stub binder = new IClockCounter.Stub() {
+		
+		public void unregisterCallback(IClockCounterCallback cb)
+				throws RemoteException {
+			callbacks.register(cb);
+		}
+		
+		public void setMode(int mode) throws RemoteException {
+			v = mode;
+		}
+		
+		public void registerCallback(IClockCounterCallback cb)
+				throws RemoteException {
+			callbacks.unregister(cb);
+		}
+		
+		public int getMode() throws RemoteException {
+			return v;
+		}
+
+		public boolean isStarted() throws RemoteException {
+			return isStarted;
+		}
+	};
 
 	
 	@Override
@@ -59,6 +86,7 @@ public class ClockService extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		callbacks.kill();
 		timer.cancel();
 	}
 	
@@ -69,8 +97,6 @@ public class ClockService extends Service {
 	}
 	
 	public void count() {
-		
-
 		dsec = Integer.valueOf(parent.dsecondsView.getText().toString());
 		sec = Integer.valueOf(parent.secondsView.getText().toString());
 		min = Integer.valueOf(parent.minView.getText().toString());
@@ -171,9 +197,8 @@ public class ClockService extends Service {
 	}
 
 	@Override
-	public IBinder onBind(Intent arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public IBinder onBind(Intent intent) {
+		return binder;
 	}
 
 }
