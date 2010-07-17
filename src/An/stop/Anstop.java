@@ -121,6 +121,7 @@ public class Anstop extends Activity {
 	AccelerometerListener al;
 
 	anstopDbAdapter dbHelper;
+	Intent clockServiceIntent;
 
 	private ServiceConnection clockCounterCon = new ServiceConnection() {
 
@@ -147,8 +148,8 @@ public class Anstop extends Activity {
 		dbHelper = new anstopDbAdapter(this);
 		dbHelper.open();
 		
-		Intent intent = new Intent(this, ClockService.class);
-		bindService(intent, clockCounterCon,
+		clockServiceIntent = new Intent(this, ClockService.class);
+		bindService(clockServiceIntent, clockCounterCon,
 				Context.BIND_AUTO_CREATE);
 		// read Preferences
 		readSettings(true);
@@ -581,7 +582,6 @@ public class Anstop extends Activity {
 	}
 
 	public void startCounting() {
-		// TODO: clock.count(); // start counting
 
 		try {
 			boundService.setMode(curMode);
@@ -589,6 +589,8 @@ public class Anstop extends Activity {
 				modeMenuItem.setEnabled(!boundService.isStarted());
 				saveMenuItem.setEnabled(!boundService.isStarted());
 			}
+			
+			startService(clockServiceIntent);
 		} catch (RemoteException e) {
 			Log.d("boundService", e.getMessage());
 		}

@@ -35,10 +35,9 @@ public class ClockService extends Service {
 	private static final int STOP = 0;
 	// private static final int COUNTDOWN = 1;
 
-	private int curMode;
+	private int curMode = 0;
 
 	public boolean isStarted = false;
-	Anstop parent;
 	Timer timer = new Timer();
 
 	int dsec = 0;
@@ -93,15 +92,11 @@ public class ClockService extends Service {
 	@Override
 	public void onStart(Intent intent, int startId) {
 		super.onStart(intent, startId);
-		//count();
+		count();
 	}
 	
 	public void count() {
-		dsec = Integer.valueOf(parent.dsecondsView.getText().toString());
-		sec = Integer.valueOf(parent.secondsView.getText().toString());
-		min = Integer.valueOf(parent.minView.getText().toString());
-		hour = Integer.valueOf(parent.hourView.getText().toString());
-		
+				
 		if (curMode == STOP) {
 			timer.scheduleAtFixedRate(new TimerTask() {
 
@@ -152,7 +147,6 @@ public class ClockService extends Service {
 
 		if (hour == 0 && min == 0 && sec == 0 && dsec == 0) {
 			isStarted = false;
-			parent.modeMenuItem.setEnabled(false);
 			return;
 		}
 
@@ -190,7 +184,6 @@ public class ClockService extends Service {
 
 		if (hour == 0 && min == 0 && sec == 0 && dsec == 0) {
 			isStarted = false;
-			parent.modeMenuItem.setEnabled(false);
 			return;
 		}
 
