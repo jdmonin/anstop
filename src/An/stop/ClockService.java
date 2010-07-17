@@ -24,6 +24,7 @@ import java.text.NumberFormat;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
@@ -45,14 +46,14 @@ public class ClockService extends Service {
 	int hour = 0;
 
 	public NumberFormat nf;
+	private NotificationManager nManager;
 
-	public ClockService() {
-		
-	}
 	
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		
+		nManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 	}
 	
 	@Override
@@ -68,36 +69,29 @@ public class ClockService extends Service {
 	}
 	
 	public void count() {
+		
 
-		if (!isStarted) {
+		dsec = Integer.valueOf(parent.dsecondsView.getText().toString());
+		sec = Integer.valueOf(parent.secondsView.getText().toString());
+		min = Integer.valueOf(parent.minView.getText().toString());
+		hour = Integer.valueOf(parent.hourView.getText().toString());
+		
+		if (v == STOP) {
+			timer.scheduleAtFixedRate(new TimerTask() {
 
-			dsec = Integer.valueOf(parent.dsecondsView.getText().toString());
-			sec = Integer.valueOf(parent.secondsView.getText().toString());
-			min = Integer.valueOf(parent.minView.getText().toString());
-			hour = Integer.valueOf(parent.hourView.getText().toString());
+				public void run() {
+					ClockCounter();
+				}
+			}, 0, 100);
+		}
 
-			isStarted = true;
-			if (v == STOP) {
-				timer.scheduleAtFixedRate(new TimerTask() {
+		else {
+			timer.scheduleAtFixedRate(new TimerTask() {
 
-					public void run() {
-						ClockCounter();
-					}
-				}, 0, 1000);
-			}
-
-			else {
-				timer.scheduleAtFixedRate(new TimerTask() {
-
-					public void run() {
-						CountdownCounter();
-					}
-				}, 0, 1000);
-			}
-
-		} else {
-			isStarted = false;
-			timer.cancel();
+				public void run() {
+					CountdownCounter();
+				}
+			}, 0, 100);
 		}
 
 	}
