@@ -26,11 +26,14 @@ import java.text.NumberFormat;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -82,7 +85,7 @@ public class Anstop extends Activity {
 	private static final int LAP = 2;
 
 	/** Current mode: {@link #STOP}, {@link #COUNTDOWN} or {@link #LAP}. */
-	private int current;
+	private int curMode;
 
 	private static final int ABOUT_DIALOG = 0;
 	private static final int SAVE_DIALOG = 1;
@@ -119,47 +122,36 @@ public class Anstop extends Activity {
 
 	anstopDbAdapter dbHelper;
 
+	private ServiceConnection clockCounterCon = new ServiceConnection() {
+
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			boundService = IClockCounter.Stub.asInterface(service);
+			try {
+				boundService.setMode(curMode);
+			} catch (RemoteException e) {
+				Log.d("onServiceConnected", e.getMessage());
+			}
+		}
+
+		public void onServiceDisconnected(ComponentName name) {
+			boundService = null;
+		}
+
+	};
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
-
-		// set the View Objects
-		dsecondsView = (TextView) findViewById(R.id.dsecondsView);
-		secondsView = (TextView) findViewById(R.id.secondsView);
-		minView = (TextView) findViewById(R.id.minView);
-		hourView = (TextView) findViewById(R.id.hourView);
-
-		// set the size
-		TextView sepView = (TextView) findViewById(R.id.sepView1);
-		sepView.setTextSize(VIEW_SIZE - 10);
-
-		sepView = (TextView) findViewById(R.id.sepView2);
-		sepView.setTextSize(VIEW_SIZE - 10);
-
-		dsecondsView.setTextSize(VIEW_SIZE);
-		secondsView.setTextSize(VIEW_SIZE);
-		minView.setTextSize(VIEW_SIZE);
-		hourView.setTextSize(VIEW_SIZE - 30);
-
+		context = getApplicationContext();
 		dbHelper = new anstopDbAdapter(this);
 		dbHelper.open();
-
-		// set Buttons and Listeners
-		startButton = (Button) findViewById(R.id.startButton);
-		startButton.setOnClickListener(new startButtonListener());
-
-		resetButton = (Button) findViewById(R.id.resetButton);
-		resetButton.setOnClickListener(new resetButtonListener());
-
-		context = getApplicationContext();
-
-		current = STOP;
-
+		
+		Intent intent = new Intent(this, ClockService.class);
+		bindService(intent, clockCounterCon,
+				Context.BIND_AUTO_CREATE);
 		// read Preferences
 		readSettings(true);
-
 	}
 
 	/**
@@ -185,6 +177,9 @@ public class Anstop extends Activity {
 		else
 			vib = null;
 
+		if (!isStartup)
+			return;
+
 		// "mode" setting: Clock mode at startup; an int saved as string.
 		try {
 			int settingMode = Integer.parseInt(settings.getString("mode", "0")); // 0
@@ -192,26 +187,18 @@ public class Anstop extends Activity {
 			// STOP
 			switch (settingMode) {
 			case STOP:
-				if (!boundService.isStarted()) {
-					// we're already at this mode at startup
-					if (!isStartup)
-						stopwatch();
-				}
+				stopwatch();
 				break;
 
 			case COUNTDOWN:
-				if (!boundService.isStarted())
-					countdown();
+				countdown();
 				break;
 
 			case LAP:
-				if (!boundService.isStarted())
-					lap();
+				lap();
 				break;
 			}
 		} catch (NumberFormatException e) {
-		} catch (RemoteException e) {
-			Log.d("boundService", e.getMessage());
 		}
 	}
 
@@ -265,14 +252,7 @@ public class Anstop extends Activity {
 		refreshButton = (Button) findViewById(R.id.refreshButton);
 		refreshButton.setOnClickListener(new refreshButtonListener());
 
-		current = COUNTDOWN;
-
-		try {
-			boundService.setMode(COUNTDOWN); // inform clock class to count down
-			// now
-		} catch (RemoteException e) {
-			Log.d("boundService", e.getMessage());
-		}
+		curMode = COUNTDOWN;
 	}
 
 	/**
@@ -314,28 +294,43 @@ public class Anstop extends Activity {
 		resetButton = (Button) findViewById(R.id.resetButton);
 		resetButton.setOnClickListener(new resetButtonListener());
 
-		current = LAP;
+		curMode = LAP;
 
-		// From clock's point of view:
-		try {
-			boundService.setMode(LAP); // lapmode behaves the same as stop
-		} catch (RemoteException e) {
-			Log.d("boundService", e.getMessage());
-		}
 	}
 
 	/**
 	 * Set the mode to {@link #STOP}, and set layout to that normal layout.
 	 */
 	private void stopwatch() {
-		onCreate(new Bundle()); // set layout to the normal Layout
-		current = STOP;
+		setContentView(R.layout.main);
 
-		try {
-			boundService.setMode(STOP);
-		} catch (RemoteException e) {
-			Log.d("boundService", e.getMessage());
-		}
+		// set the View Objects
+		dsecondsView = (TextView) findViewById(R.id.dsecondsView);
+		secondsView = (TextView) findViewById(R.id.secondsView);
+		minView = (TextView) findViewById(R.id.minView);
+		hourView = (TextView) findViewById(R.id.hourView);
+
+		// set the size
+		TextView sepView = (TextView) findViewById(R.id.sepView1);
+		sepView.setTextSize(VIEW_SIZE - 10);
+
+		sepView = (TextView) findViewById(R.id.sepView2);
+		sepView.setTextSize(VIEW_SIZE - 10);
+
+		dsecondsView.setTextSize(VIEW_SIZE);
+		secondsView.setTextSize(VIEW_SIZE);
+		minView.setTextSize(VIEW_SIZE);
+		hourView.setTextSize(VIEW_SIZE - 30);
+		
+		// set Buttons and Listeners
+		startButton = (Button) findViewById(R.id.startButton);
+		startButton.setOnClickListener(new startButtonListener());
+
+		resetButton = (Button) findViewById(R.id.resetButton);
+		resetButton.setOnClickListener(new resetButtonListener());
+
+		curMode = STOP;
+
 	}
 
 	@Override
@@ -511,14 +506,14 @@ public class Anstop extends Activity {
 	}
 
 	/**
-	 * Given the {@link #current current mode}, the name of that mode from
+	 * Given the {@link #curMode current mode}, the name of that mode from
 	 * resources.
 	 * 
 	 * @return mode name, or if unknown mode, "(unknown)".
 	 */
 	private String currentModeAsString() {
 		int modus;
-		switch (current) {
+		switch (curMode) {
 		case LAP:
 			modus = R.string.lap_mode;
 			break;
@@ -539,7 +534,7 @@ public class Anstop extends Activity {
 	 */
 	private String createBodyFromCurrent() {
 		String body;
-		switch (current) {
+		switch (curMode) {
 		case LAP:
 			body = context.getResources().getString(R.string.mode_was) + " "
 					+ context.getResources().getString(R.string.lap_mode)
@@ -561,10 +556,8 @@ public class Anstop extends Activity {
 					+ context.getResources().getString(R.string.start_time)
 					+ "\n" + hourSpinner.getSelectedItemPosition() + " "
 					+ context.getResources().getString(R.string.hour) + "\n"
-					+ nf.format(secSpinner.getSelectedItemPosition())
-					+ ":"
-					+ nf.format(minSpinner.getSelectedItemPosition())
-					+ ".0";
+					+ nf.format(secSpinner.getSelectedItemPosition()) + ":"
+					+ nf.format(minSpinner.getSelectedItemPosition()) + ".0";
 			break;
 		case STOP:
 			body = context.getResources().getString(R.string.mode_was) + " "
@@ -591,6 +584,7 @@ public class Anstop extends Activity {
 		// TODO: clock.count(); // start counting
 
 		try {
+			boundService.setMode(curMode);
 			if (modeMenuItem != null) {
 				modeMenuItem.setEnabled(!boundService.isStarted());
 				saveMenuItem.setEnabled(!boundService.isStarted());
@@ -643,18 +637,16 @@ public class Anstop extends Activity {
 					// set the Views to the input data
 					dsecondsView.setText("0");
 
-					// looking for the selected Item position (is the same as the
+					// looking for the selected Item position (is the same as
+					// the
 					// Item itself)
 					// using the NumberFormat from class clock to format
-					secondsView
-							.setText(""
-									+ nf.format(secSpinner
-											.getSelectedItemPosition()));
-					minView
-							.setText(""
-									+ nf.format(minSpinner
-											.getSelectedItemPosition()));
-					hourView.setText("" + hourSpinner.getSelectedItemPosition());
+					secondsView.setText(""
+							+ nf.format(secSpinner.getSelectedItemPosition()));
+					minView.setText(""
+							+ nf.format(minSpinner.getSelectedItemPosition()));
+					hourView
+							.setText("" + hourSpinner.getSelectedItemPosition());
 
 				} else {
 					// Show error when currently counting

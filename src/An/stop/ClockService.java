@@ -93,7 +93,7 @@ public class ClockService extends Service {
 	@Override
 	public void onStart(Intent intent, int startId) {
 		super.onStart(intent, startId);
-		count();
+		//count();
 	}
 	
 	public void count() {
