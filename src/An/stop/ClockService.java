@@ -35,7 +35,7 @@ public class ClockService extends Service {
 	private static final int STOP = 0;
 	// private static final int COUNTDOWN = 1;
 
-	private int v;
+	private int curMode;
 
 	public boolean isStarted = false;
 	Anstop parent;
@@ -58,7 +58,7 @@ public class ClockService extends Service {
 		}
 		
 		public void setMode(int mode) throws RemoteException {
-			v = mode;
+			curMode = mode;
 		}
 		
 		public void registerCallback(IClockCounterCallback cb)
@@ -67,7 +67,7 @@ public class ClockService extends Service {
 		}
 		
 		public int getMode() throws RemoteException {
-			return v;
+			return curMode;
 		}
 
 		public boolean isStarted() throws RemoteException {
@@ -102,7 +102,7 @@ public class ClockService extends Service {
 		min = Integer.valueOf(parent.minView.getText().toString());
 		hour = Integer.valueOf(parent.hourView.getText().toString());
 		
-		if (v == STOP) {
+		if (curMode == STOP) {
 			timer.scheduleAtFixedRate(new TimerTask() {
 
 				public void run() {
