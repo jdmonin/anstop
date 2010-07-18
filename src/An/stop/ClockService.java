@@ -56,7 +56,7 @@ public class ClockService extends Service {
 		
 		public void unregisterCallback(IClockCounterCallback cb)
 				throws RemoteException {
-			callbacks.register(cb);
+			callbacks.unregister(cb);
 		}
 		
 		public void setMode(int mode) throws RemoteException {
@@ -65,7 +65,7 @@ public class ClockService extends Service {
 		
 		public void registerCallback(IClockCounterCallback cb)
 				throws RemoteException {
-			callbacks.unregister(cb);
+			callbacks.register(cb);
 		}
 		
 		public int getMode() throws RemoteException {
@@ -133,6 +133,8 @@ public class ClockService extends Service {
 	}
 
 	private void ClockCounter() {
+		
+		int n = callbacks.beginBroadcast();
 
 		dsec++;
 
@@ -155,7 +157,14 @@ public class ClockService extends Service {
 			}
 		}
 
-		//send dsec
+		for (int i = 0; i < n; i++)
+			try {
+				callbacks.getBroadcastItem(i).dsecChanged(dsec);
+			} catch (RemoteException e) {
+				Log.d("dsecChanged", e.getMessage());
+			}
+		
+		callbacks.finishBroadcast();
 	}
 
 	private void CountdownCounter() {
