@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * Shows a previously saved time in the database,
@@ -103,10 +104,14 @@ public class showTimesActivity extends Activity {
 		case EXPORT_ITEM:
 			exportHelper exHlp = new exportHelper(this);
 			
+			Toast toast;
+			
 			if(exHlp.write(titleView.getText().toString(), bodyView.getText().toString()))
-				Anstop.showToast(R.string.export_succes);
+				toast = Toast.makeText(this, R.string.export_succes, Toast.LENGTH_SHORT);
 			else
-				Anstop.showToast(R.string.export_fail);
+				toast = Toast.makeText(this, R.string.export_fail, Toast.LENGTH_SHORT);
+			
+			toast.show();
 			
 			
 			return true;

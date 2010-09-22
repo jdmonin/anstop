@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-   
+    
     <string name="app_name">Anstop</string>
 <string name="reset">Zurücksetzen</string>
 <string name="settings">Einstellungen</string>
@@ -29,6 +29,7 @@
 <string name="export_all">Alle exportieren ...</string>
 <string name="mode_was">Modus war:</string>
 <string name="start_time">Startzeit war: </string>
+<string name="started_at">Begann um:</string>
 <string name="vibrate_checkbox">Vibriere bei Klick auf Start oder Stopp</string>
 <string name="saved_succes">Erfolgreich gespeichert!</string>
 <string name="mode">Modus</string>
@@ -37,10 +38,12 @@
 <string name="motion_sensor">Beschleunigungssensor</string>
 <string name="send">Senden...</string>
 <string name="startup_mode">Modus beim Start</string>
+<string name="hours">Stunden:</string>
+<string name="minutes">Minuten:</string>
+<string name="seconds">Sekunden:</string>
 <string-array name="modes_strings"><item>Stoppuhr</item>
 <item>Countdown</item>
 <item>Rundenmodus</item>
 </string-array>
+
 </resources>
-
-
