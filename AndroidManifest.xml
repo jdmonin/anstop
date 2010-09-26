@@ -16,14 +16,8 @@
     <activity android:name="settingsActivity" android:launchMode="standard"></activity>
 <activity android:name="loadActivity"></activity>
 <activity android:name="showTimesActivity"></activity>
-
-
-
-<service android:name="ClockService"></service>
 </application>
     <uses-sdk android:minSdkVersion="3" />
-
-
 
 
 

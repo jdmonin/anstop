@@ -43,7 +43,7 @@ import android.os.Message;
  * Has three states:
  *<UL>
  * <LI> Reset: This is the initial state.
- *        In STP mode, the hour, minute, second are 0.
+ *        In STOP mode, the hour, minute, second are 0.
  *        In COUNTDOWN mode they're (h, m, s), copied from spinners when
  *        the user hits the "refresh" button.
  * <LI> Started: The clock is running.
@@ -52,6 +52,7 @@ import android.os.Message;
  *        can start it to continue counting.
  *</UL>
  * You can examine the current state by reading {@link #isStarted} and {@link #wasStarted}.
+ * To reset the clock again, and/or change the mode, call {@link #reset(int, int, int, int)}.
  *<P>
  * Keeping track of laps is done in {@link Anstop}, not in this object.
  */
@@ -72,7 +73,7 @@ public class Clock {
 	 *<LI> <tt>Anstop.COUNTDOWN</tt> (1), counting down from a time set by the user
 	 *</UL>
 	 */
-	public int v;
+	private int v;
 
 	/** is the clock currently running? */
 	public boolean isStarted = false;
@@ -97,7 +98,7 @@ public class Clock {
 
 	/**
 	 * For countdown mode, the initial seconds, minutes, hours,
-	 * as set by {@link #reset(int, int, int)},
+	 * as set by {@link #reset(int, int, int, int)},
 	 * stored as a total number of seconds.
 	 * Used by {@link #adjClockOnAppResume(boolean, long)}.
 	 */
@@ -150,9 +151,12 @@ public class Clock {
 		minh = new minhandler();
 		hourh = new hourhandler();
 
+		// these are also set in reset(), along with other state fields
 		appPauseTime = -1L;
 		appBundleRestoreTime = -1L;
 		stopTime = -1L;
+		startTimeActual = -1L;
+		startTimeAdj = -1L;
 	}
 	
 	/**
@@ -404,23 +408,31 @@ public class Clock {
 	public long getStartTimeActual() { return startTimeActual; }
 
 	/**
-	 * Reset the clock while stopped.  {@link #isStarted} must be false.
-	 * Set the mode ({@link #v}) before calling this method.
-	 * If the mode is {@link #STOP}, the clock is reset to 0,
+	 * Reset the clock while stopped, and maybe change modes.  {@link #isStarted} must be false.
+	 * If <tt>newMode</tt> is {@link #STOP}, the clock will be reset to 0,
 	 * and <tt>h</tt>, <tt>m</tt>, <tt>s</tt> are ignored.
 	 *
+	 * @param newMode  new mode to set, or -1 to leave as is
 	 * @param h  for countdown mode, hour to reset the clock to
 	 * @param m  minute to reset the clock to
 	 * @param s  second to reset the clock to
-	 * @return true if was reset, false if was not because {@link #isStarted} is true.
+	 * @return true if was reset, false if was not reset because {@link #isStarted} is true.
 	 */
-	public boolean reset(final int h, final int m, final int s)
+	public boolean reset(final int newMode, final int h, final int m, final int s)
 	{
 		if (isStarted)
 			return false;
 
+		if (newMode != -1)
+			v = newMode;
+
 		wasStarted = false;
+		appPauseTime = -1L;
+		appBundleRestoreTime = -1L;
 		stopTime = -1L;
+		startTimeActual = -1L;
+		startTimeAdj = -1L;
+
 		if (v == STOP)
 		{
 			hour = 0;
@@ -439,7 +451,7 @@ public class Clock {
 
 	/**
 	 * Start or stop(pause) counting.
-	 * For <tt>COUNTDOWN</tt> mode, you must first call {@link #reset(int, int, int)}
+	 * For <tt>COUNTDOWN</tt> mode, you must first call {@link #reset(int, int, int, int)}
 	 * or set the {@link #hour}, {@link #min}, {@link #sec} fields.
 	 */
 	public void count() {

@@ -143,7 +143,9 @@ public class Anstop extends Activity {
 
 	/**
 	 * Called when the activity is first created.
-	 * Assumes {@value #STOP} mode and sets that layout.
+	 * Assumes {@link #STOP} mode and sets that layout.
+	 * Preferences are read, which calls setCurrentMode.
+	 * Also called later, to set the mode/layout back to {@link #STOP}.
 	 */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -172,12 +174,17 @@ public class Anstop extends Activity {
         minView.setTextSize(VIEW_SIZE);
         hourView.setTextSize(VIEW_SIZE - 30);
         startTimeView.setTextSize(VIEW_SIZE - 30);
-        
-        dbHelper = new anstopDbAdapter(this);
-        dbHelper.open();
+
+        if (dbHelper == null)
+        {
+	        dbHelper = new anstopDbAdapter(this);
+	        dbHelper.open();
+        }
         
         //set the clock object
-        clock = new Clock(this);
+        final boolean isInitialStartup = (clock == null);
+        if (isInitialStartup)
+        	clock = new Clock(this);
         
         //set Buttons and Listeners
         startButton = (Button) findViewById(R.id.startButton);
@@ -185,11 +192,17 @@ public class Anstop extends Activity {
         
         resetButton = (Button) findViewById(R.id.resetButton);
         resetButton.setOnClickListener(new resetButtonListener());
-        
-
-        mContext = getApplicationContext();
 
         current = STOP;
+
+        if (! isInitialStartup)
+        	return;  // <--- Early return: Already did startup once ---
+
+        // Below here are things that should be done only at
+        // initial startup, because they set the current mode.
+        // Because stopwatch() calls onCreate(), this would create a loop.
+
+        mContext = getApplicationContext();
 
         //read Preferences
         readSettings(true);
@@ -325,7 +338,7 @@ public class Anstop extends Activity {
         
         current = COUNTDOWN;
         
-    	clock.v = COUNTDOWN; //inform clock class to count down now
+        clock.reset(COUNTDOWN, 0, 0, 0);  // inform clock class to count down now
     }
 
     /**
@@ -375,7 +388,7 @@ public class Anstop extends Activity {
         current = LAP;
 
         // From clock's point of view:
-    	clock.v = STOP; // lapmode behaves the same as stop
+        clock.reset(STOP, 0, 0, 0);  // lapmode behaves the same as stop
     }
 
     /**
@@ -383,7 +396,7 @@ public class Anstop extends Activity {
      */
 	private void stopwatch() {
 		onCreate(new Bundle()); //set layout to the normal Layout
-		clock.v = STOP; //inform clock class to stop time
+		clock.reset(STOP, 0, 0, 0); //inform clock class to stop time
 		current = STOP;
 	}
 
@@ -481,7 +494,7 @@ public class Anstop extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
     	Intent i = new Intent();
     	
-        switch (item.getItemId()) {
+    	switch (item.getItemId()) {
         case SETTINGS_ITEM:
         	i.setClass(this, settingsActivity.class);
         	startActivityForResult(i, SETTINGS_ACTIVITY);
@@ -762,7 +775,7 @@ public class Anstop extends Activity {
     	public void onClick(View v) {
     		
     		if(!clock.isStarted) {
-    			clock.reset(0, 0, 0);
+    			clock.reset(-1, 0, 0, 0);
 
     			//reset all Views to zero
     			dsecondsView.setText("0");
@@ -797,7 +810,7 @@ public class Anstop extends Activity {
     			final int s = secSpinner.getSelectedItemPosition(),
     			          m = minSpinner.getSelectedItemPosition(),
     			          h = hourSpinner.getSelectedItemPosition();
-    			clock.reset(h, m, s);
+    			clock.reset(-1, h, m, s);
     			secondsView.setText(clock.nf.format(s));
     			minView.setText(clock.nf.format(m));
     			hourView.setText(Integer.toString(h));
