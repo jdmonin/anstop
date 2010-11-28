@@ -25,6 +25,7 @@ package An.stop;
 
 import java.text.NumberFormat;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -118,8 +119,10 @@ public class Clock {
 	private long startTimeActual, startTimeAdj;
 
 	/**
-	 * If {@link #wasStarted}, the time when paused by calling {@link #count()},
-	 * taken from {@link System#currentTimeMillis()}.  Otherwise -1.
+	 * If {@link #wasStarted}, and ! {@link #isStarted}, the
+	 * current time when the clock was paused by calling {@link #count()}
+	 * (taken from {@link System#currentTimeMillis()}).
+	 * Otherwise -1.
 	 */
 	private long stopTime;
 
@@ -130,10 +133,10 @@ public class Clock {
 	private long appPauseTime;
 
 	/**
-	 * Time when {@link #restoreFromSaveStateBundle(Bundle)} was called, or <tt>-1L</tt>.
+	 * Time when {@link #restoreFromSaveState(Bundle)} was called, or <tt>-1L</tt>.
 	 * Used by {@link #onAppResume()}, to prevent 2 adjustments after a restore.
 	 */
-	private long appBundleRestoreTime;
+	private long appStateRestoreTime;
 	
 	public NumberFormat nf;
 	
@@ -153,7 +156,7 @@ public class Clock {
 
 		// these are also set in reset(), along with other state fields
 		appPauseTime = -1L;
-		appBundleRestoreTime = -1L;
+		appStateRestoreTime = -1L;
 		stopTime = -1L;
 		startTimeActual = -1L;
 		startTimeAdj = -1L;
@@ -167,9 +170,10 @@ public class Clock {
 	 * <LI> clockWasActive  1 or 0
 	 * <LI> clockV    mode (clock.v)
 	 * <LI> clockAnstopCurrent  mode (anstop.current)
+	 * <LI< clockAnstopWroteStart  anstop.wroteStartTime flag: boolean
 	 * <LI> clockDigits  if clockActive: array hours, minutes, seconds, dsec
 	 * <LI> clockLaps  lap text, if any (CharSequence)
-	 * <LI> clockBundleSaveTime current time when bundle saved, from {@link System#currentTimeMillis()}
+	 * <LI> clockStateSaveTime current time when bundle saved, from {@link System#currentTimeMillis()}
 	 * <LI> clockStartTimeActual  actual time when clock was started, from {@link System#currentTimeMillis()}
 	 * <LI> clockStartTimeAdj  <tt>clockStartTimeActual</tt> adjusted forward to remove any
 	 *         time spent paused.  When counting up, the amount of time on the clock
@@ -180,20 +184,29 @@ public class Clock {
 	 *</UL>
 	 * @param outState Bundle to save into
 	 * @return true if clock was running, false otherwise
-	 * @see #restoreFromSaveStateBundle(Bundle)
+	 * @see #restoreFromSaveState(Bundle)
+	 * @see #fillSaveState(SharedPreferences)
 	 * @since 1.3
 	 */
-	public boolean fillSaveStateBundle(Bundle outState) {
+	public boolean fillSaveState(Bundle outState) {
 		final long savedAtTime = System.currentTimeMillis();
+
+		// Reminder: If you add a bundle key,
+		// be sure to add it in both copies of
+		// fillSaveState and of restoreFromSaveState.
 
 		outState.putInt("clockV", v);
 		outState.putInt("clockAnstopCurrent", parent.getCurrentMode());
+		outState.putBoolean("clockAnstopWroteStart", parent.wroteStartTime);
 		int[] hmsd = new int[]{ hour, min, sec, dsec };
 		outState.putIntArray("clockDigits", hmsd);
 		outState.putInt("clockActive", isStarted ? 1 : 0);
 		outState.putInt("clockWasActive", wasStarted ? 1 : 0);
-		outState.putLong("clockBundleSaveTime", savedAtTime);
-		outState.putLong("clockStopTime", stopTime);
+		outState.putLong("clockStateSaveTime", savedAtTime);
+		if (! isStarted)
+			outState.putLong("clockStopTime", stopTime);
+		else
+			outState.putLong("clockStopTime", -1L);
 		if (parent.lapView != null)
 			outState.putCharSequence("clockLaps", parent.lapView.getText());
 		outState.putLong("clockStartTimeActual", startTimeActual);
@@ -204,6 +217,72 @@ public class Clock {
 			outState.putInt("clockCountMin", parent.minSpinner.getSelectedItemPosition());
 			outState.putInt("clockCountSec", parent.secSpinner.getSelectedItemPosition());
 		}
+
+		return isStarted;
+	}
+
+	/**
+	 * Save the clock's current state to {@link SharedPreferences} fields.
+	 * Same contents as {@link #fillSaveState(Bundle)} except that
+	 * the key names have "anstop_state_" as a prefix.
+	 * Also sets boolean <tt>"anstop_in_use"</tt> to the value returned by {@link #isInUse()}.
+	 *
+	 * @param outState SharedPreferences to save into
+	 * @return true if clock was running, false otherwise
+	 * @see #restoreFromSaveState(SharedPreferences)
+	 */
+	public boolean fillSaveState(SharedPreferences outState) {
+		final boolean notInUse = ! isInUse();
+		if (notInUse && ! outState.getBoolean("anstop_in_use", false))
+		{
+			return false;  // <--- Early return: No change to preferences ---
+		}
+
+		SharedPreferences.Editor outPref = outState.edit();
+		final long savedAtTime = System.currentTimeMillis();
+
+		if (notInUse)
+		{
+			outPref.putBoolean("anstop_in_use", false);			
+		} else {
+			outPref.putBoolean("anstop_in_use", true);
+
+			// Reminder: If you add a bundle key,
+			// be sure to add it in both copies of
+			// fillSaveState and of restoreFromSaveState.
+
+			outPref.putInt("anstop_state_clockV", v);
+			outPref.putInt("anstop_state_current", parent.getCurrentMode());
+			outPref.putBoolean("anstop_state_wroteStart", parent.wroteStartTime);
+			outPref.putInt("anstop_state_clockDigits_h", hour);
+			outPref.putInt("anstop_state_clockDigits_m", min);
+			outPref.putInt("anstop_state_clockDigits_s", sec);
+			outPref.putInt("anstop_state_clockDigits_d", dsec);
+			outPref.putBoolean("anstop_state_clockActive", isStarted);
+			outPref.putBoolean("anstop_state_clockWasActive", wasStarted);
+			outPref.putLong("anstop_state_clockStateSaveTime", savedAtTime);
+			if (! isStarted)
+				outPref.putLong("anstop_state_clockStopTime", stopTime);
+			else
+				outPref.putLong("anstop_state_clockStopTime", -1L);
+			if (parent.lapView != null)
+				outPref.putString("anstop_state_clockLaps", parent.lapView.getText().toString());
+			else
+				outPref.putString("anstop_state_clockLaps", "");
+			outPref.putLong("anstop_state_clockStartTimeActual", startTimeActual);
+			outPref.putLong("anstop_state_clockStartTimeAdj", startTimeAdj);
+			if (parent.hourSpinner != null)
+			{
+				outPref.putInt("anstop_state_clockCountHour", parent.hourSpinner.getSelectedItemPosition());
+				outPref.putInt("anstop_state_clockCountMin", parent.minSpinner.getSelectedItemPosition());
+				outPref.putInt("anstop_state_clockCountSec", parent.secSpinner.getSelectedItemPosition());
+			} else {
+				outPref.putInt("anstop_state_clockCountHour", 0);
+				outPref.putInt("anstop_state_clockCountMin", 0);
+				outPref.putInt("anstop_state_clockCountSec", 0);
+			}
+		}
+		outPref.commit();
 
 		return isStarted;
 	}
@@ -239,7 +318,7 @@ public class Clock {
 		if (! isStarted)
 			return;
 
-		if (appPauseTime > appBundleRestoreTime)
+		if (appPauseTime > appStateRestoreTime)
 			adjClockOnAppResume(false, System.currentTimeMillis());
 
 		if(v == STOP) {
@@ -264,14 +343,15 @@ public class Clock {
 	 * and set the GUI mode accordingly, before calling this method.
 	 *<P>
 	 * Will call count() if clockStarted == 1 in the bundle, unless we've counted down to 0:0:0.
-	 * For the bundle contents, see {@link #fillSaveStateBundle(Bundle)}.
+	 * For the bundle contents, see {@link #fillSaveState(Bundle)}.
 	 * @param inState  bundle containing our state
 	 * @return true if clock was running when saved, false otherwise
+	 * @see #restoreFromSaveState(SharedPreferences)
 	 * @since 1.3
 	 */
-	public boolean restoreFromSaveStateBundle(Bundle inState) {
+	public boolean restoreFromSaveState(Bundle inState) {
 		long restoredAtTime = System.currentTimeMillis();
-		appBundleRestoreTime = restoredAtTime;
+		appStateRestoreTime = restoredAtTime;
 		if ((inState == null) || ! inState.containsKey("clockActive"))
 			return false;
 
@@ -288,10 +368,11 @@ public class Clock {
 
 		final boolean bundleClockActive = (1 == inState.getInt("clockActive"));
 		wasStarted = (1 == inState.getInt("clockWasActive"));
-		final long savedAtTime = inState.getLong("clockBundleSaveTime", restoredAtTime);
+		final long savedAtTime = inState.getLong("clockStateSaveTime", restoredAtTime);
 		startTimeActual = inState.getLong("clockStartTimeActual", savedAtTime);
 		startTimeAdj = inState.getLong("clockStartTimeAdj", startTimeActual);
 		stopTime = inState.getLong("clockStopTime", -1L);
+		parent.wroteStartTime = inState.getBoolean("clockAnstopWroteStart", false);
 		if (parent.lapView != null)
 		{
 			CharSequence laptext = inState.getCharSequence("clockLaps");
@@ -307,12 +388,97 @@ public class Clock {
 			parent.secSpinner.setSelection(inState.getInt("clockCountSec"));
 		}
 
+		if((threadS != null) && threadS.isAlive())
+			threadS.interrupt();
+		if((threadC != null) && threadC.isAlive())
+			threadC.interrupt();
+
 		// Adjust and continue the clock thread:
 		// re-read current time for most accuracy
 		if (bundleClockActive)
 		{
 			restoredAtTime = System.currentTimeMillis();
-			appBundleRestoreTime = restoredAtTime;
+			appStateRestoreTime = restoredAtTime;
+			adjClockOnAppResume(false, restoredAtTime);
+		} else {
+			adjClockOnAppResume(true, 0L);
+		}
+
+		isStarted = false;  // must be false before calling count()
+		if (bundleClockActive)
+		{
+			// Read the values from text elements we've just set, and start it:
+			// In countdown mode, will check if we're past 0:0:0 by now.
+			count();
+		}
+		return isStarted;
+	}
+
+	/**
+	 * Restore our state (start time millis, etc) and keep going.
+	 * Unless the boolean preference <tt>"anstop_in_use"</tt> is true,
+	 * nothing will be read, and false will be returned.
+	 *<P>
+	 * Must call AFTER the GUI elements (parent.dsecondsView, etc) exist.
+	 * Thus you must read <tt>"anstop_state_current"</tt> from the preferences yourself,
+	 * and set the GUI mode accordingly, before calling this method.
+	 *<P>
+	 * Will call count() if <tt>anstop_state_clockStarted</tt> == 1 in the preferences,
+	 * unless we've counted down to 0:0:0.
+	 * For the preference contents, see {@link #fillSaveState(SharedPreferences)}.
+	 * @param inState  preferences containing our state
+	 * @return true if clock was running when saved, false otherwise
+	 * @see #restoreFromSaveState(Bundle)
+	 */
+	public boolean restoreFromSaveState(SharedPreferences inState) {
+		long restoredAtTime = System.currentTimeMillis();
+		if ((inState == null) || ! inState.getBoolean("anstop_in_use", false))
+			return false;
+
+		appStateRestoreTime = restoredAtTime;
+		v = inState.getInt("anstop_state_clockV", STOP);
+
+		// read the counting fields
+		{
+			hour = inState.getInt("anstop_state_clockDigits_h", 0);
+			min  = inState.getInt("anstop_state_clockDigits_m", 0);
+			sec  = inState.getInt("anstop_state_clockDigits_s", 0);
+			dsec = inState.getInt("anstop_state_clockDigits_d", 0);
+		}
+
+		final boolean bundleClockActive = inState.getBoolean("anstop_state_clockActive", false);
+		wasStarted = inState.getBoolean("anstop_state_clockWasActive", false);
+		final long savedAtTime = inState.getLong("anstop_state_clockStateSaveTime", restoredAtTime);
+		startTimeActual = inState.getLong("anstop_state_clockStartTimeActual", savedAtTime);
+		startTimeAdj = inState.getLong("anstop_state_clockStartTimeAdj", startTimeActual);
+		stopTime = inState.getLong("anstop_state_clockStopTime", -1L);
+		parent.wroteStartTime = inState.getBoolean("anstop_state_wroteStart", false);
+		if (parent.lapView != null)
+		{
+			String laptext = inState.getString("anstop_state_clockLaps", "");
+			if (laptext.length() > 0)
+				parent.lapView.setText(laptext);
+			else
+				parent.lapView.setText("");
+		}
+		if (parent.hourSpinner != null)
+		{
+			parent.hourSpinner.setSelection(inState.getInt("anstop_state_clockCountHour", 0));
+			parent.minSpinner.setSelection(inState.getInt("anstop_state_clockCountMin", 0));
+			parent.secSpinner.setSelection(inState.getInt("anstop_state_clockCountSec", 0));
+		}
+
+		if((threadS != null) && threadS.isAlive())
+			threadS.interrupt();
+		if((threadC != null) && threadC.isAlive())
+			threadC.interrupt();
+
+		// Adjust and continue the clock thread:
+		// re-read current time for most accuracy
+		if (bundleClockActive)
+		{
+			restoredAtTime = System.currentTimeMillis();
+			appStateRestoreTime = restoredAtTime;
 			adjClockOnAppResume(false, restoredAtTime);
 		} else {
 			adjClockOnAppResume(true, 0L);
@@ -335,7 +501,7 @@ public class Clock {
 	 *<P>
 	 * If <tt>adjDisplayOnly</tt> is false, do not call unless {@link #isStarted}.
 	 *<P>
-	 * Used with {@link #onAppResume()} and {@link #restoreFromSaveStateBundle(Bundle)}.
+	 * Used with {@link #onAppResume()} and {@link #restoreFromSaveState(Bundle)}.
 	 *
 	 * @param adjDisplayOnly  If true, update the display fields based on
 	 *    the current hour, min, sec, dsec internal field values,
@@ -376,9 +542,9 @@ public class Clock {
 		if (parent.dsecondsView != null)
 			parent.dsecondsView.setText(Integer.toString(dsec));
 		if (parent.secondsView != null)
-			parent.secondsView.setText(Integer.toString(sec));
+			parent.secondsView.setText(nf.format(sec));
 		if (parent.minView != null)
-			parent.minView.setText(Integer.toString(min));
+			parent.minView.setText(nf.format(min));
 		if (parent.hourView != null)
 			parent.hourView.setText(Integer.toString(hour));
 	}
@@ -408,6 +574,12 @@ public class Clock {
 	public long getStartTimeActual() { return startTimeActual; }
 
 	/**
+	 * Is the clock active or in use?
+	 * @return true if <tt>isStarted</tt> or if hours, minutes, seconds or dsec are not 0.
+	 */
+	public boolean isInUse() { return isStarted || (hour > 0) || (min > 0) || (sec > 0) || (dsec > 0); }
+
+	/**
 	 * Reset the clock while stopped, and maybe change modes.  {@link #isStarted} must be false.
 	 * If <tt>newMode</tt> is {@link #STOP}, the clock will be reset to 0,
 	 * and <tt>h</tt>, <tt>m</tt>, <tt>s</tt> are ignored.
@@ -428,7 +600,7 @@ public class Clock {
 
 		wasStarted = false;
 		appPauseTime = -1L;
-		appBundleRestoreTime = -1L;
+		appStateRestoreTime = -1L;
 		stopTime = -1L;
 		startTimeActual = -1L;
 		startTimeAdj = -1L;
@@ -451,8 +623,16 @@ public class Clock {
 
 	/**
 	 * Start or stop(pause) counting.
+	 *<P>
 	 * For <tt>COUNTDOWN</tt> mode, you must first call {@link #reset(int, int, int, int)}
 	 * or set the {@link #hour}, {@link #min}, {@link #sec} fields.
+	 *<P>
+	 * If <tt>wasStarted</tt>, and if <tt>stopTime</tt> != -1,
+	 * will update <tt>startTimeAdj</tt>
+	 * (based on current time and <tt>stopTime</tt>)
+	 * before starting the counting thread.
+	 * This assumes that the counting was recently paused by the
+	 * user, and is starting up again.
 	 */
 	public void count() {
 		final long now = System.currentTimeMillis();
@@ -463,7 +643,9 @@ public class Clock {
 			{
 				startTimeActual = now;
 				startTimeAdj = startTimeActual;
-			} else {
+			}
+			else if (stopTime != -1L)
+			{
 				startTimeAdj += (now - stopTime);
 			}
 

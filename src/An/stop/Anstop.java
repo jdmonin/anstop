@@ -96,8 +96,12 @@ public class Anstop extends Activity {
 	
 	private int laps = 1;
 
-	/** if true, we already wrote the start date/time into {@link #lapView}. */
-	private boolean wroteStartTime;
+	/**
+	 * If true, we already wrote the start date/time into {@link #lapView}.
+	 * Visibility is non-private for use by {@link Clock#fillSaveState(Bundle)}
+	 * and {@link Clock#restoreFromSaveState(Bundle)}.
+	 */
+	boolean wroteStartTime;
 
 	/**
 	 * Date formatter for day of week + user's medium date format + hh:mm:ss;
@@ -135,7 +139,13 @@ public class Anstop extends Activity {
 	
 	AccelerometerListener al;
 	
+	/**
+	 * DatabaseHelper, if opened.
+	 * Usually null, unless we've saved a time to the database.
+	 * Closed and set to null in {@link #onPause()}.
+	 */
 	anstopDbAdapter dbHelper;
+
 	/** Mode Menu's items, for {@link #updateModeMenuFromCurrent()} to indicate current mode. */
 	private MenuItem modeMenu_itemStop;
 	private MenuItem modeMenu_itemLap;
@@ -175,12 +185,6 @@ public class Anstop extends Activity {
         hourView.setTextSize(VIEW_SIZE - 30);
         startTimeView.setTextSize(VIEW_SIZE - 30);
 
-        if (dbHelper == null)
-        {
-	        dbHelper = new anstopDbAdapter(this);
-	        dbHelper.open();
-        }
-        
         //set the clock object
         final boolean isInitialStartup = (clock == null);
         if (isInitialStartup)
@@ -211,12 +215,21 @@ public class Anstop extends Activity {
         if ((savedInstanceState != null)
         	&& savedInstanceState.containsKey("clockAnstopCurrent"))
         {
+        	// bundle from onSaveInstanceState
         	onRestoreInstanceState(savedInstanceState);
+        } else {
+        	// prefs from onPause when isFinishing
+        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
+        	onRestoreInstanceState(settings);
         }
     }
 
     /**
      * Read our settings, at startup or after calling the SettingsActivity.
+     *<P>
+     * Does not check <tt>"anstop_in_use"</tt> or read the instance state
+     * when the application is finishing; for that, see {@link Clock#restoreFromSaveState(SharedPreferences)}.
+     *
      * @param isStartup Are we just starting now, not already running?
      */
     private void readSettings(final boolean isStartup) {
@@ -406,7 +419,7 @@ public class Anstop extends Activity {
 	 */
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		clock.fillSaveStateBundle(outState);
+		clock.fillSaveState(outState);
 	}
 
 	/**
@@ -421,9 +434,29 @@ public class Anstop extends Activity {
 			return;
 		final int newCurrent = inState.getInt("clockAnstopCurrent", STOP);
 		setCurrentMode(newCurrent);
-		clock.restoreFromSaveStateBundle(inState);
+		clock.restoreFromSaveState(inState);
 	}
 
+	/**
+	 * Restore our state after an Android exit and subsequent {@link #onCreate(Bundle)}.
+	 * @param settings {@link PreferenceManager#getDefaultSharedPreferences(Context)}
+	 */
+	private void onRestoreInstanceState(SharedPreferences settings) {
+		if ( ! settings.getBoolean("anstop_in_use", false) )
+			return;
+		final int newCurrent = settings.getInt("anstop_state_current", STOP);
+		setCurrentMode(newCurrent);
+		clock.restoreFromSaveState(settings);
+	}
+
+	/**
+	 * Stop the clock thread.
+	 *<P>
+	 * If not {@link #isFinishing()}, relies on a separate call to
+	 * {@link #onSaveInstanceState(Bundle)} to save current state.
+	 *<P>
+	 * If {@link #isFinishing()}, saves our current state to {@link SharedPreferences}. 
+	 */
 	@Override
 	public void onPause()
 	{
@@ -431,6 +464,15 @@ public class Anstop extends Activity {
 		if (! isFinishing())
 		{
 			clock.onAppPause();
+		} else {
+			clock.fillSaveState
+				(PreferenceManager.getDefaultSharedPreferences(mContext));
+		}
+
+		if (dbHelper != null)
+		{
+			dbHelper.close();  // prevent leaks
+			dbHelper = null;
 		}
 	}
 
@@ -587,6 +629,11 @@ public class Anstop extends Activity {
         		public void onClick(DialogInterface dialog, int whichButton) {
 		    			
         				String body = createBodyFromCurrent();
+        				if (dbHelper == null)
+        				{
+        					dbHelper = new anstopDbAdapter(Anstop.this);
+        					dbHelper.open();
+        				}        		        
 		    			dbHelper.createNew(input.getText().toString(), body);
 		    			Toast toast = Toast.makeText(getApplicationContext(), R.string.saved_succes, Toast.LENGTH_SHORT);
 		    			toast.show();
