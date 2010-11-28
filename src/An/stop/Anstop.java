@@ -249,6 +249,8 @@ public class Anstop extends Activity {
         else
         	vib = null;
 
+        if(!isStartup) return; // app was started before, user changed settings
+        
         // "mode" setting: Clock mode at startup; an int saved as string.
         try
         {
@@ -540,7 +542,6 @@ public class Anstop extends Activity {
         case SETTINGS_ITEM:
         	i.setClass(this, settingsActivity.class);
         	startActivityForResult(i, SETTINGS_ACTIVITY);
-        	readSettings(false);
         	return true;
 
         case MODE_STOP:
@@ -658,9 +659,9 @@ public class Anstop extends Activity {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        	readSettings(false); // because only settingsactivity is started for
-        	// result, we can launch that without checking the parameters.
-        }
+    	readSettings(false); // because only settingsactivity is started for
+    	// result, we can launch that without checking the parameters.
+    }
 
     /**
      * Given the {@link #current current mode}, the name of that mode from resources.
