@@ -72,8 +72,10 @@ public class showTimesActivity extends Activity {
 		
 		Cursor time = dbHelper.fetch(mRowId);
 		startManagingCursor(time);
+		
 		titleView.setText(time.getString(time.getColumnIndexOrThrow(anstopDbAdapter.KEY_TITLE)));
 		bodyView.setText(time.getString(time.getColumnIndexOrThrow(anstopDbAdapter.KEY_BODY)));
+		
 		
 		dbHelper.close();
 		
@@ -123,6 +125,12 @@ public class showTimesActivity extends Activity {
 		}
 		
 		return false;
+	}
+	
+	@Override
+	public void onSaveInstanceState (Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putLong(anstopDbAdapter.KEY_ROWID, mRowId);
 	}
 	
 
