@@ -4,15 +4,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:id="@+id/stopwatchLayout" android:orientation="vertical">
-   <android.gesture.GestureOverlayView 
-    android:id="@+id/gesture_overlay"
-	android:layout_width="fill_parent" 
-    android:layout_height="fill_parent"
-    
-    android:gestureStrokeType="multiple"
-    android:eventsInterceptionEnabled="true"
-    android:orientation="vertical">
+    android:id="@+id/stopwatchLayout">
+    <LinearLayout
+		android:id="@+id/mainLayout"
+		android:layout_height="fill_parent"
+		android:layout_width="fill_parent"
+		android:orientation="vertical">
 
 <LinearLayout android:id="@+id/LinearLayout03" android:layout_width="wrap_content" android:layout_height="wrap_content"><TextView android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/hourView" android:text="0"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/hour" android:id="@+id/hourLabelView"></TextView></LinearLayout><RelativeLayout android:id="@+id/RelativeLayout01" android:layout_width="wrap_content" android:layout_height="wrap_content"><LinearLayout android:id="@+id/LinearLayout02" android:layout_width="wrap_content" android:layout_height="wrap_content"><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/minView" android:text="00"></TextView><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=":" android:id="@+id/sepView2"></TextView><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/secondsView" android:text="00"></TextView><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=":" android:id="@+id/sepView1"></TextView><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/dsecondsView" android:text="0"></TextView></LinearLayout></RelativeLayout>
 
@@ -24,6 +21,5 @@
 
 <TextView android:layout_width="fill_parent"
     android:layout_height="wrap_content" android:id="@+id/main_startTimeView"/>
-</android.gesture.GestureOverlayView>
+    </LinearLayout>
 </LinearLayout>
-

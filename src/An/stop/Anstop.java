@@ -45,6 +45,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -57,6 +58,7 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.LinearLayout.LayoutParams;
 
 /**
  * Anstop's main activity, showing the current clock, lap times, etc.
@@ -175,15 +177,14 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
+        current = STOP;
         //set the View Objects
         dsecondsView = (TextView) findViewById(R.id.dsecondsView);
         secondsView = (TextView) findViewById(R.id.secondsView); 
         minView = (TextView) findViewById(R.id.minView);
         hourView = (TextView) findViewById(R.id.hourView);
         startTimeView = (TextView) findViewById(R.id.main_startTimeView);
-        gestureOverlay = (GestureOverlayView) findViewById(R.id.gesture_overlay);
-        gestureOverlay.addOnGesturePerformedListener(this);
+        setupGesture();
         lapView = null;
         if (startTimeView.length() == 0)
         	wroteStartTime = false;
@@ -213,7 +214,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         resetButton = (Button) findViewById(R.id.resetButton);
         resetButton.setOnClickListener(new resetButtonListener());
 
-        current = STOP;
+
 
         if (! isInitialStartup)
         	return;  // <--- Early return: Already did startup once ---
@@ -321,7 +322,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
      * inform clock class to count down now.
      */
     public void countdown() {
-    	
+        current = COUNTDOWN;
     	//set the Layout to the countdown layout
     	setContentView(R.layout.countdown);
     	
@@ -331,8 +332,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         minView = (TextView) findViewById(R.id.minView);
         hourView = (TextView) findViewById(R.id.hourView);
         startTimeView = (TextView) findViewById(R.id.countdown_startTimeView);
-        gestureOverlay = (GestureOverlayView) findViewById(R.id.gesture_overlay);
-        gestureOverlay.addOnGesturePerformedListener(this);
+        setupGesture();
         lapView = null;
         if (startTimeView.length() == 0)
         	wroteStartTime = false;
@@ -372,7 +372,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         refreshButton  = (Button) findViewById(R.id.refreshButton);
         refreshButton.setOnClickListener(new refreshButtonListener());
         
-        current = COUNTDOWN;
+
         
         clock.reset(COUNTDOWN, 0, 0, 0);  // inform clock class to count down now
     }
@@ -382,7 +382,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
      * inform clock class to count laps now (same clock-action as STOP).
      */
     public void lap() {
-    	
+        
+        current = LAP;
     	//set the Layout to the lap-mode layout
     	setContentView(R.layout.lap);
     	
@@ -391,8 +392,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         secondsView = (TextView) findViewById(R.id.secondsView); 
         minView = (TextView) findViewById(R.id.minView);
         hourView = (TextView) findViewById(R.id.hourView);
-        gestureOverlay = (GestureOverlayView) findViewById(R.id.gesture_overlay);
-        gestureOverlay.addOnGesturePerformedListener(this);
+        setupGesture();
         
         //set the size
         TextView sepView = (TextView) findViewById(R.id.sepView1);
@@ -422,20 +422,45 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         resetButton.setOnClickListener(new resetButtonListener());
 
         lapScroll = (ScrollView) findViewById(R.id.ScrollView01);
-       
-        current = LAP;
+
 
         // From clock's point of view:
         clock.reset(STOP, 0, 0, 0);  // lapmode behaves the same as stop
     }
 
-    /**
+    private void setupGesture() {
+    	LinearLayout layout = getLayout(current);
+    	gestureOverlay = new GestureOverlayView(this);
+		layout.addView(gestureOverlay, new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT, 1));
+		ViewGroup mainViewGroup = (ViewGroup) findViewById(R.id.mainLayout);
+		layout.removeView(mainViewGroup);
+		gestureOverlay.addView(mainViewGroup);
+		gestureOverlay.addOnGesturePerformedListener(this);
+
+	}
+    
+    private LinearLayout getLayout(int index) {
+    	switch(index) {
+		case LAP:
+			return (LinearLayout) findViewById(R.id.lapLayout);
+			
+		case COUNTDOWN:
+			return (LinearLayout) findViewById(R.id.countDownLayout);
+			
+		case STOP:
+			return (LinearLayout) findViewById(R.id.stopwatchLayout);
+			
+		}
+    	return null;
+    }
+
+	/**
      * Set the mode to {@link #STOP}, and set layout to that normal layout.
      */
 	private void stopwatch() {
+		current = STOP;
 		onCreate(new Bundle()); //set layout to the normal Layout
 		clock.reset(STOP, 0, 0, 0); //inform clock class to stop time
-		current = STOP;
 	}
 
 	/**
@@ -923,14 +948,14 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	    				current = 0;
 	    			else
 	    				current += 1;
-	    			animateSwitch(true);
+	    			animateSwitch(false);
 	    		}
 	    		if(prediction.name.equals("SwipeLeft")) {
 	    			if(current == 0)
 	    				current = 2;
 	    			else
 	    				current -= 1;
-	    			animateSwitch(false);
+	    			animateSwitch(true);
 	    		}
 	    	}
 	    }
@@ -939,9 +964,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     private void animateSwitch(final boolean toRight) {
     	
     	Animation animation = AnimationUtils.makeOutAnimation(this, toRight);
-    	LinearLayout layout = null;
+    	
     	int modeBefore = -1;
-    	if(!toRight) {
+    	if(toRight) {
     		if(current == 2)
     			modeBefore = 0;
     		else
@@ -954,17 +979,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     			modeBefore = current - 1;
     	}
     	
-		switch(modeBefore) {
-		case LAP:
-			layout = (LinearLayout) findViewById(R.id.lapLayout);
-			break;
-		case COUNTDOWN:
-			layout = (LinearLayout) findViewById(R.id.countDownLayout);
-			break;
-		case STOP:
-			layout = (LinearLayout) findViewById(R.id.stopwatchLayout);
-			break;
-		}
+    	LinearLayout layout = getLayout(modeBefore);
 		final LinearLayout layout2 = layout;
 		animation.setAnimationListener(new AnimationListener() {
 			//@Override
