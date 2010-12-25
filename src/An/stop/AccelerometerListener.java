@@ -91,7 +91,7 @@ public class AccelerometerListener implements SensorEventListener {
 			currenForce = Math.abs(current_x+current_y+current_z - last_x - last_y - last_z) / diffTime * 10000;
 			
 			if (currenForce > FORCE_THRESHOLD)				
-				clock.count(); //phone was has been shaken
+				clock.count(); //phone has been shaken
 			
 			last_x = current_x;
 			last_y = current_y;

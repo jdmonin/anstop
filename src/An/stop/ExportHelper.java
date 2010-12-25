@@ -31,12 +31,12 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.os.Environment;
 
-public class exportHelper {
+public class ExportHelper {
 	
 	private FileOutputStream out;
 	Context mContext;
 	
-	public exportHelper(Context context) {
+	public ExportHelper(Context context) {
 		this.mContext = context;
 	}
 
@@ -93,16 +93,16 @@ public class exportHelper {
 	 * @return String[] with [0]=title, [1]=body, or null if not found.
 	 */
 	public String[] getRow(long rowId) {
-		anstopDbAdapter dbHelper = null;
+		AnstopDbAdapter dbHelper = null;
 		String[] columns = null;
 		try {
-			dbHelper = new anstopDbAdapter(mContext);
+			dbHelper = new AnstopDbAdapter(mContext);
 			dbHelper.open();
 			
 			Cursor time = dbHelper.fetch(rowId);
 			columns = new String[2];
-			columns[0] = time.getString(time.getColumnIndexOrThrow(anstopDbAdapter.KEY_TITLE));
-			columns[1] = time.getString(time.getColumnIndexOrThrow(anstopDbAdapter.KEY_BODY));
+			columns[0] = time.getString(time.getColumnIndexOrThrow(AnstopDbAdapter.KEY_TITLE));
+			columns[1] = time.getString(time.getColumnIndexOrThrow(AnstopDbAdapter.KEY_BODY));
 			
 			dbHelper.close();
 		} catch (SQLException e) {

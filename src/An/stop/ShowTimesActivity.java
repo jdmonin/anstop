@@ -33,7 +33,7 @@ import android.widget.Toast;
  * Shows a previously saved time in the database,
  * with options to delete, export or send.
  */
-public class showTimesActivity extends Activity {
+public class ShowTimesActivity extends Activity {
 	
 	private static final int VIEW_SIZE = 30;
 	
@@ -46,7 +46,7 @@ public class showTimesActivity extends Activity {
 	private static final int MENU_SEND = 16;
 	private static final int SEND_ITEM = 17;
 
-	private anstopDbAdapter dbHelper;
+	private AnstopDbAdapter dbHelper;
 	private Long mRowId;
 	TextView titleView;
 	TextView bodyView;
@@ -56,25 +56,25 @@ public class showTimesActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.show_times);
-		dbHelper = new anstopDbAdapter(this);
+		dbHelper = new AnstopDbAdapter(this);
 		dbHelper.open();
 		
 		bodyView = (TextView) findViewById(R.id.bodyView);
 		titleView = (TextView) findViewById(R.id.titleView);
-		mRowId = savedInstanceState != null ? savedInstanceState.getLong(anstopDbAdapter.KEY_ROWID) 
+		mRowId = savedInstanceState != null ? savedInstanceState.getLong(AnstopDbAdapter.KEY_ROWID) 
 				: null;
 		
 		if (mRowId == null) {
 			Bundle extras = getIntent().getExtras();            
-			mRowId = extras != null ? extras.getLong(anstopDbAdapter.KEY_ROWID) 
+			mRowId = extras != null ? extras.getLong(AnstopDbAdapter.KEY_ROWID) 
 					: null;
 		}
 		
 		Cursor time = dbHelper.fetch(mRowId);
 		startManagingCursor(time);
 		
-		titleView.setText(time.getString(time.getColumnIndexOrThrow(anstopDbAdapter.KEY_TITLE)));
-		bodyView.setText(time.getString(time.getColumnIndexOrThrow(anstopDbAdapter.KEY_BODY)));
+		titleView.setText(time.getString(time.getColumnIndexOrThrow(AnstopDbAdapter.KEY_TITLE)));
+		bodyView.setText(time.getString(time.getColumnIndexOrThrow(AnstopDbAdapter.KEY_BODY)));
 		
 		
 		dbHelper.close();
@@ -104,7 +104,7 @@ public class showTimesActivity extends Activity {
 	        return true;
 	        
 		case EXPORT_ITEM:
-			exportHelper exHlp = new exportHelper(this);
+			ExportHelper exHlp = new ExportHelper(this);
 			
 			Toast toast;
 			
@@ -130,7 +130,7 @@ public class showTimesActivity extends Activity {
 	@Override
 	public void onSaveInstanceState (Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putLong(anstopDbAdapter.KEY_ROWID, mRowId);
+		outState.putLong(AnstopDbAdapter.KEY_ROWID, mRowId);
 	}
 	
 

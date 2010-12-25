@@ -28,7 +28,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 
-public class anstopDbAdapter {
+public class AnstopDbAdapter {
 	
     private static final int DATABASE_VERSION = 2;
     
@@ -64,11 +64,11 @@ public class anstopDbAdapter {
         }
     }
     
-    anstopDbAdapter(Context context) {
+    AnstopDbAdapter(Context context) {
     	this.mContext = context;
     }
     
-    public anstopDbAdapter open() throws SQLException {
+    public AnstopDbAdapter open() throws SQLException {
     		dbHelper = new DataBaseHelper(mContext);
         	mDb = dbHelper.getWritableDatabase();
         	return this;

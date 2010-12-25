@@ -22,6 +22,8 @@
 
 package An.stop;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -29,18 +31,29 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.gesture.Gesture;
+import android.gesture.GestureLibraries;
+import android.gesture.GestureLibrary;
+import android.gesture.GestureOverlayView;
+import android.gesture.Prediction;
+import android.gesture.GestureOverlayView.OnGesturePerformedListener;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Animation.AnimationListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -52,7 +65,7 @@ import android.widget.Toast;
  * Uses 1 of 3 layouts, depending on the {@link #current} mode:
  * <tt>main</tt>, <tt>countdown</tt>, <tt>lap</tt>.
  */
-public class Anstop extends Activity {
+public class Anstop extends Activity implements OnGesturePerformedListener {
     
 	
 	private static final int MENU_MODE_GROUP = 0;
@@ -138,13 +151,15 @@ public class Anstop extends Activity {
 	Vibrator vib;
 	
 	AccelerometerListener al;
+	GestureOverlayView gestureOverlay;
+	GestureLibrary gestureLibrary;
 	
 	/**
 	 * DatabaseHelper, if opened.
 	 * Usually null, unless we've saved a time to the database.
 	 * Closed and set to null in {@link #onPause()}.
 	 */
-	anstopDbAdapter dbHelper;
+	AnstopDbAdapter dbHelper;
 
 	/** Mode Menu's items, for {@link #updateModeMenuFromCurrent()} to indicate current mode. */
 	private MenuItem modeMenu_itemStop;
@@ -168,6 +183,8 @@ public class Anstop extends Activity {
         minView = (TextView) findViewById(R.id.minView);
         hourView = (TextView) findViewById(R.id.hourView);
         startTimeView = (TextView) findViewById(R.id.main_startTimeView);
+        gestureOverlay = (GestureOverlayView) findViewById(R.id.gesture_overlay);
+        gestureOverlay.addOnGesturePerformedListener(this);
         lapView = null;
         if (startTimeView.length() == 0)
         	wroteStartTime = false;
@@ -222,6 +239,9 @@ public class Anstop extends Activity {
         	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         	onRestoreInstanceState(settings);
         }
+        
+        gestureLibrary = GestureLibraries.fromRawResource(this, R.raw.gestures);
+        gestureLibrary.load();
     }
 
     /**
@@ -312,6 +332,8 @@ public class Anstop extends Activity {
         minView = (TextView) findViewById(R.id.minView);
         hourView = (TextView) findViewById(R.id.hourView);
         startTimeView = (TextView) findViewById(R.id.countdown_startTimeView);
+        gestureOverlay = (GestureOverlayView) findViewById(R.id.gesture_overlay);
+        gestureOverlay.addOnGesturePerformedListener(this);
         lapView = null;
         if (startTimeView.length() == 0)
         	wroteStartTime = false;
@@ -370,6 +392,8 @@ public class Anstop extends Activity {
         secondsView = (TextView) findViewById(R.id.secondsView); 
         minView = (TextView) findViewById(R.id.minView);
         hourView = (TextView) findViewById(R.id.hourView);
+        gestureOverlay = (GestureOverlayView) findViewById(R.id.gesture_overlay);
+        gestureOverlay.addOnGesturePerformedListener(this);
         
         //set the size
         TextView sepView = (TextView) findViewById(R.id.sepView1);
@@ -540,7 +564,7 @@ public class Anstop extends Activity {
     	
     	switch (item.getItemId()) {
         case SETTINGS_ITEM:
-        	i.setClass(this, settingsActivity.class);
+        	i.setClass(this, SettingsActivity.class);
         	startActivityForResult(i, SETTINGS_ACTIVITY);
         	return true;
 
@@ -573,7 +597,7 @@ public class Anstop extends Activity {
         	return true;
 
         case LOAD_ITEM:
-        	i.setClass(this, loadActivity.class);
+        	i.setClass(this, LoadActivity.class);
         	startActivity(i);
         	return true;
         	
@@ -632,7 +656,7 @@ public class Anstop extends Activity {
         				String body = createBodyFromCurrent();
         				if (dbHelper == null)
         				{
-        					dbHelper = new anstopDbAdapter(Anstop.this);
+        					dbHelper = new AnstopDbAdapter(Anstop.this);
         					dbHelper.open();
         				}        		        
 		    			dbHelper.createNew(input.getText().toString(), body);
@@ -887,10 +911,87 @@ public class Anstop extends Activity {
         	    public void run() {
         	    	lapScroll.fullScroll(ScrollView.FOCUS_DOWN);
         	    }
-        	}); 
+        	});
     	}
-    }    
+    }
 
-    
+	public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture) {
+		List<Prediction> predictions = gestureLibrary.recognize(gesture);
+	    for(Prediction prediction : predictions) {
+	    	if(prediction.score > 1.0) {
+	    		if(prediction.name.equals("SwipeRight")) {
+	    			if(current == 2)
+	    				current = 0;
+	    			else
+	    				current =+ 1;
+	    			animateSwitch(true);
+	    		}
+	    		if(prediction.name.equals("SwipeLeft")) {
+	    			if(current == 0)
+	    				current = 2;
+	    			else
+	    				current =- 1;
+	    			animateSwitch(false);
+	    		}
+	    	}
+	    }
+	}    
+
+    private void animateSwitch(final boolean toRight) {
+    	
+    	Animation animation = AnimationUtils.makeOutAnimation(this, toRight);
+    	LinearLayout layout = null;
+    	int modeBefore = -1;
+    	if(!toRight) {
+    		if(current == 2)
+    			modeBefore = 0;
+    		else
+    			modeBefore = current + 1;
+    	}
+    	else {
+    		if(current == 0)
+    			modeBefore = 2;
+    		else
+    			modeBefore = current - 1;
+    	}
+    	
+		switch(modeBefore) {
+		case LAP:
+			layout = (LinearLayout) findViewById(R.id.lapLayout);
+			break;
+		case COUNTDOWN:
+			layout = (LinearLayout) findViewById(R.id.countDownLayout);
+			break;
+		case STOP:
+			layout = (LinearLayout) findViewById(R.id.stopwatchLayout);
+			break;
+		}
+		final LinearLayout layout2 = layout;
+		animation.setAnimationListener(new AnimationListener() {
+			//@Override
+			public void onAnimationStart(Animation animation) {
+			}
+			//@Override
+			public void onAnimationRepeat(Animation animation) {
+			}
+			//@Override
+			public void onAnimationEnd(Animation animation) {
+				switch(current) {
+				case LAP:
+					lap();
+					break;
+				case COUNTDOWN:
+					countdown();
+					break;
+				case STOP:
+					stopwatch();
+					break;
+				}
+				Animation inAnim = AnimationUtils.makeInAnimation(Anstop.this, toRight); 
+				layout2.startAnimation(inAnim);
+			}
+		});
+		layout.startAnimation(animation);
+    }
     
 }

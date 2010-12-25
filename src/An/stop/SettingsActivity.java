@@ -24,7 +24,7 @@ package An.stop;
 
 import android.os.Bundle;
 
-public class settingsActivity extends android.preference.PreferenceActivity {
+public class SettingsActivity extends android.preference.PreferenceActivity {
 	
 	
 	@Override

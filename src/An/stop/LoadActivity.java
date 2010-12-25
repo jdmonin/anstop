@@ -41,9 +41,9 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
  * Presents the list of previously saved times in the database,
  * with options to view, delete, export or send.
  */
-public class loadActivity extends ListActivity {
+public class LoadActivity extends ListActivity {
 	
-	private anstopDbAdapter dbHelper;
+	private AnstopDbAdapter dbHelper;
 	String body;
 	
 	private static final int MENU_DELETE = 12;
@@ -63,7 +63,7 @@ public class loadActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.load);
-		dbHelper = new anstopDbAdapter(this);
+		dbHelper = new AnstopDbAdapter(this);
 		dbHelper.open();
 		fillData();
 		registerForContextMenu(getListView());
@@ -75,7 +75,7 @@ public class loadActivity extends ListActivity {
 		Cursor c = dbHelper.fetchAll();
         startManagingCursor(c);
         
-        String[] from = new String[]{anstopDbAdapter.KEY_TITLE};
+        String[] from = new String[]{AnstopDbAdapter.KEY_TITLE};
         int[] to = new int[]{R.id.text1};
         
         
@@ -95,8 +95,8 @@ public class loadActivity extends ListActivity {
 	@Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
-        Intent i = new Intent(this, showTimesActivity.class);
-        i.putExtra(anstopDbAdapter.KEY_ROWID, id);
+        Intent i = new Intent(this, ShowTimesActivity.class);
+        i.putExtra(AnstopDbAdapter.KEY_ROWID, id);
         startActivity(i);
     }
 	
@@ -114,7 +114,7 @@ public class loadActivity extends ListActivity {
     	case EXPORT_ITEM:
     		
     		Toast toast;
-    		exportHelper exHlp = new exportHelper(this);
+    		ExportHelper exHlp = new ExportHelper(this);
 	        
 			
 			if(exHlp.write(info.id))
@@ -128,7 +128,7 @@ public class loadActivity extends ListActivity {
 
     	case SEND_ITEM:
 	    	{
-	    		exportHelper seHelp = new exportHelper(this);
+	    		ExportHelper seHelp = new ExportHelper(this);
 	    		String[] columns = seHelp.getRow(info.id);
 	    		if (columns != null)
 	    	        Anstop.startSendMailIntent
@@ -155,7 +155,7 @@ public class loadActivity extends ListActivity {
 			
 			Toast toast;
 			
-			exportHelper exHlp = new exportHelper(this);
+			ExportHelper exHlp = new ExportHelper(this);
 			if(exHlp.write(c))
 				toast = Toast.makeText(this, R.string.export_succes, Toast.LENGTH_SHORT);
 			else
