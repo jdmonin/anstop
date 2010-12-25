@@ -980,7 +980,6 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     	}
     	
     	LinearLayout layout = getLayout(modeBefore);
-		final LinearLayout layout2 = layout;
 		animation.setAnimationListener(new AnimationListener() {
 			//@Override
 			public void onAnimationStart(Animation animation) {
@@ -1001,11 +1000,13 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 					stopwatch();
 					break;
 				}
+				updateModeMenuFromCurrent();
 				Animation inAnim = AnimationUtils.makeInAnimation(Anstop.this, toRight); 
-				layout2.startAnimation(inAnim);
+				getLayout(current).startAnimation(inAnim);
 			}
 		});
 		layout.startAnimation(animation);
+		
     }
     
 }
