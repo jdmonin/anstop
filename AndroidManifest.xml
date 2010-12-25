@@ -13,9 +13,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    <activity android:name="settingsActivity" android:launchMode="standard"></activity>
-<activity android:name="loadActivity"></activity>
-<activity android:name="showTimesActivity"></activity>
+    <activity android:name="SettingsActivity" android:launchMode="standard"></activity>
+<activity android:name="LoadActivity"></activity>
+<activity android:name="ShowTimesActivity"></activity>
 </application>
     <uses-sdk android:minSdkVersion="4" />
 

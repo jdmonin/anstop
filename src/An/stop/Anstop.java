@@ -574,11 +574,14 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		switch (current)
 	    	{
     		case STOP:
-    			modeMenu_itemStop.setChecked(true);  break;
+    			if(modeMenu_itemStop != null)
+    				modeMenu_itemStop.setChecked(true);  break;
 	    	case LAP:
-    			modeMenu_itemLap.setChecked(true);  break;
+	    		if(modeMenu_itemStop != null)
+	    			modeMenu_itemLap.setChecked(true);  break;
 	    	case COUNTDOWN:
-    			modeMenu_itemCountdown.setChecked(true);  break;
+	    		if(modeMenu_itemStop != null)
+	    			modeMenu_itemCountdown.setChecked(true);  break;
 	    	}
 	}
     
