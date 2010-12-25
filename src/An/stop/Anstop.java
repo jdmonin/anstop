@@ -41,7 +41,6 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -923,14 +922,14 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	    			if(current == 2)
 	    				current = 0;
 	    			else
-	    				current =+ 1;
+	    				current += 1;
 	    			animateSwitch(true);
 	    		}
 	    		if(prediction.name.equals("SwipeLeft")) {
 	    			if(current == 0)
 	    				current = 2;
 	    			else
-	    				current =- 1;
+	    				current -= 1;
 	    			animateSwitch(false);
 	    		}
 	    	}
