@@ -943,6 +943,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     }
 
 	public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture) {
+		if(clock.isStarted)
+			return;
 		List<Prediction> predictions = gestureLibrary.recognize(gesture);
 	    for(Prediction prediction : predictions) {
 	    	if(prediction.score > 1.0) {
