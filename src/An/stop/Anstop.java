@@ -436,6 +436,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		layout.removeView(mainViewGroup);
 		gestureOverlay.addView(mainViewGroup);
 		gestureOverlay.addOnGesturePerformedListener(this);
+		gestureOverlay.setGestureVisible(false);
 
 	}
     
