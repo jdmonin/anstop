@@ -1,7 +1,8 @@
 /***************************************************************************
  *   Copyright (C) 2009 by mj   										   *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010 Jeremy Monin jeremy@nand.net *
+ *   Portions of this file Copyright (C) 2010-2011 Jeremy Monin            *
+ *    jeremy@nand.net                                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -108,8 +109,6 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	
 	private static final int VIEW_SIZE = 60;
 	
-	private int laps = 1;
-
 	/**
 	 * If true, we already wrote the start date/time into {@link #lapView}.
 	 * Visibility is non-private for use by {@link Clock#fillSaveState(Bundle)}
@@ -144,8 +143,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	Spinner hourSpinner;
 	/** scrollview containing {@link #lapView} */
 	ScrollView lapScroll;
-	
+
+	/** Context menu item for Mode. Null until {@link #onCreateOptionsMenu(Menu)} is called. */
 	MenuItem modeMenuItem;
+
+	/** Context menu item for Save. Null until {@link #onCreateOptionsMenu(Menu)} is called. */
 	MenuItem saveMenuItem;
 	
 	Context mContext;
@@ -277,6 +279,12 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	        int settingMode = Integer.parseInt(settings.getString("mode", "0")); // 0 == STOP
 	        setCurrentMode(settingMode);
         } catch (NumberFormatException e) {}
+        
+        if(settings.getBoolean("first_start", true)) {
+        	Toast.makeText(getApplicationContext(), R.string.first_start, Toast.LENGTH_LONG).show();
+        	settings.edit().putBoolean("first_start", false);
+        	settings.edit().commit();
+        }
     }
 
     /**
@@ -827,11 +835,74 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		}
 		return fmt_dow_meddate;
 	}
-    
+
+	/**
+	 * For countdown mode, handle a click of the Refresh button.
+	 * If not started, set the clock and the displayed Hour/Min/Seconds from
+	 * the spinners.  Otherwise show a toast (cannot refresh during count).
+	 *
+	 * @param onlyIfZero  If true, only set the clock to the input data if the clock is currently 0:0:0:0.
+	 */
+	private void clickRefreshCountdownTime(final boolean onlyIfZero)
+	{
+		if(!clock.isStarted) {
+
+			if (onlyIfZero && 
+				((clock.hour != 0) || (clock.min != 0) || (clock.sec != 0) || (clock.dsec != 0)))
+			{
+				return;  // <---  Early return: Not 0:0:0:0 ---
+			}
+
+			//set the Views to the input data
+			dsecondsView.setText("0");
+			
+			//looking for the selected Item position (is the same as the Item itself)
+			//using the NumberFormat from class clock to format 
+			final int s = secSpinner.getSelectedItemPosition(),
+			          m = minSpinner.getSelectedItemPosition(),
+			          h = hourSpinner.getSelectedItemPosition();
+			clock.reset(-1, h, m, s);
+			secondsView.setText(clock.nf.format(s));
+			minView.setText(clock.nf.format(m));
+			hourView.setText(Integer.toString(h));
+	
+			startTimeView.setText("");
+			wroteStartTime = false;
+		}
+		else {
+			//Show error when currently counting
+			Toast toast = Toast.makeText(mContext, R.string.refresh_during_count, Toast.LENGTH_SHORT);
+			toast.show();
+		}
+	}
+	
     private class startButtonListener implements OnClickListener {
     	
     	public void onClick(View v) {
     		
+    		// If starting to count in countdown mode, but 'refresh' hasn't
+    		// been clicked, the clock shows 0:0:0 and nothing will happen.
+    		// Refresh automatically.
+    		if ((current == COUNTDOWN) && (! clock.isStarted) && (! clock.wasStarted))
+    		{
+    			clickRefreshCountdownTime(true);
+    		}
+
+    		// If starting to count in countdown mode, but the clock has 0:0:0,
+    		// nothing will happen.  Let the user know.
+    		if ((current == COUNTDOWN) && (! clock.isStarted) &&     		
+				(clock.hour == 0) && (clock.min == 0) && (clock.sec == 0) && (clock.dsec == 0))
+    		{
+    			final int resId;
+    			if (clock.wasStarted)
+    				resId = R.string.countdown_completed_please_refresh;
+    			else
+    				resId = R.string.countdown_please_set_hms;
+    			Toast.makeText(Anstop.this, resId, Toast.LENGTH_SHORT).show();
+
+    			return; // <--- Early return: Countdown already 0:0:0:0 ---
+    		}
+
     		clock.count();  // start or stop counting
     		
     		if(modeMenuItem != null) {
@@ -882,7 +953,6 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     			secondsView.setText("00");
     			minView.setText("00");
     			hourView.setText("0");
-    			laps = 1;
     			if(lapView != null)
     				lapView.setText(R.string.laps);
     			if(startTimeView != null)
@@ -900,36 +970,14 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     private class refreshButtonListener implements OnClickListener {
     	
     	public void onClick(View v) {
-    		
-    		if(!clock.isStarted) {
-    			//set the Views to the input data
-    			dsecondsView.setText("0");
-    			
-    			//looking for the selected Item position (is the same as the Item itself)
-    			//using the NumberFormat from class clock to format 
-    			final int s = secSpinner.getSelectedItemPosition(),
-    			          m = minSpinner.getSelectedItemPosition(),
-    			          h = hourSpinner.getSelectedItemPosition();
-    			clock.reset(-1, h, m, s);
-    			secondsView.setText(clock.nf.format(s));
-    			minView.setText(clock.nf.format(m));
-    			hourView.setText(Integer.toString(h));
-
-    			startTimeView.setText("");
-    			wroteStartTime = false;
-    		}
-    		else {
-    			//Show error when currently counting
-    			Toast toast = Toast.makeText(mContext, R.string.refresh_during_count, Toast.LENGTH_SHORT);
-    			toast.show();
-    		}
+    		clickRefreshCountdownTime(false);
     	}
     }
     
     private class lapButtonListener implements OnClickListener {
     	
     	public void onClick(View v) {
-        	lapView.append("\n" + (laps++) + ". " + clock.getCurrentValue());
+        	lapView.append("\n" + (clock.laps++) + ". " + clock.getCurrentValue());
 
         	if(vib != null)
         		vib.vibrate(50);

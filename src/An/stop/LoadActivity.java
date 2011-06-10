@@ -71,6 +71,12 @@ public class LoadActivity extends ListActivity {
 		
 	}
 	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		dbHelper.close();  // prevent leaks
+	}
+	
 	private void fillData() {
 		Cursor c = dbHelper.fetchAll();
         startManagingCursor(c);

@@ -1,7 +1,8 @@
 /***************************************************************************
  *   Copyright (C) 2009 by mj   										   *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010 Jeremy Monin jeremy@nand.net *
+ *   Portions of this file Copyright (C) 2010-2011 Jeremy Monin            *
+ *    jeremy@nand.net                                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -98,6 +99,11 @@ public class Clock {
 	int hour = 0;
 
 	/**
+	 * For lap mode, the current lap number, or 1 if not lap mode.
+	 */
+	int laps = 1;
+
+	/**
 	 * For countdown mode, the initial seconds, minutes, hours,
 	 * as set by {@link #reset(int, int, int, int)},
 	 * stored as a total number of seconds.
@@ -172,6 +178,7 @@ public class Clock {
 	 * <LI> clockAnstopCurrent  mode (anstop.current)
 	 * <LI< clockAnstopWroteStart  anstop.wroteStartTime flag: boolean
 	 * <LI> clockDigits  if clockActive: array hours, minutes, seconds, dsec
+	 * <LI> clockLapCount  lap count, including current lap (starts at 1, not 0)
 	 * <LI> clockLaps  lap text, if any (CharSequence)
 	 * <LI> clockStateSaveTime current time when bundle saved, from {@link System#currentTimeMillis()}
 	 * <LI> clockStartTimeActual  actual time when clock was started, from {@link System#currentTimeMillis()}
@@ -207,6 +214,7 @@ public class Clock {
 			outState.putLong("clockStopTime", stopTime);
 		else
 			outState.putLong("clockStopTime", -1L);
+		outState.putInt("clockLapCount", laps);
 		if (parent.lapView != null)
 			outState.putCharSequence("clockLaps", parent.lapView.getText());
 		outState.putLong("clockStartTimeActual", startTimeActual);
@@ -265,6 +273,7 @@ public class Clock {
 				outPref.putLong("anstop_state_clockStopTime", stopTime);
 			else
 				outPref.putLong("anstop_state_clockStopTime", -1L);
+			outPref.putInt("anstop_state_clockLapCount", laps);
 			if (parent.lapView != null)
 				outPref.putString("anstop_state_clockLaps", parent.lapView.getText().toString());
 			else
@@ -373,6 +382,7 @@ public class Clock {
 		startTimeAdj = inState.getLong("clockStartTimeAdj", startTimeActual);
 		stopTime = inState.getLong("clockStopTime", -1L);
 		parent.wroteStartTime = inState.getBoolean("clockAnstopWroteStart", false);
+		laps = inState.getInt("clockLapCount", 1);
 		if (parent.lapView != null)
 		{
 			CharSequence laptext = inState.getCharSequence("clockLaps");
@@ -453,6 +463,7 @@ public class Clock {
 		startTimeAdj = inState.getLong("anstop_state_clockStartTimeAdj", startTimeActual);
 		stopTime = inState.getLong("anstop_state_clockStopTime", -1L);
 		parent.wroteStartTime = inState.getBoolean("anstop_state_wroteStart", false);
+		laps = inState.getInt("anstop_state_clockLapCount", 1);
 		if (parent.lapView != null)
 		{
 			String laptext = inState.getString("anstop_state_clockLaps", "");
@@ -605,6 +616,7 @@ public class Clock {
 		startTimeActual = -1L;
 		startTimeAdj = -1L;
 
+		laps = 1;
 		if (v == STOP)
 		{
 			hour = 0;
@@ -744,8 +756,11 @@ public class Clock {
 			
 			if(hour == 0 && min == 0 && sec == 0 && dsec == 0) {
 				isStarted = false;
-				parent.modeMenuItem.setEnabled(true);
-				parent.saveMenuItem.setEnabled(true);
+				if (parent.modeMenuItem != null)
+				{
+					parent.modeMenuItem.setEnabled(true);
+					parent.saveMenuItem.setEnabled(true);
+				}
 				return;
 			}
 			
@@ -798,8 +813,11 @@ public class Clock {
 				
 				if(hour == 0 && min == 0 && sec == 0 && dsec == 0) {
 					isStarted = false;
-					parent.modeMenuItem.setEnabled(true);
-					parent.saveMenuItem.setEnabled(true);
+					if (parent.modeMenuItem != null)
+					{
+						parent.modeMenuItem.setEnabled(true);
+						parent.saveMenuItem.setEnabled(true);
+					}
 					return;
 				}
 					
