@@ -876,6 +876,30 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		}
 	}
 	
+	/**
+	 * Reset the clock and hh/mm/ss views.
+	 * If isStarted, do nothing.
+	 * If wasStarted, call this after the confirmation alert.
+	 */
+	private void resetClockAndViews()
+	{
+		if(clock.isStarted)
+			return;
+
+		clock.reset(-1, 0, 0, 0);
+
+		//reset all Views to zero
+		dsecondsView.setText("0");
+		secondsView.setText("00");
+		minView.setText("00");
+		hourView.setText("0");
+		if(lapView != null)
+			lapView.setText(R.string.laps);
+		if(startTimeView != null)
+			startTimeView.setText("");
+		wroteStartTime = false;		
+	}
+
     private class startButtonListener implements OnClickListener {
     	
     	public void onClick(View v) {
@@ -946,18 +970,25 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     	public void onClick(View v) {
     		
     		if(!clock.isStarted) {
-    			clock.reset(-1, 0, 0, 0);
+    			if (!clock.wasStarted) {
+    				resetClockAndViews();
+    			} else {
+    				AlertDialog.Builder alert = new AlertDialog.Builder(Anstop.this);
+    				alert.setTitle(R.string.confirm);
+    				alert.setMessage(R.string.confirm_reset_message);
 
-    			//reset all Views to zero
-    			dsecondsView.setText("0");
-    			secondsView.setText("00");
-    			minView.setText("00");
-    			hourView.setText("0");
-    			if(lapView != null)
-    				lapView.setText(R.string.laps);
-    			if(startTimeView != null)
-    				startTimeView.setText("");
-    			wroteStartTime = false;
+    				alert.setPositiveButton(R.string.reset, new DialogInterface.OnClickListener() {
+    					public void onClick(DialogInterface dialog, int whichButton) {
+    						resetClockAndViews();
+    					}
+    				});
+
+    				alert.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+    					public void onClick(DialogInterface dialog, int whichButton) { }
+    				});
+
+    				alert.show();
+    			}
     		}    		
     		else {
     			//Show error when currently counting
@@ -970,7 +1001,25 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     private class refreshButtonListener implements OnClickListener {
     	
     	public void onClick(View v) {
-    		clickRefreshCountdownTime(false);
+    		if(clock.isStarted || !clock.wasStarted) {
+    			clickRefreshCountdownTime(false);
+    		} else {
+    			AlertDialog.Builder alert = new AlertDialog.Builder(Anstop.this);
+    			alert.setTitle(R.string.confirm);
+    			alert.setMessage(R.string.confirm_refresh_message);
+
+    			alert.setPositiveButton(R.string.refresh, new DialogInterface.OnClickListener() {
+    				public void onClick(DialogInterface dialog, int whichButton) {
+    					clickRefreshCountdownTime(false);
+    				}
+    			});
+
+    			alert.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+    				public void onClick(DialogInterface dialog, int whichButton) { }
+    			});
+
+    			alert.show();
+    		}    		
     	}
     }
     
