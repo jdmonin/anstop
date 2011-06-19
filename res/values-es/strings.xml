@@ -1,55 +1,55 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    
-    <string name="app_name">Anstop</string>
-<string name="reset">Reajustar</string>
-<string name="settings">Configuración</string>
-<string name="reset_during_count">¡No se puede reajustar contando!</string>
-<string name="hour"> hora(s)</string>
-<string name="motion_checkbox">Usar el sensor de movimiento para iniciar y parar</string>
-
-<string name="refresh">Recargar</string>
-<string name="refresh_during_count">¡No se puede recargar contando!</string>
-<string name="start_stop">Iniciar/Parar</string>
-<string name="lap">-  ¡Vuelta!  -</string>
-<string name="laps">Vueltas:</string>
-<string name="about">Acerca de</string>
-<string name="lap_mode">Modo de vuelta</string>
-<string name="stop">Cronómetro</string>
-<string name="countdown">Cuenta regresiva</string>
-<string name="countdown_please_set_hms">Para contar, por favor, seleccione las horas, minutos y segundos.</string>
-<string name="countdown_completed_please_refresh">La cuenta regresiva a 0 es completa.\nPor favor, pulsa en Iniciar para volver a empezar.</string>
-<string name="about_dialog">Anstop v1.4, una pequeña aplicación para Cronómetro y Cuenta regresiva de tiempo.\nCopyright (C) 2009, 2010, 2011 MJ y Jeremy Monin &lt;anstop.googlecode.com&gt;\nLicencia es GPLv2 (http://www.gnu.org/licenses/gpl-2.0.html)\nPara obtener el código fuente, visite anstop.googlecode.com</string>
-
-<string name="save">Guardar</string>
-<string name="load">Cargar</string>
-<string name="save_dialog">Por favor, escriba un nombre para guardar los resultados</string>
-<string name="no_entry">¡No hay entradas!</string>
-<string name="delete">Eliminar</string>
-<string name="export">Exportar ...</string>
-<string name="export_succes">¡Guardado correctamente en almacenamiento externo (SD)!</string>
-<string name="export_fail">¡Exportación fracasó!</string>
-<string name="export_all">Exportar todos ...</string>
-<string name="mode_was">Modo fue: </string>
-<string name="start_time">Tiempo inicio fue:</string>
-<string name="started_at">Tiempo inicio:</string>
-<string name="vibrate_checkbox">Vibrar al hacer pulsar en Iniciar o Parar</string>
-<string name="saved_succes">¡Guardado correctamente!</string>
-<string name="mode">Modo</string>
-<string name="cancel">Cancelar</string>
-<string name="vibrate">Vibrar</string>
-<string name="motion_sensor">Sensor de Movimiento</string>
-<string name="send">Enviar...</string>
-<string name="startup_mode">Modo de inicio</string>
-<string name="hours">Horas:</string>
-<string name="minutes">Minutos:</string>
-<string name="seconds">Segundos:</string>
-<string-array name="modes_strings"><item>Cronómetro</item>
-<item>Cuenta regresiva</item>
-<item>Modo de vuelta</item>
-</string-array>
-<string name="first_start">Consejo: Se puede deslizar a la izquierda oa la derecha, para cambiar el modo.</string>
-<string name="confirm">Confirmar</string>
-<string name="confirm_refresh_message">¿Seguro de que desea recargar?</string>
-<string name="confirm_reset_message">¿Seguro de que desea reajustar?</string>
-</resources>
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Anstop</string>
+<string name="reset">Reajustar</string>
+<string name="settings">Configuración</string>
+<string name="reset_during_count">¡No se puede reajustar contando!</string>
+<string name="hour"> hora(s)</string>
+<string name="motion_checkbox">Usar el sensor de movimiento para iniciar y parar</string>
+
+<string name="refresh">Recargar</string>
+<string name="refresh_during_count">¡No se puede recargar contando!</string>
+<string name="start_stop">Iniciar/Parar</string>
+<string name="lap">-  ¡Vuelta!  -</string>
+<string name="laps">Vueltas:</string>
+<string name="about">Acerca de</string>
+<string name="lap_mode">Modo de vuelta</string>
+<string name="stop">Cronómetro</string>
+<string name="countdown">Cuenta regresiva</string>
+<string name="countdown_please_set_hms">Para contar, por favor, seleccione las horas, minutos y segundos.</string>
+<string name="countdown_completed_please_refresh">La cuenta regresiva a 0 es completa.\nPor favor, pulsa en Iniciar para volver a empezar.</string>
+<string name="about_dialog">Anstop v1.4, una pequeña aplicación para Cronómetro y Cuenta regresiva de tiempo.\nCopyright (C) 2009, 2010, 2011 MJ y Jeremy Monin &lt;anstop.googlecode.com&gt;\nLicencia es GPLv2 (http://www.gnu.org/licenses/gpl-2.0.html)\nPara obtener el código fuente, visite anstop.googlecode.com</string>
+
+<string name="save">Guardar</string>
+<string name="load">Cargar</string>
+<string name="save_dialog">Por favor, escriba un nombre para guardar los resultados</string>
+<string name="no_entry">¡No hay entradas!</string>
+<string name="delete">Eliminar</string>
+<string name="export">Exportar ...</string>
+<string name="export_succes">¡Guardado correctamente en almacenamiento externo (SD)!</string>
+<string name="export_fail">¡Exportación fracasó!</string>
+<string name="export_all">Exportar todos ...</string>
+<string name="mode_was">Modo fue: </string>
+<string name="start_time">Tiempo inicio fue:</string>
+<string name="started_at">Tiempo inicio:</string>
+<string name="vibrate_checkbox">Vibrar al hacer pulsar en Iniciar o Parar</string>
+<string name="saved_succes">¡Guardado correctamente!</string>
+<string name="mode">Modo</string>
+<string name="cancel">Cancelar</string>
+<string name="vibrate">Vibrar</string>
+<string name="motion_sensor">Sensor de Movimiento</string>
+<string name="send">Enviar...</string>
+<string name="startup_mode">Modo de inicio</string>
+<string name="hours">Horas:</string>
+<string name="minutes">Minutos:</string>
+<string name="seconds">Segundos:</string>
+<string-array name="modes_strings"><item>Cronómetro</item>
+<item>Cuenta regresiva</item>
+<item>Modo de vuelta</item>
+</string-array>
+<string name="first_start">Consejo: Se puede deslizar a la izquierda oa la derecha, para cambiar el modo.</string>
+<string name="confirm">Confirmar</string>
+<string name="confirm_refresh_message">¿Seguro de que desea recargar?</string>
+<string name="confirm_reset_message">¿Seguro de que desea reajustar?</string>
+</resources>
