@@ -48,4 +48,8 @@
 <item>Cuenta regresiva</item>
 <item>Modo de vuelta</item>
 </string-array>
+<string name="first_start">Consejo: Se puede deslizar a la izquierda oa la derecha, para cambiar el modo.</string>
+<string name="confirm">Confirmar</string>
+<string name="confirm_refresh_message">¿Seguro de que desea recargar?</string>
+<string name="confirm_reset_message">¿Seguro de que desea reajustar?</string>
 </resources>
