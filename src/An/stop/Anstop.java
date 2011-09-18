@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.gesture.Gesture;
 import android.gesture.GestureLibraries;
 import android.gesture.GestureLibrary;
@@ -878,8 +879,10 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	
 	/**
 	 * Reset the clock and hh/mm/ss views.
+	 * Clear <tt>"anstop_in_use"</tt> flag in shared preferences.
+	 *<P>
 	 * If isStarted, do nothing.
-	 * If wasStarted, call this after the confirmation alert.
+	 * If wasStarted, call this only after the confirmation alert.
 	 */
 	private void resetClockAndViews()
 	{
@@ -898,6 +901,15 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		if(startTimeView != null)
 			startTimeView.setText("");
 		wroteStartTime = false;		
+
+		// Check for an old anstop_in_use flag from previous runs
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
+		if(settings.getBoolean("anstop_in_use", false))
+		{
+			Editor outPref = settings.edit();
+			outPref.putBoolean("anstop_in_use", false);
+			outPref.commit();
+		}
 	}
 
     private class startButtonListener implements OnClickListener {
