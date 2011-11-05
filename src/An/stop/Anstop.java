@@ -100,7 +100,10 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	/** Lap mode (and layout), for {@link #current} */
 	private static final int LAP = 2;
 
-	/** Current mode: {@link #STOP}, {@link #COUNTDOWN} or {@link #LAP}. */
+	/**
+	 * Current mode: {@link #STOP}, {@link #COUNTDOWN} or {@link #LAP}.
+	 * Corresponds to <tt>{@link Clock}.v</tt> mode.
+	 */
 	private int current;
 	
 	private static final int ABOUT_DIALOG = 0;
@@ -448,7 +451,13 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		gestureOverlay.setGestureVisible(false);
 
 	}
-    
+
+    /**
+     * Get the layout corresponding to a counting mode.
+     * @param index  Mode number: a valid mode for {@link #current}
+     * @return the LinearLayout for <tt>lapLayout</tt>,
+     *   <tt>countdownLayout</tt> or <tt>stopwatchLayout</tt>
+     */
     private LinearLayout getLayout(int index) {
     	switch(index) {
 		case LAP:

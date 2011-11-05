@@ -56,6 +56,10 @@ import android.os.Message;
  * You can examine the current state by reading {@link #isStarted} and {@link #wasStarted}.
  * To reset the clock again, and/or change the mode, call {@link #reset(int, int, int, int)}.
  *<P>
+ * When running, a thread either counts up ({@link #threadS}) or down ({@link #threadC}),
+ * firing every 100ms.  The {@link #parent}'s hour:minute:second.dsec displays are updated
+ * through {@link #hourh} and the rest of the handlers here.
+ *<P>
  * Keeping track of laps is done in {@link Anstop}, not in this object.
  */
 public class Clock {
@@ -176,7 +180,7 @@ public class Clock {
 	 * <LI> clockWasActive  1 or 0
 	 * <LI> clockV    mode (clock.v)
 	 * <LI> clockAnstopCurrent  mode (anstop.current)
-	 * <LI< clockAnstopWroteStart  anstop.wroteStartTime flag: boolean
+	 * <LI> clockAnstopWroteStart  anstop.wroteStartTime flag: boolean
 	 * <LI> clockDigits  if clockActive: array hours, minutes, seconds, dsec
 	 * <LI> clockLapCount  lap count, including current lap (starts at 1, not 0)
 	 * <LI> clockLaps  lap text, if any (CharSequence)
@@ -337,6 +341,7 @@ public class Clock {
 			threadS.start();
 		}
 		else {
+			// COUNTDOWN
 			if((threadC != null) && threadC.isAlive())
 				threadC.interrupt();
 			threadC = new countDownThread();
@@ -695,6 +700,7 @@ public class Clock {
 			}
 				
 			else {
+				// COUNTDOWN
 				if(threadC.isAlive())
 					threadC.interrupt();
 			}
@@ -702,6 +708,10 @@ public class Clock {
 			
 	}
 	
+	/**
+	 * Lap mode, count up from 0.
+	 * @see countDownThread
+	 */
 	private class clockThread extends Thread {		
 		public clockThread() { setDaemon(true); }
 
@@ -747,6 +757,12 @@ public class Clock {
 		
 	}
 	
+	/**
+	 * Countdown mode, count down to 0.
+	 * Before starting this thread, set non-zero h:m:s.d by calling {@link Clock#reset(int, int, int, int)}.
+	 * Otherwise the thread immediately stops at 00:00:00.0.
+	 * @see clockThread
+	 */
 	private class countDownThread extends Thread {
 		public countDownThread() { setDaemon(true); }
 
