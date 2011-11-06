@@ -65,18 +65,10 @@ import android.os.Message;
 public class Clock {
 
 	/**
-	 * Stopwatch Mode for {@link #v}.
-	 * Same value as <tt>Anstop.STOP</tt> (0).
-	 * The other mode is <tt>COUNTDOWN</tt> (1).
-	 */
-	private static final int STOP = 0;
-	//private static final int COUNTDOWN = 1;
-
-	/**
 	 * Counting mode. Two possibilities:
 	 *<UL>
-	 *<LI> {@link #STOP} (0), counting up from 0
-	 *<LI> <tt>Anstop.COUNTDOWN</tt> (1), counting down from a time set by the user
+	 *<LI> {@link Anstop#LAP} (0), counting up from 0
+	 *<LI> {@link Anstop#COUNTDOWN} (1), counting down from a time set by the user
 	 *</UL>
 	 */
 	private int v;
@@ -334,14 +326,14 @@ public class Clock {
 		if (appPauseTime > appStateRestoreTime)
 			adjClockOnAppResume(false, System.currentTimeMillis());
 
-		if(v == STOP) {
+		if(v == Anstop.LAP) {
 			if((threadS != null) && threadS.isAlive())
 				threadS.interrupt();
 			threadS = new clockThread();
 			threadS.start();
 		}
 		else {
-			// COUNTDOWN
+			// Anstop.COUNTDOWN
 			if((threadC != null) && threadC.isAlive())
 				threadC.interrupt();
 			threadC = new countDownThread();
@@ -451,7 +443,7 @@ public class Clock {
 			return false;
 
 		appStateRestoreTime = restoredAtTime;
-		v = inState.getInt("anstop_state_clockV", STOP);
+		v = inState.getInt("anstop_state_clockV", Anstop.LAP);
 
 		// read the counting fields
 		{
@@ -535,7 +527,7 @@ public class Clock {
 			// based on our mode, adjust dsec, sec, min, hour:
 			switch (v)
 			{
-			case STOP:
+			case Anstop.LAP:
 				ttotal = resumedAtTime - startTimeAdj;
 				break;
 	
@@ -597,7 +589,7 @@ public class Clock {
 
 	/**
 	 * Reset the clock while stopped, and maybe change modes.  {@link #isStarted} must be false.
-	 * If <tt>newMode</tt> is {@link #STOP}, the clock will be reset to 0,
+	 * If <tt>newMode</tt> is {@link Anstop#LAP}, the clock will be reset to 0,
 	 * and <tt>h</tt>, <tt>m</tt>, <tt>s</tt> are ignored.
 	 *
 	 * @param newMode  new mode to set, or -1 to leave as is
@@ -622,7 +614,7 @@ public class Clock {
 		startTimeAdj = -1L;
 
 		laps = 1;
-		if (v == STOP)
+		if (v == Anstop.LAP)
 		{
 			hour = 0;
 			min = 0;
@@ -668,7 +660,7 @@ public class Clock {
 
 			isStarted = true;
 			wasStarted = true;
-			if(v == STOP) {
+			if(v == Anstop.LAP) {
 				if((threadS != null) && threadS.isAlive())
 					threadS.interrupt();
 				threadS = new clockThread();
@@ -676,7 +668,7 @@ public class Clock {
 			}
 				
 			else {
-				// COUNTDOWN
+				// Anstop.COUNTDOWN
 				if((threadC != null) && threadC.isAlive())
 					threadC.interrupt();
 				if ((dsec > 0) || (sec > 0) || (min > 0) || (hour > 0))
@@ -694,13 +686,13 @@ public class Clock {
 			isStarted = false;
 			stopTime = now;
 			
-			if(v == STOP) {
+			if(v == Anstop.LAP) {
 				if(threadS.isAlive())
 					threadS.interrupt();
 			}
 				
 			else {
-				// COUNTDOWN
+				// Anstop.COUNTDOWN
 				if(threadC.isAlive())
 					threadC.interrupt();
 			}
