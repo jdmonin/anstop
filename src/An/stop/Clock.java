@@ -67,7 +67,7 @@ public class Clock {
 	/**
 	 * Counting mode. Two possibilities:
 	 *<UL>
-	 *<LI> {@link Anstop#LAP} (0), counting up from 0
+	 *<LI> {@link Anstop#STOP_LAP} (0), counting up from 0
 	 *<LI> {@link Anstop#COUNTDOWN} (1), counting down from a time set by the user
 	 *</UL>
 	 */
@@ -326,7 +326,7 @@ public class Clock {
 		if (appPauseTime > appStateRestoreTime)
 			adjClockOnAppResume(false, System.currentTimeMillis());
 
-		if(v == Anstop.LAP) {
+		if(v == Anstop.STOP_LAP) {
 			if((threadS != null) && threadS.isAlive())
 				threadS.interrupt();
 			threadS = new clockThread();
@@ -443,7 +443,7 @@ public class Clock {
 			return false;
 
 		appStateRestoreTime = restoredAtTime;
-		v = inState.getInt("anstop_state_clockV", Anstop.LAP);
+		v = inState.getInt("anstop_state_clockV", Anstop.STOP_LAP);
 
 		// read the counting fields
 		{
@@ -527,7 +527,7 @@ public class Clock {
 			// based on our mode, adjust dsec, sec, min, hour:
 			switch (v)
 			{
-			case Anstop.LAP:
+			case Anstop.STOP_LAP:
 				ttotal = resumedAtTime - startTimeAdj;
 				break;
 	
@@ -589,7 +589,7 @@ public class Clock {
 
 	/**
 	 * Reset the clock while stopped, and maybe change modes.  {@link #isStarted} must be false.
-	 * If <tt>newMode</tt> is {@link Anstop#LAP}, the clock will be reset to 0,
+	 * If <tt>newMode</tt> is {@link Anstop#STOP_LAP}, the clock will be reset to 0,
 	 * and <tt>h</tt>, <tt>m</tt>, <tt>s</tt> are ignored.
 	 *
 	 * @param newMode  new mode to set, or -1 to leave as is
@@ -614,7 +614,7 @@ public class Clock {
 		startTimeAdj = -1L;
 
 		laps = 1;
-		if (v == Anstop.LAP)
+		if (v == Anstop.STOP_LAP)
 		{
 			hour = 0;
 			min = 0;
@@ -660,7 +660,7 @@ public class Clock {
 
 			isStarted = true;
 			wasStarted = true;
-			if(v == Anstop.LAP) {
+			if(v == Anstop.STOP_LAP) {
 				if((threadS != null) && threadS.isAlive())
 					threadS.interrupt();
 				threadS = new clockThread();
@@ -686,7 +686,7 @@ public class Clock {
 			isStarted = false;
 			stopTime = now;
 			
-			if(v == Anstop.LAP) {
+			if(v == Anstop.STOP_LAP) {
 				if(threadS.isAlive())
 					threadS.interrupt();
 			}

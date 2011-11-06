@@ -14,7 +14,6 @@
 <string name="lap">-  ¡Vuelta!  -</string>
 <string name="laps">Vueltas:</string>
 <string name="about">Acerca de</string>
-<string name="lap_mode">Modo de vuelta</string>
 <string name="stop">Cronómetro</string>
 <string name="countdown">Cuenta regresiva</string>
 <string name="countdown_please_set_hms">Para contar, por favor, seleccione las horas, minutos y segundos.</string>

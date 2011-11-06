@@ -14,7 +14,6 @@
 <string name="lap">-  Lap!  -</string>
 <string name="laps">Laps:</string>
 <string name="about">About</string>
-<string name="lap_mode">Lap Mode</string>
 <string name="stop">Stopwatch</string>
 <string name="countdown">Countdown</string>
 <string name="countdown_please_set_hms">Please select the hours, minutes, and seconds to count down.</string>
@@ -46,7 +45,6 @@
 <string name="seconds">Seconds:</string>
 <string-array name="modes_strings"><item>Stopwatch</item>
 <item>Countdown</item>
-<item>Lap Mode</item>
 </string-array>
 <string name="first_start">Tip: You can swipe left or right, to change the mode!</string>
 <string name="confirm">Confirm</string>
