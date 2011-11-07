@@ -255,16 +255,19 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	        if (settingMode == OBSOL_LAP)
 	        {
 	        	settingMode = STOP_LAP;
-	        	settings.edit().putString("mode", "0");
-	        	settings.edit().commit();
+	        	Editor outPref = settings.edit();
+	        	outPref.putString("mode", "0");
+	        	outPref.commit();
 	        }
 	        setCurrentMode(settingMode);
         } catch (NumberFormatException e) {}
         
         if(settings.getBoolean("first_start", true)) {
+        	// Show once: "Tip: You can swipe left or right, to change the mode!"
         	Toast.makeText(getApplicationContext(), R.string.first_start, Toast.LENGTH_LONG).show();
-        	settings.edit().putBoolean("first_start", false);
-        	settings.edit().commit();
+        	Editor outPref = settings.edit();
+        	outPref.putBoolean("first_start", false);
+        	outPref.commit();
         }
     }
 
