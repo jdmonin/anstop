@@ -78,6 +78,8 @@ public class Clock {
 
 	/** has the clock ran since its last reset? This is not an 'isPaused' flag, because
 	 *  it's set true when the counting begins and {@link #isStarted} is set true.
+	 *<P>
+	 *  <tt>wasStarted</tt> is set true by {@link #count()}, and false by {@link #reset(int, int, int, int)}.
 	 */
 	public boolean wasStarted = false;
 

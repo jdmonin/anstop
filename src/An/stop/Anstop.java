@@ -1012,6 +1012,10 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     	}
     }
 
+	/**
+	 * When the user swipes left or right, change to the previous/next mode
+	 * only if the clock isn't running.
+	 */
 	public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture) {
 		if(clock.isStarted)
 			return;
@@ -1019,41 +1023,39 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	    for(Prediction prediction : predictions) {
 	    	if(prediction.score > 1.0) {
 	    		if(prediction.name.equals("SwipeRight")) {
+	    			final int cprev = current;
 	    			if(current == 1)
 	    				current = 0;
 	    			else
 	    				current += 1;
-	    			animateSwitch(false);
+	    			animateSwitch(false, cprev);
 	    		}
 	    		if(prediction.name.equals("SwipeLeft")) {
+	    			final int cprev = current;
 	    			if(current == 0)
 	    				current = 1;
 	    			else
 	    				current -= 1;
-	    			animateSwitch(true);
+	    			animateSwitch(true, cprev);
 	    		}
 	    	}
 	    }
 	}    
 
-    private void animateSwitch(final boolean toRight) {
+    /**
+     * Animate changing the current mode after a SwipeRight or SwipeLeft gesture.
+     * You must update {@link #current} before calling.  Uses {@link AnimationUtils}.
+     *<P>
+     * Note: This method's animations do not cause {@link #onPause()} or {@link #onResume()}.
+     * 
+     * @param toRight  True if the old mode is exiting to the right, and the new mode coming in from the left
+     * @param modeBefore  The previous mode, before {@link #current} was changed
+     * @see #onGesturePerformed(GestureOverlayView, Gesture)
+     */
+    private void animateSwitch(final boolean toRight, final int modeBefore) {
     	
     	Animation animation = AnimationUtils.makeOutAnimation(this, toRight);
-    	
-    	int modeBefore = -1;
-    	if(toRight) {
-    		if(current == 1)
-    			modeBefore = 0;
-    		else
-    			modeBefore = current + 1;
-    	}
-    	else {
-    		if(current == 0)
-    			modeBefore = 1;
-    		else
-    			modeBefore = current - 1;
-    	}
-    	
+
     	LinearLayout layout = getLayout(modeBefore);
 		animation.setAnimationListener(new AnimationListener() {
 			//@Override
