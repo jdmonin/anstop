@@ -219,6 +219,7 @@ public class Clock {
 		outState.putLong("clockStartTimeAdj", startTimeAdj);
 		if (parent.hourSpinner != null)
 		{
+			// used by restoreFromSaveStateFields to calc countdnTotalSeconds
 			outState.putInt("clockCountHour", parent.hourSpinner.getSelectedItemPosition());
 			outState.putInt("clockCountMin", parent.minSpinner.getSelectedItemPosition());
 			outState.putInt("clockCountSec", parent.secSpinner.getSelectedItemPosition());
@@ -280,6 +281,7 @@ public class Clock {
 			outPref.putLong("anstop_state_clockStartTimeAdj", startTimeAdj);
 			if (parent.hourSpinner != null)
 			{
+				// used by restoreFromSaveStateFields to calc countdnTotalSeconds
 				outPref.putInt("anstop_state_clockCountHour", parent.hourSpinner.getSelectedItemPosition());
 				outPref.putInt("anstop_state_clockCountMin", parent.minSpinner.getSelectedItemPosition());
 				outPref.putInt("anstop_state_clockCountSec", parent.secSpinner.getSelectedItemPosition());
@@ -392,9 +394,16 @@ public class Clock {
 		}
 		if (parent.hourSpinner != null)
 		{
-			parent.hourSpinner.setSelection(inState.getInt("clockCountHour"));
-			parent.minSpinner.setSelection(inState.getInt("clockCountMin"));
-			parent.secSpinner.setSelection(inState.getInt("clockCountSec"));
+			final int
+			  h = inState.getInt("clockCountHour"),
+			  m = inState.getInt("clockCountMin"),
+			  s = inState.getInt("clockCountSec");
+			countdnTotalSeconds = ((h * 60) + m) * 60 + s;
+			parent.hourSpinner.setSelection(h);
+			parent.minSpinner.setSelection(m);
+			parent.secSpinner.setSelection(s);
+		} else {
+			countdnTotalSeconds = 0;
 		}
 
 		if((threadS != null) && threadS.isAlive())
@@ -473,9 +482,16 @@ public class Clock {
 		}
 		if (parent.hourSpinner != null)
 		{
-			parent.hourSpinner.setSelection(inState.getInt("anstop_state_clockCountHour", 0));
-			parent.minSpinner.setSelection(inState.getInt("anstop_state_clockCountMin", 0));
-			parent.secSpinner.setSelection(inState.getInt("anstop_state_clockCountSec", 0));
+			final int
+			  h = inState.getInt("anstop_state_clockCountHour", 0),
+			  m = inState.getInt("anstop_state_clockCountMin", 0),
+			  s = inState.getInt("anstop_state_clockCountSec", 0);
+			countdnTotalSeconds = ((h * 60) + m) * 60 + s;
+			parent.hourSpinner.setSelection(h);
+			parent.minSpinner.setSelection(m);
+			parent.secSpinner.setSelection(s);
+		} else {
+			countdnTotalSeconds = 0;
 		}
 
 		if((threadS != null) && threadS.isAlive())
