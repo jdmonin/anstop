@@ -652,13 +652,12 @@ public class Clock {
 	/**
 	 * Change the current mode.
 	 *<P>
-	 * If the current mode is already <tt>newMode</tt>, do nothing.
+	 * If the current mode is already <tt>newMode</tt>, change it anyway;
+	 * calls <tt>reset</tt> to update all fields.
 	 * @see #reset(int, int, int, int)
 	 */
 	public void changeMode(final int newMode)
 	{
-		if (newMode == v)
-			return;
 		reset(newMode, 0, 0, 0);
 	}
 
