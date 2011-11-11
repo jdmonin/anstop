@@ -364,10 +364,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         
         refreshButton  = (Button) findViewById(R.id.refreshButton);
         refreshButton.setOnClickListener(new refreshButtonListener());
-        
 
-        
-        clock.reset(COUNTDOWN, 0, 0, 0);  // inform clock class to count down now
+        // inform clock class to count down now
+        clock.changeMode(COUNTDOWN, 0, 0, 0);
     }
 
     /**
@@ -416,7 +415,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         lapScroll = (ScrollView) findViewById(R.id.lapScrollView);
 
         // From clock's point of view:
-        clock.reset(STOP_LAP, 0, 0, 0);
+        clock.changeMode(STOP_LAP);
     }
 
     private void setupGesture() {

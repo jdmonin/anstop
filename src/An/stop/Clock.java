@@ -615,6 +615,7 @@ public class Clock {
 	 * @param m  minute to reset the clock to
 	 * @param s  second to reset the clock to
 	 * @return true if was reset, false if was not reset because {@link #isStarted} is true.
+	 * @see #changeMode(int)
 	 */
 	public boolean reset(final int newMode, final int h, final int m, final int s)
 	{
@@ -646,6 +647,19 @@ public class Clock {
 		dsec = 0;
 
 		return true;
+	}
+
+	/**
+	 * Change the current mode.
+	 *<P>
+	 * If the current mode is already <tt>newMode</tt>, do nothing.
+	 * @see #reset(int, int, int, int)
+	 */
+	public void changeMode(final int newMode)
+	{
+		if (newMode == v)
+			return;
+		reset(newMode, 0, 0, 0);
 	}
 
 	/**
