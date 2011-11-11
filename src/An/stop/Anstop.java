@@ -366,7 +366,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         refreshButton.setOnClickListener(new refreshButtonListener());
 
         // inform clock class to count down now
-        clock.changeMode(COUNTDOWN, 0, 0, 0);
+        clock.changeMode(COUNTDOWN);
     }
 
     /**
