@@ -482,7 +482,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	private void onRestoreInstanceState(SharedPreferences settings) {
 		if ( ! settings.getBoolean("anstop_in_use", false) )
 			return;
-		final int newCurrent = settings.getInt("anstop_state_current", STOP_LAP);
+		int newCurrent = settings.getInt("anstop_state_current", STOP_LAP);
+		if (newCurrent == OBSOL_LAP)
+			newCurrent = STOP_LAP;
 		setCurrentMode(newCurrent);
 		clock.restoreFromSaveState(settings);
 	}
