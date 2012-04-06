@@ -65,8 +65,9 @@ import android.widget.LinearLayout.LayoutParams;
 /**
  * Anstop's main activity, showing the current clock, lap times, etc.
  *<P>
- * Uses 1 of 3 layouts, depending on the {@link #current} mode:
- * <tt>main</tt>, <tt>countdown</tt>, <tt>lap</tt>.
+ * Uses 1 of 2 layouts, depending on the {@link #current} mode:
+ * <tt>main</tt> or <tt>countdown</tt>.
+ * Main implements {@link #MODE_STOP} which includes Lap mode.
  */
 public class Anstop extends Activity implements OnGesturePerformedListener {
     
@@ -139,7 +140,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	TextView secondsView;
 	TextView minView;
 	TextView hourView;
-	/** shows start time in layouts which don't contain {@link #lapView} */
+	/** shows start time in the countdown layout, which doesn't contain {@link #lapView} */
 	TextView startTimeView;
 	/** shows start time and laps; when <tt>lapView</tt> is non-null, {@link #startTimeView} is null */
 	TextView lapView;
