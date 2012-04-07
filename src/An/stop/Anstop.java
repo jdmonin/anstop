@@ -115,7 +115,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	private static final int VIEW_SIZE = 60;
 	
 	/**
-	 * If true, we already wrote the start date/time into {@link #lapView}.
+	 * If true, we already wrote the start date/time into {@link #lapView}
+	 * or {@link #startTimeView}, by calling {@link #writeStartTimeToView()}.
+	 *<P>
 	 * Visibility is non-private for use by {@link Clock#fillSaveState(Bundle)}
 	 * and {@link Clock#restoreFromSaveState(Bundle)}.
 	 */
@@ -874,6 +876,35 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		}
 	}
 
+	/**
+	 * Format and write the start time to its view
+	 * ({@link #startTimeView} or {@link #lapView}).
+	 * Sets {@link #wroteStartTime}.
+	 */
+	private void writeStartTimeToView() {
+		if (fmt_dow_meddate_time == null)
+			fmt_dow_meddate_time = buildDateFormatDOWmedium(Anstop.this);
+
+		StringBuffer sb = new StringBuffer();
+		sb.append(getResources().getText(R.string.started_at));
+		sb.append(" ");
+		final long sttime = clock.getStartTimeActual();
+		sb.append(DateFormat.format(fmt_dow_meddate_time, sttime));
+
+		if (lapView != null)
+		{
+			sb.append("\n\n");
+			sb.append(lapView.getText());  // "Laps:"
+			lapView.setText(sb);
+		}
+		else if (startTimeView != null)
+		{
+			startTimeView.setText(sb);	
+		}
+
+		wroteStartTime = true;
+	}
+
     private class startButtonListener implements OnClickListener {
     	
     	public void onClick(View v) {
@@ -914,29 +945,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     		
     		if (clock.isStarted && ! wroteStartTime)
     		{
-				if (fmt_dow_meddate_time == null)
-					fmt_dow_meddate_time = buildDateFormatDOWmedium(Anstop.this);
-
-				StringBuffer sb = new StringBuffer();
-				sb.append(getResources().getText(R.string.started_at));
-				sb.append(" ");
-				final long sttime = clock.getStartTimeActual();
-				sb.append(DateFormat.format(fmt_dow_meddate_time, sttime));
-
-				if (lapView != null)
-    			{
-    				sb.append("\n\n");
-    				sb.append(lapView.getText());
-    				lapView.setText(sb);
-    			}
-				else if (startTimeView != null)
-    			{
-					startTimeView.setText(sb);	
-    			}
-    			wroteStartTime = true;
+    			writeStartTimeToView();
     		}
         	
         }
+
     }
     
     private class resetButtonListener implements OnClickListener {
