@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009 by mj   										   *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010-2011 Jeremy Monin            *
+ *   Portions of this file Copyright (C) 2010-2012 Jeremy Monin            *
  *    jeremy@nand.net                                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -68,6 +68,9 @@ import android.widget.LinearLayout.LayoutParams;
  * Uses 1 of 2 layouts, depending on the {@link #current} mode:
  * <tt>main</tt> or <tt>countdown</tt>.
  * Main implements {@link #MODE_STOP} which includes Lap mode.
+ *<P>
+ * Many fields' visibility are non-private for use by
+ * {@link Clock#fillSaveState(Bundle)} and {@link Clock#restoreFromSaveState(Bundle)}.
  */
 public class Anstop extends Activity implements OnGesturePerformedListener {
     
@@ -109,31 +112,41 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	
 	private static final int ABOUT_DIALOG = 0;
 	private static final int SAVE_DIALOG = 1;
+	/** Dialog to set the optional {@link #comment} */
+	private static final int COMMENT_DIALOG = 2;
 	
 	private static final int SETTINGS_ACTIVITY = 0;
 	
 	private static final int VIEW_SIZE = 60;
-	
+
+	// Reminder: If you add or change fields, be sure to update
+	// Clock.fillSaveState and Clock.restoreFromSaveStateFields
+
 	/**
 	 * If true, we already wrote the start date/time into {@link #lapView}
-	 * or {@link #startTimeView}, by calling {@link #writeStartTimeToView()}.
-	 *<P>
-	 * Visibility is non-private for use by {@link Clock#fillSaveState(Bundle)}
-	 * and {@link Clock#restoreFromSaveState(Bundle)}.
+	 * or {@link #startTimeView}, by calling {@link #updateStartTimeCommentLapsView()}.
 	 */
 	boolean wroteStartTime;
 
 	/**
 	 * Date formatter for day of week + user's medium date format + hh:mm:ss;
-	 * used in {@link startButtonListener#onClick(View)}
-	 * for "started at:".
+	 * used in {@link #updateStartTimeCommentLapsView()} for "started at:".
 	 */
 	private StringBuffer fmt_dow_meddate_time;
 
 	Clock clock;
+	/** Lap data for {@link #lapView}. */
+	StringBuilder laps;
+	/**
+	 * Optional comment, or null.
+	 * In the layout, Start time, <tt>comment</tt>, and {@link #laps}
+	 * are all shown in startTimeView or LapView.
+	 * @see #updateStartTimeCommentLapsView()
+	 */
+	String comment;
 	/** start/stop (resume/pause) */
 	Button startButton;
-	/** reset the count */
+	/** in stopwatch/lap mode, reset the count */
 	Button resetButton;
 	/** in countdown mode, sets the hour/minute/second views to the input spinners' current data */
 	Button refreshButton;
@@ -142,9 +155,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	TextView secondsView;
 	TextView minView;
 	TextView hourView;
-	/** shows start time in the countdown layout, which doesn't contain {@link #lapView} */
+	/** shows start time and {@link #comment} in the countdown layout, which doesn't contain {@link #lapView} */
 	TextView startTimeView;
-	/** shows start time and laps; when <tt>lapView</tt> is non-null, {@link #startTimeView} is null */
+	/** shows start time, {@link #comment}, and {@link #laps}. When <tt>lapView</tt> is non-null, {@link #startTimeView} is null */
 	TextView lapView;
 	Spinner secSpinner;
 	Spinner minSpinner;
@@ -157,7 +170,14 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
 	/** Context menu item for Save. Null until {@link #onCreateOptionsMenu(Menu)} is called. */
 	MenuItem saveMenuItem;
-	
+
+	/**
+	 * Edit text for {@link #comment} in {@link #COMMENT_DIALOG}.
+	 * Null until {@link #onCreateDialog(int)} is called.
+	 * Updated in {@link #onPrepareDialog(int, Dialog)}.
+	 */
+	private transient EditText commentEdit;
+
 	Context mContext;
 	Vibrator vib;
 	
@@ -318,6 +338,10 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
      */
     public void countdown() {
         current = COUNTDOWN;
+        comment = null;
+        if ((laps != null) && (laps.length() > 0))
+        	laps.delete(0, laps.length());
+
     	//set the Layout to the countdown layout
     	setContentView(R.layout.countdown);
     	
@@ -327,6 +351,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         minView = (TextView) findViewById(R.id.minView);
         hourView = (TextView) findViewById(R.id.hourView);
         startTimeView = (TextView) findViewById(R.id.countdown_startTimeView);
+        setupCommentLongPress(startTimeView);
         setupGesture();
         lapView = null;
         lapScroll = null;
@@ -379,6 +404,13 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     public void stopwatch() {
 
         current = STOP_LAP;
+        comment = null;
+        if (laps == null)
+        	laps = new StringBuilder();
+        else if (laps.length() > 0)
+        	laps.delete(0, laps.length());
+        laps.append(getResources().getString(R.string.laps));
+
     	//set the Layout to the stopwatch/lap-mode layout
     	setContentView(R.layout.main);
     	
@@ -404,6 +436,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         startTimeView = null;
         lapView = (TextView) findViewById(R.id.lapView);
         lapView.setTextSize(VIEW_SIZE - 30);
+        setupCommentLongPress(lapView);
         wroteStartTime = false;
 
         lapButton = (Button) findViewById(R.id.lapButton);
@@ -431,6 +464,20 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		gestureOverlay.addOnGesturePerformedListener(this);
 		gestureOverlay.setGestureVisible(false);
 
+	}
+
+	/**
+	 * Set up long-press on the read-only start time / lap textview
+	 * to allow editing the optional {@link #comment}.
+	 * @param tv  Either {@link #lapView} or {@link #startTimeView}
+	 */
+	private void setupCommentLongPress(TextView tv) {
+		tv.setOnLongClickListener(new View.OnLongClickListener() {			
+			public boolean onLongClick(View v) {
+				showDialog(COMMENT_DIALOG);
+				return true;
+			}
+		});		
 	}
 
     /**
@@ -685,11 +732,52 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	dialog = saveBuilder.create();
         	break;
 
+        case COMMENT_DIALOG:
+        	AlertDialog.Builder commentBuilder = new AlertDialog.Builder(this);
+        	commentBuilder.setTitle(R.string.comment);
+        	if (commentEdit == null)
+        		commentEdit = new EditText(this);
+        	final EditText inputComm = commentEdit;
+        	// commentEdit contents are set from comment in onPrepareDialog
+        	commentBuilder.setView(inputComm);
+
+        	commentBuilder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+	    				comment = inputComm.getText().toString().trim();
+	    				if (comment.length() == 0)
+	    					comment = null;
+	    				updateStartTimeCommentLapsView();
+        			}
+        		});
+
+        	commentBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) { }
+        		});
+        	dialog = commentBuilder.create();
+        	break;
+
         default: dialog = null;
 		}
 		
 		
         return dialog;
+    }
+
+    /**
+     * Update {@link #commentEdit} before showing {@link #COMMENT_DIALOG}.
+     */
+    protected void onPrepareDialog(final int id, Dialog dialog)
+    {
+    	if ((id != COMMENT_DIALOG) || (commentEdit == null))
+    	{
+    		super.onPrepareDialog(id, dialog);
+    		return;
+    	}
+
+    	if (comment != null)
+    		commentEdit.setText(comment);
+    	else
+    		commentEdit.setText("");
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -715,9 +803,13 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     }
 
     /**
-     * Construct a string with the current mode, time, and laps (if applicable).
+     * Construct a string with the current mode, time,
+     * {@link #comment}, and {@link #laps} (if applicable).
      */
 	private String createBodyFromCurrent() {
+		// Start time, comment, and laps are all
+		// within startTimeView's or LapView's text.
+
 		String body;
 		switch(current) {
 		case COUNTDOWN:
@@ -806,7 +898,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * If not started, set the clock and the displayed Hour/Min/Seconds from
 	 * the spinners.  Otherwise show a toast (cannot refresh during count).
 	 *
-	 * @param onlyIfZero  If true, only set the clock to the input data if the clock is currently 0:0:0:0.
+	 * @param onlyIfZero  If true, set the clock to the input data only if the clock is currently 0:0:0:0.
+	 * @see #resetClockAndViews()
 	 */
 	private void clickRefreshCountdownTime(final boolean onlyIfZero)
 	{
@@ -831,8 +924,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			minView.setText(clock.nf.format(m));
 			hourView.setText(Integer.toString(h));
 	
-			startTimeView.setText("");
 			wroteStartTime = false;
+			if (comment == null)
+				startTimeView.setText("");
+			else
+				startTimeView.setText(comment);
 		}
 		else {
 			//Show error when currently counting
@@ -842,11 +938,14 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	}
 	
 	/**
+	 * For stopwatch/lap mode,
 	 * Reset the clock and hh/mm/ss views.
 	 * Clear <tt>"anstop_in_use"</tt> flag in shared preferences.
 	 *<P>
 	 * If isStarted, do nothing.
 	 * If wasStarted, call this only after the confirmation alert.
+	 *
+	 * @see #clickRefreshCountdownTime(boolean)
 	 */
 	private void resetClockAndViews()
 	{
@@ -860,11 +959,20 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		secondsView.setText("00");
 		minView.setText("00");
 		hourView.setText("0");
+		if((laps != null) && (laps.length() > 0))
+			laps.delete(0, laps.length());
 		if(lapView != null)
-			lapView.setText(R.string.laps);
+		{
+			final String lapsHeader = getResources().getString(R.string.laps); 
+			if (laps == null)
+				laps = new StringBuilder();
+			laps.append(lapsHeader);
+			lapView.setText(lapsHeader);
+		}
 		if(startTimeView != null)
 			startTimeView.setText("");
 		wroteStartTime = false;		
+		comment = null;
 
 		// Check for an old anstop_in_use flag from previous runs
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -877,32 +985,41 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	}
 
 	/**
-	 * Format and write the start time to its view
-	 * ({@link #startTimeView} or {@link #lapView}).
-	 * Sets {@link #wroteStartTime}.
+	 * Format and write the start time, {@link #comment},
+	 * and {@link #laps} (if applicable) displayed
+	 * in {@link #startTimeView} or {@link #lapView}.
 	 */
-	private void writeStartTimeToView() {
+	void updateStartTimeCommentLapsView() {
 		if (fmt_dow_meddate_time == null)
 			fmt_dow_meddate_time = buildDateFormatDOWmedium(Anstop.this);
 
 		StringBuffer sb = new StringBuffer();
-		sb.append(getResources().getText(R.string.started_at));
-		sb.append(" ");
 		final long sttime = clock.getStartTimeActual();
-		sb.append(DateFormat.format(fmt_dow_meddate_time, sttime));
+		if (sttime != -1L)
+		{
+			sb.append(getResources().getText(R.string.started_at));
+			sb.append(" ");
+			sb.append(DateFormat.format(fmt_dow_meddate_time, sttime));
+		}
+
+		if ((comment != null) && (comment.length() > 0))
+		{
+			if (sb.length() > 0)
+				sb.append("\n\n");
+			sb.append(comment);
+		}
 
 		if (lapView != null)
 		{
-			sb.append("\n\n");
-			sb.append(lapView.getText());  // "Laps:"
+			if (sb.length() > 0)
+				sb.append("\n\n");
+			sb.append(laps);
 			lapView.setText(sb);
 		}
 		else if (startTimeView != null)
 		{
 			startTimeView.setText(sb);	
 		}
-
-		wroteStartTime = true;
 	}
 
     private class startButtonListener implements OnClickListener {
@@ -945,7 +1062,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     		
     		if (clock.isStarted && ! wroteStartTime)
     		{
-    			writeStartTimeToView();
+    			updateStartTimeCommentLapsView();
+    			wroteStartTime = true;
     		}
         	
         }
@@ -1013,7 +1131,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     private class lapButtonListener implements OnClickListener {
     	
     	public void onClick(View v) {
-        	lapView.append("\n" + (clock.laps++) + ". " + clock.getCurrentValue());
+    		final String newLap = "\n" + (clock.laps++) + ". " + clock.getCurrentValue();
+        	laps.append(newLap);
+        	lapView.append(newLap);
 
         	if(vib != null)
         		vib.vibrate(50);
