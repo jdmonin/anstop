@@ -34,7 +34,7 @@ import android.os.Message;
 /**
  * Timer object and thread.
  *<P>
- * Has two modes (STOP and COUNTDOWN); its mode field is {@link #v}.
+ * Has two modes ({@link Anstop#STOP_LAP} and {@link Anstop#COUNTDOWN}); clock's mode field is {@link #v}.
  * Has accessible fields for the current {@link #hour}, {@link #min}, {@link #sec}, {@link #dsec}.
  * Has a link to the {@link #parent} Anstop, and will sometimes read or set parent's text field contents.
  *<P>
@@ -70,6 +70,9 @@ public class Clock {
 	 *<LI> {@link Anstop#STOP_LAP} (0), counting up from 0
 	 *<LI> {@link Anstop#COUNTDOWN} (1), counting down from a time set by the user
 	 *</UL>
+	 * @see #getMode()
+	 * @see #changeMode(int)
+	 * @see #reset(int, int, int, int)
 	 */
 	private int v;
 
@@ -362,6 +365,8 @@ public class Clock {
 	 * Must call AFTER the GUI elements (parent.dsecondsView, etc) exist.
 	 * Thus you must read <tt>clockAnstopCurrent</tt> from the bundle yourself,
 	 * and set the GUI mode accordingly, before calling this method.
+	 * Once the GUI is set, call {@link #changeMode(int)} to reset clock fields
+	 * and then call this method.
 	 *<P>
 	 * Will call count() if clockStarted == 1 in the bundle, unless we've counted down to 0:0:0.
 	 * For the bundle contents, see {@link #fillSaveState(Bundle)}.
@@ -457,6 +462,8 @@ public class Clock {
 	 * Must call AFTER the GUI elements (parent.dsecondsView, etc) exist.
 	 * Thus you must read <tt>"anstop_state_current"</tt> from the preferences yourself,
 	 * and set the GUI mode accordingly, before calling this method.
+	 * Once the GUI is set, call {@link #changeMode(int)} to reset clock fields
+	 * and then call this method.
 	 *<P>
 	 * Will call count() if <tt>anstop_state_clockStarted</tt> == 1 in the preferences,
 	 * unless we've counted down to 0:0:0.
@@ -630,6 +637,12 @@ public class Clock {
 	public boolean isInUse() { return isStarted || (hour > 0) || (min > 0) || (sec > 0) || (dsec > 0); }
 
 	/**
+	 * Get the clock's current counting mode.
+	 * @return  the mode; {@link Anstop#STOP_LAP} or {@link Anstop#COUNTDOWN}
+	 */
+	public int getMode() { return v; }
+
+	/**
 	 * Reset the clock while stopped, and maybe change modes.  {@link #isStarted} must be false.
 	 * If <tt>newMode</tt> is {@link Anstop#STOP_LAP}, the clock will be reset to 0,
 	 * and <tt>h</tt>, <tt>m</tt>, <tt>s</tt> are ignored.
@@ -679,6 +692,7 @@ public class Clock {
 	 * If the current mode is already <tt>newMode</tt>, change it anyway;
 	 * calls <tt>reset</tt> to update all fields.
 	 * @see #reset(int, int, int, int)
+	 * @param newMode  The new mode; {@link Anstop#STOP_LAP} or {@link Anstop#COUNTDOWN}
 	 */
 	public void changeMode(final int newMode)
 	{
