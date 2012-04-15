@@ -175,8 +175,7 @@ public class Clock {
 	 *<UL>
 	 * <LI> clockActive  1 or 0
 	 * <LI> clockWasActive  1 or 0
-	 * <LI> clockV    mode (clock.v)
-	 * <LI> clockAnstopCurrent  mode (anstop.current)
+	 * <LI> clockAnstopCurrent  mode (clock.v; was anstop.current before those were combined)
 	 * <LI> clockAnstopWroteStart  anstop.wroteStartTime flag: boolean
 	 * <LI> clockDigits  if clockActive: array hours, minutes, seconds, dsec
 	 * <LI> clockComment   comment text, if any (String)
@@ -204,8 +203,7 @@ public class Clock {
 		// be sure to add it in both copies of
 		// fillSaveState and of restoreFromSaveState.
 
-		outState.putInt("clockV", v);
-		outState.putInt("clockAnstopCurrent", parent.getCurrentMode());
+		outState.putInt("clockAnstopCurrent", v);
 		outState.putBoolean("clockAnstopWroteStart", parent.wroteStartTime);
 		int[] hmsd = new int[]{ hour, min, sec, dsec };
 		outState.putIntArray("clockDigits", hmsd);
@@ -268,8 +266,7 @@ public class Clock {
 			// be sure to add it in both copies of
 			// fillSaveState and of restoreFromSaveState.
 
-			outPref.putInt("anstop_state_clockV", v);
-			outPref.putInt("anstop_state_current", parent.getCurrentMode());
+			outPref.putInt("anstop_state_current", v);
 			outPref.putBoolean("anstop_state_wroteStart", parent.wroteStartTime);
 			outPref.putInt("anstop_state_clockDigits_h", hour);
 			outPref.putInt("anstop_state_clockDigits_m", min);
@@ -381,7 +378,9 @@ public class Clock {
 		if ((inState == null) || ! inState.containsKey("clockActive"))
 			return false;
 
-		v = inState.getInt("clockV");
+		// set v to ensure consistent state; should be set already
+		// by changeMode before this method was called.
+		v = inState.getInt("clockAnstopCurrent");
 
 		// read the counting fields
 		{
@@ -478,7 +477,10 @@ public class Clock {
 			return false;
 
 		appStateRestoreTime = restoredAtTime;
-		v = inState.getInt("anstop_state_clockV", Anstop.STOP_LAP);
+
+		// set v to ensure consistent state; should be set already
+		// by changeMode before this method was called.
+		v = inState.getInt("anstop_state_current", Anstop.STOP_LAP);
 
 		// read the counting fields
 		{
@@ -639,6 +641,8 @@ public class Clock {
 	/**
 	 * Get the clock's current counting mode.
 	 * @return  the mode; {@link Anstop#STOP_LAP} or {@link Anstop#COUNTDOWN}
+	 * @see #changeMode(int)
+	 * @see #reset(int, int, int, int)
 	 */
 	public int getMode() { return v; }
 
