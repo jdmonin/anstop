@@ -73,8 +73,8 @@ import android.widget.LinearLayout.LayoutParams;
  * {@link Clock#fillSaveState(Bundle)} and {@link Clock#restoreFromSaveState(Bundle)}.
  */
 public class Anstop extends Activity implements OnGesturePerformedListener {
-    
-	
+
+
 	private static final int MENU_MODE_GROUP = 0;
 	/** Menu item to choose {@link #STOP_LAP} mode */
 	private static final int MODE_STOP = 1;
@@ -444,15 +444,18 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
      * Set up swipe gesture, based on the current mode and layout.
      */
     private void setupGesture() {
-    	LinearLayout layout = getLayout(clock.getMode());
+		ViewGroup layout = getLayout(clock.getMode());  // layout for entire activity
     	gestureOverlay = new GestureOverlayView(this);
-		layout.addView(gestureOverlay, new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT, 1));
 		ViewGroup mainViewGroup = (ViewGroup) findViewById(R.id.mainLayout);
-		layout.removeView(mainViewGroup);
+
+		// remove before add, in case layout is ScrollView and can have only 1 child:
+		((ViewGroup)mainViewGroup.getParent()).removeView(mainViewGroup);  // avoid "specified child already has a parent"
+		layout.removeAllViews();  // avoid "ScrollView can host only one direct child"
+		layout.addView(gestureOverlay, new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT, 1));
+
 		gestureOverlay.addView(mainViewGroup);
 		gestureOverlay.addOnGesturePerformedListener(this);
 		gestureOverlay.setGestureVisible(false);
-
 	}
 
 	/**
@@ -470,18 +473,19 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	}
 
     /**
-     * Get the layout corresponding to a counting mode.
+     * Get the activity layout corresponding to a counting mode.
+     * <tt>mainLayout</tt> is contained inside this one.
      * @param index  Mode number: a valid mode for {@link Clock#getMode()}
-     * @return the LinearLayout for
+     * @return the layout (LinearLayout or ScrollView) for
      *   <tt>countdownLayout</tt> or <tt>stopwatchLayout</tt>
      */
-    private LinearLayout getLayout(int index) {
+    private ViewGroup getLayout(final int index) {
     	switch(index) {
 		case COUNTDOWN:
-			return (LinearLayout) findViewById(R.id.countDownLayout);
+			return (ViewGroup) findViewById(R.id.countDownLayout);
 			
 		case STOP_LAP:
-			return (LinearLayout) findViewById(R.id.stopwatchLayout);
+			return (ViewGroup) findViewById(R.id.stopwatchLayout);
 			
 		}
     	return null;
@@ -1144,6 +1148,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture) {
 		if(clock.isStarted)
 			return;
+
 		List<Prediction> predictions = gestureLibrary.recognize(gesture);
 	    for(Prediction prediction : predictions) {
 	    	if(prediction.score > 1.0) {
@@ -1185,7 +1190,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     	
     	Animation animation = AnimationUtils.makeOutAnimation(this, toRight);
 
-    	LinearLayout layout = getLayout(modeBefore);
+    	ViewGroup layout = getLayout(modeBefore);
 		animation.setAnimationListener(new AnimationListener() {
 			//@Override
 			public void onAnimationStart(Animation animation) {
