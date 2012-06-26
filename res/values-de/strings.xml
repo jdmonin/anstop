@@ -18,7 +18,7 @@
 <string name="countdown">Countdown</string>
 <string name="countdown_please_set_hms">Bitte wählen Sie die Stunden, Minuten und Sekunden.</string>
 <string name="countdown_completed_please_refresh">Der Countdown ist beendet.\nBitte drücken Sie auf Start, um ihn erneut zu starten.</string>
-<string name="about_dialog">Anstop v1.4, Eine kleine Anwendung zum Stoppen der Zeit.\nCopyright (C) 2009, 2010, 2011 MJ und Jeremy Monin &lt;anstop.googlecode.com&gt;\nLizenz: GPLv2 (http://www.gnu.org/licenses/gpl-2.0.html)\nFür den Quellcode gehen sie bitte auf anstop.googlecode.com</string>
+<string name="about_dialog">Anstop v1.4, Eine kleine Anwendung zum Stoppen der Zeit.\nCopyright (C) 2009-2012 MJ und Jeremy Monin &lt;anstop.googlecode.com&gt;\nLizenz: GPLv2 (http://www.gnu.org/licenses/gpl-2.0.html)\nFür den Quellcode gehen sie bitte auf anstop.googlecode.com</string>
 
 <string name="save">Speichern</string>
 <string name="load">Laden</string>
@@ -45,7 +45,6 @@
 <string name="seconds">Sekunden:</string>
 <string-array name="modes_strings"><item>Stoppuhr</item>
 <item>Countdown</item>
-<item>Rundenmodus</item>
 </string-array>
 <string name="first_start">Tipp: Sie können nach links oder rechts mit dem Finger wischen, um den Modus zu ändern!</string>
 <string name="change">Ändern</string>

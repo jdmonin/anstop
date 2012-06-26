@@ -19,7 +19,7 @@
 <string name="countdown">Atzerako kontaketa</string>
 <string name="countdown_please_set_hms">Mesedez hautatu orduak, minutuak eta segundoak atzerako kontaketarako.</string>
 <string name="countdown_completed_please_refresh">Atzerako kontaketa zeroraino iritsi da.\nMesedez sakatu Freskatu berriz hasteko.</string>
-<string name="about_dialog">Anstop v1.4, kronometro eta atzerako kontaketa aplikazio txikia.\nCopyright-a (C) 2009, 2010, 2011 MJ eta Jeremy Monin &lt;anstop.googlecode.com&gt;\nLizentzia GPLv2 da (http://www.gnu.org/licenses/gpl-2.0.html)\nIturburu-kodea eskuratzeko bisitatu anstop.googlecode.com</string>
+<string name="about_dialog">Anstop v1.4, kronometro eta atzerako kontaketa aplikazio txikia.\nCopyright-a (C) 2009-2012 MJ eta Jeremy Monin &lt;anstop.googlecode.com&gt;\nLizentzia GPLv2 da (http://www.gnu.org/licenses/gpl-2.0.html)\nIturburu-kodea eskuratzeko bisitatu anstop.googlecode.com</string>
 
 <string name="save">Gorde</string>
 <string name="load">Kargatu</string>

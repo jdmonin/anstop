@@ -18,7 +18,7 @@
 <string name="countdown">Cuenta regresiva</string>
 <string name="countdown_please_set_hms">Para contar, por favor, seleccione las horas, minutos y segundos.</string>
 <string name="countdown_completed_please_refresh">La cuenta regresiva a 0 es completa.\nPor favor, pulsa en Iniciar para volver a empezar.</string>
-<string name="about_dialog">Anstop v1.4, una pequeña aplicación para Cronómetro y Cuenta regresiva de tiempo.\nCopyright (C) 2009, 2010, 2011 MJ y Jeremy Monin &lt;anstop.googlecode.com&gt;\nLicencia es GPLv2 (http://www.gnu.org/licenses/gpl-2.0.html)\nPara obtener el código fuente, visite anstop.googlecode.com</string>
+<string name="about_dialog">Anstop v1.4, una pequeña aplicación para Cronómetro y Cuenta regresiva de tiempo.\nCopyright (C) 2009-2012 MJ y Jeremy Monin &lt;anstop.googlecode.com&gt;\nLicencia es GPLv2 (http://www.gnu.org/licenses/gpl-2.0.html)\nPara obtener el código fuente, visite anstop.googlecode.com</string>
 
 <string name="save">Guardar</string>
 <string name="load">Cargar</string>
@@ -45,7 +45,6 @@
 <string name="seconds">Segundos:</string>
 <string-array name="modes_strings"><item>Cronómetro</item>
 <item>Cuenta regresiva</item>
-<item>Modo de vuelta</item>
 </string-array>
 <string name="first_start">Consejo: Se puede deslizar a la izquierda oa la derecha, para cambiar el modo.</string>
 <string name="change">Cambiar</string>
