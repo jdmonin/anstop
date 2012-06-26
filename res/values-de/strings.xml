@@ -48,8 +48,10 @@
 <item>Rundenmodus</item>
 </string-array>
 <string name="first_start">Tipp: Sie können nach links oder rechts mit dem Finger wischen, um den Modus zu ändern!</string>
+<string name="change">Ändern</string>
 <string name="comment">Kommentar</string>
 <string name="confirm">Bestätigen</string>
+<string name="confirm_change_mode_message">Ändern des Modus wird die Stoppuhr zurückzustellen.</string>
 <string name="confirm_refresh_message">Sind Sie sicher, dass Sie erneuern möchten?</string>
 <string name="confirm_reset_message">Sind Sie sicher, dass Sie zurücksetzen möchten?</string>
 

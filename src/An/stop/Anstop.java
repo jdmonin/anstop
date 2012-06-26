@@ -1149,6 +1149,10 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		if(clock.isStarted)
 			return;
 
+		final boolean wasStartedOrCommented
+			= clock.wasStarted
+			  || ((comment != null) && (comment.length() > 0));
+
 		List<Prediction> predictions = gestureLibrary.recognize(gesture);
 	    for(Prediction prediction : predictions) {
 	    	if(prediction.score > 1.0) {
@@ -1159,8 +1163,13 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	    				newMode = 0;
 	    			else
 	    				newMode = cprev + 1;
-	    			clock.changeMode(newMode);
-	    			animateSwitch(false, cprev);
+	    			if (wasStartedOrCommented)
+	    			{
+	    				popupConfirmChangeModeFromSwipe(false, cprev, newMode);
+	    			} else {
+		    			clock.changeMode(newMode);
+		    			animateSwitch(false, cprev);
+	    			}
 	    		}
 	    		if(prediction.name.equals("SwipeLeft")) {
 	    			final int cprev = clock.getMode();
@@ -1169,12 +1178,50 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	    				newMode = 1;
 	    			else
 	    				newMode = cprev - 1;
-	    			clock.changeMode(newMode);
-	    			animateSwitch(true, cprev);
+	    			if (wasStartedOrCommented)
+	    			{
+	    				popupConfirmChangeModeFromSwipe(true, cprev, newMode);
+	    			} else {
+		    			clock.changeMode(newMode);
+		    			animateSwitch(true, cprev);
+	    			}
 	    		}
 	    	}
 	    }
 	}    
+
+	/**
+	 * Show a popup dialog to have the user confirm swiping to a different mode,
+	 * which will clear the current laps and comment (if any).
+	 *<P>
+	 * If the swipe is confirmed, will call {@link #animateSwitch(boolean, int)}.
+	 *<P>
+	 * Call only if we need to ask, because clock.wasStarted or a comment was typed.
+	 * @param toRight  True if the old mode is exiting to the right, and the new mode coming in from the left;
+	 *                     passed to {@link #animateSwitch(boolean, int)}
+	 * @param currMode  The current mode; passed to {@link #animateSwitch(boolean, int)}
+	 * @param newMode  The new mode if confirmed; passed to {@link Clock#changeMode(int)}
+	 */
+	private void popupConfirmChangeModeFromSwipe
+		(final boolean toRight, final int currMode, final int newMode)
+	{
+		AlertDialog.Builder alert = new AlertDialog.Builder(Anstop.this);
+		alert.setTitle(R.string.confirm);
+		alert.setMessage(R.string.confirm_change_mode_message);
+
+		alert.setPositiveButton(R.string.change, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				clock.changeMode(newMode);
+				animateSwitch(toRight, currMode);		
+			}
+		});
+
+		alert.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) { }
+		});
+
+		alert.show();
+	}
 
     /**
      * Animate changing the current mode after a SwipeRight or SwipeLeft gesture.
