@@ -47,8 +47,10 @@
 <item>Countdown</item>
 </string-array>
 <string name="first_start">Tip: You can swipe left or right, to change the mode!</string>
+<string name="change">Change</string>
 <string name="comment">Comment</string>
 <string name="confirm">Confirm</string>
+<string name="confirm_change_mode_message">Changing the mode will reset the stopwatch.</string>
 <string name="confirm_refresh_message">Are you sure you want to refresh?</string>
 <string name="confirm_reset_message">Are you sure you want to reset?</string>
 

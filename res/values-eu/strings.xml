@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Basque translation by Asier Iturralde Sarasola  2012-04-22 -->
+<resources>
+    
+    <string name="app_name">Anstop</string>
+<string name="reset">Berrezarri</string>
+<string name="settings">Ezarpenak</string>
+<string name="reset_during_count">Ezin da berrezarri martxan dagoela!</string>
+<string name="hour"> ordu</string>
+<string name="motion_checkbox">Erabili mugimendu-sentsorea hasi eta gelditzeko</string>
+
+<string name="refresh">Freskatu</string>
+<string name="refresh_during_count">Ezin da freskatu martxan dagoela!</string>
+<string name="start_stop">Hasi/Gelditu</string>
+<string name="lap">-  Bira!  -</string>
+<string name="laps">Birak:</string>
+<string name="about">Honi buruz</string>
+<string name="stop">Kronometroa</string>
+<string name="countdown">Atzerako kontaketa</string>
+<string name="countdown_please_set_hms">Mesedez hautatu orduak, minutuak eta segundoak atzerako kontaketarako.</string>
+<string name="countdown_completed_please_refresh">Atzerako kontaketa zeroraino iritsi da.\nMesedez sakatu Freskatu berriz hasteko.</string>
+<string name="about_dialog">Anstop v1.4, kronometro eta atzerako kontaketa aplikazio txikia.\nCopyright-a (C) 2009, 2010, 2011 MJ eta Jeremy Monin &lt;anstop.googlecode.com&gt;\nLizentzia GPLv2 da (http://www.gnu.org/licenses/gpl-2.0.html)\nIturburu-kodea eskuratzeko bisitatu anstop.googlecode.com</string>
+
+<string name="save">Gorde</string>
+<string name="load">Kargatu</string>
+<string name="save_dialog">Mesedez sartu izen bat emaitzak gordetzeko</string>
+<string name="no_entry">Sarrerarik ez!</string>
+<string name="delete">Ezabatu</string>
+<string name="export">Esportatu ...</string>
+<string name="export_succes">Behar bezala gorde da SD txartelean!</string>
+<string name="export_fail">Esportatzeak huts egin du!</string>
+<string name="export_all">Esportatu guztiak ...</string>
+<string name="mode_was">Modua hau zen: </string>
+<string name="start_time">Hasierako ordua hau zen:</string>
+<string name="started_at">Hasierako ordua:</string>
+<string name="vibrate_checkbox">Bibratu Hasi edo Gelditu klikatzean</string>
+<string name="saved_succes">Behar bezala gorde da!</string>
+<string name="mode">Modua</string>
+<string name="cancel">Utzi</string>
+<string name="vibrate">Bibratu</string>
+<string name="motion_sensor">Mugimendu-sentsorea</string>
+<string name="send">Bidali...</string>
+<string name="startup_mode">Modua abiaraztean</string>
+<string name="hours">Orduak:</string>
+<string name="minutes">Minutuak:</string>
+<string name="seconds">Segundoak:</string>
+<string-array name="modes_strings"><item>Kronometroa</item>
+<item>Atzerako kontaketa</item>
+</string-array>
+<string name="first_start">Aholkua: Hatza ezkerrera edo eskuinera pasa dezakezu modua aldatzeko!</string>
+<string name="comment">Iruzkina</string>
+<string name="confirm">Baieztatu</string>
+<string name="confirm_refresh_message">Ziur zaude freskatu nahi duzula?</string>
+<string name="confirm_reset_message">Ziur zaude berrezarri nahi duzula?</string>
+
+</resources>
