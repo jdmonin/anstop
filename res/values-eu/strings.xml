@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Basque translation by Asier Iturralde Sarasola  2012-04-22 -->
+<!-- Basque translation by Asier Iturralde Sarasola  2012-04-22 updated 2012-06-30 -->
 <resources>
     
     <string name="app_name">Anstop</string>
@@ -51,7 +51,7 @@
 <string name="change">Aldatu</string>
 <string name="comment">Iruzkina</string>
 <string name="confirm">Baieztatu</string>
-<string name="confirm_change_mode_message">Modua aldatzeak kronometroa berrezarri da.</string>
+<string name="confirm_change_mode_message">Modua aldatzeak kronometroa berrezarriko du.</string>
 <string name="confirm_refresh_message">Ziur zaude freskatu nahi duzula?</string>
 <string name="confirm_reset_message">Ziur zaude berrezarri nahi duzula?</string>
 
