@@ -60,7 +60,8 @@ import android.os.Message;
  * firing every 100ms.  The {@link #parent}'s hour:minute:second.dsec displays are updated
  * through {@link #hourh} and the rest of the handlers here.
  *<P>
- * Keeping track of laps is done in {@link Anstop}, not in this object.
+ * To lap, call {@link #lap(StringBuffer)}.  Note that persisting
+ * the lap data arrays must be done in {@link Anstop}, not here.
  */
 public class Clock {
 
@@ -101,9 +102,34 @@ public class Clock {
 
 	/**
 	 * For lap mode, the current lap number, or 1 if not lap mode.
+	 * If <tt>laps</tt> &gt; 1, at least 1 lap has been recorded
+	 * in {@link #lap_elapsed} and {@link #lap_systime}.
 	 */
 	int laps = 1;
 
+	/**
+	 * Elapsed time (milliseconds) of each lap, if lap mode.
+	 * The highest occupied index is ({@link #laps} - 2).
+	 * If this array is about to be filled, {@link #lap(StringBuffer)} will extend it.
+	 *<P>
+	 * Not persisted in {@link #fillSaveState(Bundle)} or {@link #fillSaveState(SharedPreferences)}.
+	 * Instead, current laps must be stored in the database.
+	 * @see #lap_systime
+	 */
+	private long[] lap_elapsed = new long[64];
+
+	/**
+	 * System time (milliseconds) of each lap, if lap mode,
+	 * from {@link System#currentTimeMillis()}.
+	 * The highest occupied index is ({@link #laps} - 2).
+	 * If this array is about to be filled, {@link #lap(StringBuffer)} will extend it.
+	 *<P>
+	 * Not persisted in {@link #fillSaveState(Bundle)} or {@link #fillSaveState(SharedPreferences)}.
+	 * Instead, current laps must be stored in the database.
+	 * @see #lap_elapsed
+	 */
+	private long[] lap_systime = new long[64];
+	
 	/**
 	 * For countdown mode, the initial seconds, minutes, hours,
 	 * as set by {@link #reset(int, int, int, int)},
@@ -630,18 +656,25 @@ public class Clock {
 	 * Get the current value of this timer, in milliseconds.
 	 * @param sb  Optional StringBuffer, or null;
 	 *    current value in the format "#h mm:ss:d" will be appended to sb
+	 * @param withLap  If true, sb will have the lap number too;
+	 *    sb's appended format will be "lap. #h mm:ss:d"
 	 * @return the number of milliseconds representing the timer's
 	 *    current hours, minutes, seconds, and dsec
 	 * @since 1.xx
 	 * @see #getCurrentValue()
 	 */
-	public long getCurrentValueMillis(StringBuffer sb)
+	public long getCurrentValueMillis(StringBuffer sb, final boolean withLap)
 	{
 		// copy fields first, in case they're about to increment in the other thread
 		final int ds = dsec, s = sec, m = min, h = hour;
 
 		if (sb != null)
 		{
+			if (withLap)
+			{
+				sb.append(laps);
+				sb.append(". ");
+			}
 			sb.append(h);
 			sb.append("h ");
 			sb.append(nf.format(m));
@@ -674,6 +707,37 @@ public class Clock {
 	 * @see #reset(int, int, int, int)
 	 */
 	public int getMode() { return v; }
+
+	/**
+	 * Take a lap now.  Optionally append the current lap time to a buffer.
+	 * @param sb  Null or a buffer to which the lap info
+	 *    will be appended, in the format "lap. #h mm:ss:d"
+	 * @return the lap number; the first lap number is 1.
+	 * @since 1.xx
+	 */
+	public int lap(StringBuffer sb)
+	{
+		final long lapNow = System.currentTimeMillis(),
+		           lapElapsed = getCurrentValueMillis(sb, true);  // appends sb
+		final int lapnum = laps++;
+		final int i = lapnum - 1;
+		if (i >= lap_systime.length)
+		{
+			// copy the lap arrays
+			final int L = lap_systime.length,
+			          Lnew = L + 64;
+			long[] systi = new long[Lnew],
+			       elaps = new long[Lnew];
+			System.arraycopy(lap_systime, 0, systi, 0, L);
+			System.arraycopy(lap_elapsed, 0, elaps, 0, L);
+			lap_systime = systi;
+			lap_elapsed = elaps;
+		}
+		lap_systime[i] = lapNow;
+		lap_elapsed[i] = lapElapsed;
+
+		return lapnum;
+	}
 
 	/**
 	 * Reset the clock while stopped, and maybe change modes.  {@link #isStarted} must be false.

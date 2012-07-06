@@ -1129,14 +1129,12 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
     	/**
     	 * Lap button clicked; get clock time from
-    	 * {@link Clock#getCurrentValueMillis(StringBuffer)},
+    	 * {@link Clock#getCurrentValueMillis(StringBuffer, boolean)},
     	 * append it to {@link #laps} and {@link #lapView}.
     	 */
     	public void onClick(View v) {
     		sb.append("\n");
-    		sb.append(clock.laps++);
-    		sb.append(". ");
-    		clock.getCurrentValueMillis(sb);
+    		clock.lap(sb);  // format: "lap. #h mm:ss:d"
         	laps.append(sb);
         	lapView.append(sb);
 
