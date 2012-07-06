@@ -610,7 +610,8 @@ public class Clock {
 	/**
 	 * Get the current value of this timer.
 	 * @return a stringbuffer of the form "#h mm:ss:d"
-	 * @since 1.xx
+	 * @since 1.3
+	 * @see #getCurrentValueMillis()
 	 */
 	public StringBuffer getCurrentValue()
 	{
@@ -623,6 +624,34 @@ public class Clock {
 		sb.append(':');
 		sb.append(dsec);
 		return sb;
+	}
+
+	/**
+	 * Get the current value of this timer, in milliseconds.
+	 * @param sb  Optional StringBuffer, or null;
+	 *    current value in the format "#h mm:ss:d" will be appended to sb
+	 * @return the number of milliseconds representing the timer's
+	 *    current hours, minutes, seconds, and dsec
+	 * @since 1.xx
+	 * @see #getCurrentValue()
+	 */
+	public long getCurrentValueMillis(StringBuffer sb)
+	{
+		// copy fields first, in case they're about to increment in the other thread
+		final int ds = dsec, s = sec, m = min, h = hour;
+
+		if (sb != null)
+		{
+			sb.append(h);
+			sb.append("h ");
+			sb.append(nf.format(m));
+			sb.append(':');
+			sb.append(nf.format(s));
+			sb.append(':');
+			sb.append(ds);
+		}
+		return (((h * 60 + m) * 60 + s)
+				* 10 + ds) * 100L;
 	}
 
 	/**

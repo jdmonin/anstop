@@ -1123,14 +1123,28 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     }
     
     private class lapButtonListener implements OnClickListener {
-    	
+
+    	/** lap time for {@link #onClick()}; is empty between uses */
+    	private StringBuffer sb = new StringBuffer();
+
+    	/**
+    	 * Lap button clicked; get clock time from
+    	 * {@link Clock#getCurrentValueMillis(StringBuffer)},
+    	 * append it to {@link #laps} and {@link #lapView}.
+    	 */
     	public void onClick(View v) {
-    		final String newLap = "\n" + (clock.laps++) + ". " + clock.getCurrentValue();
-        	laps.append(newLap);
-        	lapView.append(newLap);
+    		sb.append("\n");
+    		sb.append(clock.laps++);
+    		sb.append(". ");
+    		clock.getCurrentValueMillis(sb);
+        	laps.append(sb);
+        	lapView.append(sb);
 
         	if(vib != null)
         		vib.vibrate(50);
+
+        	// clear sb for the next onClick
+        	sb.delete(0, sb.length());
 
         	// Scroll to bottom of lap times
         	lapScroll.post(new Runnable() {
