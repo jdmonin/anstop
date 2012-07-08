@@ -72,13 +72,13 @@ public class Clock {
 	//   the default format has LAP_FMT_FLAG_ELAPSED and no others,
 	//   unless the user changes that preference.
 
-	/** Lap time format flag: Elapsed. <tt>mm:ss:d</tt> */
+	/** Lap time format flag: Elapsed. <tt>h mm:ss:d</tt> */
 	public static final int LAP_FMT_FLAG_ELAPSED = 1;
 
-	/** Lap time format flag: Delta. <tt>(+mm:ss:d)</tt> */
+	/** Lap time format flag: Delta. <tt>(+h mm:ss:d)</tt> */
 	public static final int LAP_FMT_FLAG_DELTA = 2;
 
-	/** Lap time format flag: System time. <tt>@hh:mm:ss</tt> */
+	/** Lap time format flag: System time. <tt>@hh:mm</tt> */
 	public static final int LAP_FMT_FLAG_SYSTIME = 4;
 
 	/**
@@ -245,8 +245,8 @@ public class Clock {
 	 * <LI> clockComment   comment text, if any (String)
 	 * <LI> clockLapCount  lap count, including current lap (starts at 1, not 0)
 	 * <LI> clockLaps  lap text, if any (CharSequence here; String in {@link #fillSaveState(SharedPreferences)})
-	 * <LI> clockLapsElapsed  each lap's elapsed time {@link #lap_elapsed}, if {@link #laps} &gt; 1
-	 * <LI> clockLapsSystime  each lap's wall-clock time {@link #lap_systime}, if {@link #laps} &gt; 1
+	 * <LI> clockLapsElapsed  each lap's elapsed time ({@link #lap_elapsed}[]), if {@link #laps} &gt; 1
+	 * <LI> clockLapsSystime  each lap's wall-clock time ({@link #lap_systime}[]), if {@link #laps} &gt; 1
 	 * <LI> clockStateSaveTime current time when bundle saved, from {@link System#currentTimeMillis()}
 	 * <LI> clockStartTimeActual  actual time when clock was started, from {@link System#currentTimeMillis()}
 	 * <LI> clockStartTimeAdj  <tt>clockStartTimeActual</tt> adjusted forward to remove any

@@ -272,7 +272,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         // Lap Display Format setting
         try
         {
-        	// read the new settings; default is LAP_FMT_FLAG_ELAPSED only
+        	// read the flags, possibly just changed by user; default is LAP_FMT_FLAG_ELAPSED only
         	final boolean lapFmtElapsed = settings.getBoolean("lap_format_elapsed", true),
         	              lapFmtDelta   = settings.getBoolean("lap_format_delta", false),
         	              lapFmtSystime = settings.getBoolean("lap_format_systime", false);

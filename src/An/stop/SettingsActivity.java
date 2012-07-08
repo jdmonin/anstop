@@ -66,7 +66,7 @@ public class SettingsActivity
 		if (! key.startsWith("lap_format_"))
 			return;
 
-    	// read the new settings; default is LAP_FMT_FLAG_ELAPSED only
+    	// read all 3 of the settings; default is LAP_FMT_FLAG_ELAPSED only
     	final boolean lapFmtElapsed = settings.getBoolean("lap_format_elapsed", true),
     	              lapFmtDelta   = settings.getBoolean("lap_format_delta", false),
     	              lapFmtSystime = settings.getBoolean("lap_format_systime", false);
