@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2009 by mj   										   *
+ *   Copyright (C) 2009-2011 by mj										   *
  *   fakeacc.mj@gmail.com  												   *
  *   Portions of this file Copyright (C) 2010-2012 Jeremy Monin            *
  *    jeremy@nand.net                                                      *
@@ -120,13 +120,13 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
 	/**
 	 * If true, we already wrote the start date/time into {@link #lapView}
-	 * or {@link #startTimeView}, by calling {@link #updateStartTimeCommentLapsView()}.
+	 * or {@link #startTimeView}, by calling {@link #updateStartTimeCommentLapsView(boolean)}.
 	 */
 	boolean wroteStartTime;
 
 	/**
 	 * Date formatter for day of week + user's medium date format + hh:mm:ss;
-	 * used in {@link #updateStartTimeCommentLapsView()} for "started at:".
+	 * used in {@link #updateStartTimeCommentLapsView(boolean)} for "started at:".
 	 */
 	private StringBuffer fmt_dow_meddate_time;
 
@@ -137,7 +137,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * Optional comment, or null.
 	 * In the layout, Start time, <tt>comment</tt>, and {@link #laps}
 	 * are all shown in startTimeView or LapView.
-	 * @see #updateStartTimeCommentLapsView()
+	 * @see #updateStartTimeCommentLapsView(boolean)
 	 */
 	String comment;
 	/** start/stop (resume/pause) */
@@ -203,6 +203,10 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        // Set the default shared pref values, especially for checkboxes.
+        // See android bug http://code.google.com/p/android/issues/detail?id=6641
+    	PreferenceManager.setDefaultValues(this, R.xml.settings, true);
+
         //set the clock object
         final boolean isInitialStartup = (clock == null);
         if (isInitialStartup)
@@ -264,6 +268,31 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	vib = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         else
         	vib = null;
+
+        // Lap Display Format setting
+        try
+        {
+        	// read the new settings; default is LAP_FMT_FLAG_ELAPSED only
+        	final boolean lapFmtElapsed = settings.getBoolean("lap_format_elapsed", true),
+        	              lapFmtDelta   = settings.getBoolean("lap_format_delta", false),
+        	              lapFmtSystime = settings.getBoolean("lap_format_systime", false);
+        	int settingLap = 0;
+        	if (lapFmtElapsed) settingLap += Clock.LAP_FMT_FLAG_ELAPSED;
+        	if (lapFmtDelta)   settingLap += Clock.LAP_FMT_FLAG_DELTA;
+        	if (lapFmtSystime) settingLap += Clock.LAP_FMT_FLAG_SYSTIME;
+        	if (settingLap == 0)
+        	{
+        		// Should not happen, but if it does, correct it to default
+        		settings.edit().putBoolean("lap_format_elapsed", true).commit();
+        		settingLap = Clock.LAP_FMT_FLAG_ELAPSED;
+        	}
+        	if (settingLap != clock.lapFormatFlags)
+        	{
+        		clock.setLapFormat
+        			(settingLap, DateFormat.getTimeFormat(getApplicationContext()));
+        		updateStartTimeCommentLapsView(true);
+        	}
+        } catch (Throwable e) {}
 
         if(!isStartup) return; // app was started before, user changed settings
         
@@ -621,6 +650,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         case SETTINGS_ITEM:
         	i.setClass(this, SettingsActivity.class);
         	startActivityForResult(i, SETTINGS_ACTIVITY);
+        	  // on result, will call readSettings(false).
         	return true;
 
         case MODE_STOP:
@@ -739,7 +769,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	    				comment = inputComm.getText().toString().trim();
 	    				if (comment.length() == 0)
 	    					comment = null;
-	    				updateStartTimeCommentLapsView();
+	    				updateStartTimeCommentLapsView(false);
         			}
         		});
 
@@ -981,8 +1011,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * Format and write the start time, {@link #comment},
 	 * and {@link #laps} (if applicable) displayed
 	 * in {@link #startTimeView} or {@link #lapView}.
+	 * @param lapFormatChanged  True if the lap format flags have changed
 	 */
-	void updateStartTimeCommentLapsView() {
+	void updateStartTimeCommentLapsView(final boolean lapFormatChanged) {
 		if (fmt_dow_meddate_time == null)
 			fmt_dow_meddate_time = buildDateFormatDOWmedium(Anstop.this);
 
@@ -1004,6 +1035,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
 		if (lapView != null)
 		{
+			if (lapFormatChanged)
+			{
+				laps.delete(0, laps.length());  // clear previous contents
+				clock.formatTimeAllLaps(laps);
+			}
 			if (sb.length() > 0)
 				sb.append("\n\n");
 			sb.append(laps);
@@ -1056,7 +1092,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     		
     		if (clock.isStarted && ! wroteStartTime)
     		{
-    			updateStartTimeCommentLapsView();
+    			updateStartTimeCommentLapsView(false);
     			wroteStartTime = true;
     		}
         	
@@ -1125,11 +1161,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     private class lapButtonListener implements OnClickListener {
 
     	/** lap time for {@link #onClick()}; is empty between uses */
-    	private StringBuffer sb = new StringBuffer();
+    	private StringBuilder sb = new StringBuilder();
 
     	/**
     	 * Lap button clicked; get clock time from
-    	 * {@link Clock#getCurrentValueMillis(StringBuffer, boolean)},
+    	 * {@link Clock#lap(StringBuffer)},
     	 * append it to {@link #laps} and {@link #lapView}.
     	 */
     	public void onClick(View v) {
