@@ -1,7 +1,8 @@
 /***************************************************************************
- *   Copyright (C) 2009 by mj   										   *
+ *   Copyright (C) 2009-2010 by mj                                         *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010 Jeremy Monin jeremy@nand.net *
+ *   Portions of this file Copyright (C) 2010,2012 Jeremy Monin            *
+ *     jeremy@nand.net                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -74,7 +75,18 @@ public class ShowTimesActivity extends Activity {
 		startManagingCursor(time);
 		
 		titleView.setText(time.getString(time.getColumnIndexOrThrow(AnstopDbAdapter.KEY_TITLE)));
-		bodyView.setText(time.getString(time.getColumnIndexOrThrow(AnstopDbAdapter.KEY_BODY)));
+		final int col_body = time.getColumnIndexOrThrow(AnstopDbAdapter.KEY_BODY),
+		          col_mode = time.getColumnIndex(AnstopDbAdapter.FIELD_TIMES_MODE);
+		if (time.isNull(col_mode))
+		{
+			// Simple: no mode
+			bodyView.setText(time.getString(col_body));
+		} else {
+			// Mode, laps, start time are separate fields. Col_body contains the comment only.
+			ExportHelper fmtBody = new ExportHelper(this);
+			final String[] formatted = fmtBody.getRow(mRowId);
+			bodyView.setText(formatted[1]);
+		}
 		
 		
 		dbHelper.close();

@@ -65,6 +65,9 @@ import android.os.Message;
  * at Activity.onStop must be done in {@link Anstop}, not here.
  * {@link #fillSaveState(Bundle)} stores the lap data arrays, but there's no corresponding
  * method to save long arrays to {@link SharedPreferences}.
+ *<P>
+ * Lap display formatting is done through flags such as {@link #LAP_FMT_FLAG_DELTA}
+ * and the nested class {@link Clock.LapFormatter}.
  */
 public class Clock {
 
@@ -94,26 +97,13 @@ public class Clock {
 	private int v;
 
 	/**
-	 * Any lap format flags, such as {@link #LAP_FMT_FLAG_SYSTIME}, currently
-	 * active; the default is {@link #LAP_FMT_FLAG_ELAPSED} only.
+	 * Lap formatting flags and fields.
 	 * Read-only from {@link Anstop} class.
+	 * The active format flags are {@link Clock.LapFormatter#lapFormatFlags lapf.lapFormatFlags};
+	 * the default is {@link #LAP_FMT_FLAG_ELAPSED} only.
 	 * To change, call {@link #setLapFormat(int, DateFormat)}.
-	 *<P>
-	 * <b>Note:</b> Currently, code and settings.xml both assume that
-	 * the default format has LAP_FMT_FLAG_ELAPSED and no others,
-	 * unless the user changes that preference.
 	 */
-	public int lapFormatFlags = LAP_FMT_FLAG_ELAPSED;
-
-	/**
-	 * Time-of-day format used in {@link #getCurrentValueMillis(StringBuffer, boolean)}
-	 * for lap format, when {@link #LAP_FMT_FLAG_SYSTIME} is used.
-	 *<P>
-	 * This is null initially; {@link #LAP_FMT_FLAG_ELAPSED} doesn't need it.
-	 * If {@link #setLapFormat(int, DateFormat)} changes {@link #lapFormatFlags} to
-	 * anything else, it's a required parameter, so it would be non-null when needed.
-	 */
-	private java.text.DateFormat lapFormatTimeOfDay;
+	public LapFormatter lapf;
 
 	/** is the clock currently running? */
 	public boolean isStarted = false;
@@ -147,6 +137,7 @@ public class Clock {
 
 	/**
 	 * Elapsed time (milliseconds) of each lap, if lap mode.
+	 * Read-only outside this class, please.
 	 * The highest occupied index is ({@link #laps} - 2).
 	 * If this array is about to be filled, {@link #lap(StringBuffer)} will extend it.
 	 *<P>
@@ -154,11 +145,12 @@ public class Clock {
 	 * Instead, current laps must be stored in the database.
 	 * @see #lap_systime
 	 */
-	private long[] lap_elapsed = new long[64];
+	long[] lap_elapsed = new long[64];
 
 	/**
 	 * System time (milliseconds) of each lap, if lap mode,
 	 * from {@link System#currentTimeMillis()}.
+	 * Read-only outside this class, please.
 	 * The highest occupied index is ({@link #laps} - 2).
 	 * If this array is about to be filled, {@link #lap(StringBuffer)} will extend it.
 	 *<P>
@@ -166,7 +158,7 @@ public class Clock {
 	 * Instead, current laps must be stored in the database.
 	 * @see #lap_elapsed
 	 */
-	private long[] lap_systime = new long[64];
+	long[] lap_systime = new long[64];
 	
 	/**
 	 * For countdown mode, the initial seconds, minutes, hours,
@@ -209,16 +201,10 @@ public class Clock {
 	 */
 	private long appStateRestoreTime;
 	
-	public NumberFormat nf;
-	
 	
 	public Clock(Anstop parent) {
 		this.parent = parent;
-		nf = NumberFormat.getInstance();
-		
-		nf.setMinimumIntegerDigits(2);  // The minimum Digits required is 2
-		nf.setMaximumIntegerDigits(2); // The maximum Digits required is 2
-
+		lapf = new LapFormatter();
 
 		dsech = new dsechandler();
 		sech = new sechandler();
@@ -543,6 +529,11 @@ public class Clock {
 	 * Will call count() if <tt>anstop_state_clockStarted</tt> == 1 in the preferences,
 	 * unless we've counted down to 0:0:0.
 	 * For the preference contents, see {@link #fillSaveState(SharedPreferences)}.
+	 *<P>
+	 * <b>Reminder:</b> {@link #lap_elapsed} and {@link #lap_systime} aren't restored here,
+	 * unlike {@link #restoreFromSaveState(Bundle)}, although the {@link #laps} counter is
+	 * restored.  Please restore the lap data from the database after calling this method.
+	 *
 	 * @param inState  preferences containing our state
 	 * @return true if clock was running when saved, false otherwise
 	 * @see #restoreFromSaveState(Bundle)
@@ -676,9 +667,9 @@ public class Clock {
 		if (parent.dsecondsView != null)
 			parent.dsecondsView.setText(Integer.toString(dsec));
 		if (parent.secondsView != null)
-			parent.secondsView.setText(nf.format(sec));
+			parent.secondsView.setText(lapf.nf.format(sec));
 		if (parent.minView != null)
-			parent.minView.setText(nf.format(min));
+			parent.minView.setText(lapf.nf.format(min));
 		if (parent.hourView != null)
 			parent.hourView.setText(Integer.toString(hour));
 	}
@@ -694,9 +685,9 @@ public class Clock {
 		StringBuffer sb = new StringBuffer();
 		sb.append(hour);
 		sb.append("h ");
-		sb.append(nf.format(min));
+		sb.append(lapf.nf.format(min));
 		sb.append(':');
-		sb.append(nf.format(sec));
+		sb.append(lapf.nf.format(sec));
 		sb.append(':');
 		sb.append(dsec);
 		return sb;
@@ -725,9 +716,10 @@ public class Clock {
 			(((h * 60 + m) * 60 + s)
 			 * 10 + ds) * 100L;
 
-		formatTimeLap
+		lapf.formatTimeLap
 			(sb, withLap, h, m, s, ds,
-			 laps, elapsedMillis, System.currentTimeMillis());
+			 laps, elapsedMillis, System.currentTimeMillis(),
+			 lap_elapsed);
 		return elapsedMillis;
 	}
 
@@ -739,100 +731,7 @@ public class Clock {
 	public void formatTimeAllLaps(StringBuilder sb)
 		throws IllegalArgumentException
 	{
-		if (sb == null)
-			throw new IllegalArgumentException();
-
-		for (int i = 1; i < laps; ++i)
-		{
-			if (i > 1)
-				sb.append('\n');
-			formatTimeLap(sb, true, -1, 0, 0, 0, i, lap_elapsed[i-1], lap_systime[i-1]);
-		}
-	}
-
-	/**
-	 * Format one lap's time, appending it to a buffer.
-	 * @param sb   Buffer to append to
-	 * @param withLap  If true, append <tt>lapNum</tt>
-	 * @param h        Elapsed hours if known, or -1 to calculate from <tt>elapsedMillis</tt>;
-	 *                 used with flag {@link #LAP_FMT_FLAG_ELAPSED}
-	 * @param m   Elapsed minutes if known; if <tt>h</tt> is -1, will calculate from <tt>elapsedMillis</tt>
-	 * @param s   Elapsed seconds if known; if <tt>h</tt> is -1, will calculate from <tt>elapsedMillis</tt>
-	 * @param ds  Elapsed deciseconds if known; if <tt>h</tt> is -1, will calculate from <tt>elapsedMillis</tt>
-	 * @param lapNum   Lap number
-	 * @param elapsedMillis  Milliseconds representing h, m, s, ds
-	 * @param systimeMillis
-	 */
-	private void formatTimeLap(StringBuilder sb, final boolean withLap,
-		int h, int m, int s, int ds,
-		final int lapNum, final long elapsedMillis, final long systimeMillis)
-	{
-		if (sb == null)
-			return;
-
-		boolean sbNeedsSpace = false;  // true if appended anything that needs a space afterwards
-
-		if (withLap)
-		{
-			sb.append(lapNum);
-			sb.append(". ");
-		}
-		if (0 != (lapFormatFlags & LAP_FMT_FLAG_ELAPSED))
-		{
-			if (h == -1)
-			{
-				long elapsed = elapsedMillis / 100L;
-				ds = (int) (elapsed % 10);
-				elapsed /= 10L;
-				s = (int) (elapsed % 60);
-				elapsed /= 60L;
-				m = (int) (elapsed % 60);
-				elapsed /= 60L;
-				h = (int) elapsed;
-			}
-			sb.append(h);
-			sb.append("h ");
-			sb.append(nf.format(m));
-			sb.append(':');
-			sb.append(nf.format(s));
-			sb.append(':');
-			sb.append(ds);
-			sbNeedsSpace = true;
-		}
-
-		if (0 != (lapFormatFlags & LAP_FMT_FLAG_DELTA))
-		{
-			final long prevLap = (lapNum > 1) ? lap_elapsed[lapNum - 2] : 0;
-			long lapDelta = (elapsedMillis - prevLap) / 100;  // dsec, not msec
-			final int dds = (int) (lapDelta % 10);
-			lapDelta /= 10;
-			final int dsec = (int) (lapDelta % 60);
-			lapDelta /= 60;
-			final int dm = (int) (lapDelta % 60);
-			lapDelta /= 60;
-
-			if (sbNeedsSpace)
-				sb.append(' ');
-			sb.append("(+");
-			sb.append(lapDelta);
-			sb.append("h ");
-			sb.append(nf.format(dm));
-			sb.append(':');
-			sb.append(nf.format(dsec));
-			sb.append(':');
-			sb.append(dds);
-			sb.append(')');
-			sbNeedsSpace = true;
-		}
-
-		if ((0 != (lapFormatFlags & LAP_FMT_FLAG_SYSTIME))
-			&& (lapFormatTimeOfDay != null))
-		{
-			if (sbNeedsSpace)
-				sb.append(' ');
-			sb.append('@');
-			sb.append(lapFormatTimeOfDay.format(systimeMillis));
-		}
+		lapf.formatTimeAllLaps(sb, laps, lap_elapsed, lap_systime);
 	}
 
 	/**
@@ -841,6 +740,15 @@ public class Clock {
 	 *   or -1L if never started.
 	 */
 	public long getStartTimeActual() { return startTimeActual; }
+
+	/**
+	 * Get the actual stop time, if any.
+	 * @return  If {@link #wasStarted}, and ! {@link #isStarted}, the
+	 * current time when the clock was paused by calling {@link #count()}
+	 * (taken from {@link System#currentTimeMillis()}).
+	 * Otherwise -1.
+	 */
+	public long getStopTime() { return stopTime; }
 
 	/**
 	 * Is the clock active or in use?
@@ -860,7 +768,7 @@ public class Clock {
 	 * Set the lap format flags.
 	 * @param newFormatFlags  Collection of flags, such as {@link #LAP_FMT_FLAG_DELTA}; not 0
 	 * @param formatForSysTime Short time format in case {@link #LAP_FMT_FLAG_SYSTIME} is used; not null.
-	 *    Value should be <tt>android.text.DateFormat.getTimeFormat(getApplicationContext())</tt>.
+	 *    Value should be <tt>android.text.format.DateFormat.getTimeFormat(getApplicationContext())</tt>.
 	 *    Note that <tt>getTimeFormat</tt> gives hours and minutes, it has no standard way to include the seconds;
 	 *    if more precision is needed, the user can get it from elapsed or delta seconds.
 	 * @throws IllegalArgumentException if flags &lt;= 0, or <tt>formatForSysTime == null</tt> 
@@ -868,10 +776,7 @@ public class Clock {
 	public void setLapFormat(final int newFormatFlags, final DateFormat formatForSysTime)
 		throws IllegalArgumentException
 	{
-		if ((newFormatFlags <= 0) || (formatForSysTime == null))
-			throw new IllegalArgumentException();
-		lapFormatFlags = newFormatFlags;
-		lapFormatTimeOfDay = formatForSysTime;
+		lapf.setLapFormat(newFormatFlags, formatForSysTime);
 	}
 
 	/**
@@ -1179,14 +1084,14 @@ public class Clock {
 	private class sechandler extends Handler {
 		@Override
 		public void handleMessage (Message msg) {
-			parent.secondsView.setText("" + nf.format(sec));
+			parent.secondsView.setText("" + lapf.nf.format(sec));
 		}
 	}
 	
 	private class minhandler extends Handler {
 		@Override
 		public void handleMessage (Message msg) {
-			parent.minView.setText("" + nf.format(min));
+			parent.minView.setText("" + lapf.nf.format(min));
 		}
 	}
 	
@@ -1197,6 +1102,180 @@ public class Clock {
 		}
 	}
 	
-		
+	/**
+	 * Flags, settings, and methods to format laps.
+	 * Each {@link Clock} has one <tt>LapFormatter</tt>.
+	 * Used by {@link Clock#lap(StringBuilder)}
+	 * and by {@link ExportHelper}.
+	 * The currently active flags are {@link #lapFormatFlags}.
+	 */
+	public static class LapFormatter {
+
+		/**
+		 * Any lap format flags, such as {@link Clock#LAP_FMT_FLAG_SYSTIME}, currently
+		 * active; the default is {@link Clock#LAP_FMT_FLAG_ELAPSED} only.
+		 * Read-only from {@link Anstop} class.
+		 * To change, call {@link #setLapFormat(int, DateFormat)}.
+		 *<P>
+		 * <b>Note:</b> Currently, code and settings.xml both assume that
+		 * the default format has LAP_FMT_FLAG_ELAPSED and no others,
+		 * unless the user changes that preference.
+		 */
+		public int lapFormatFlags = LAP_FMT_FLAG_ELAPSED;
+
+		/**
+		 * Time-of-day format used in {@link Clock#getCurrentValueMillis(StringBuffer, boolean)}
+		 * for lap format, when {@link Clock#LAP_FMT_FLAG_SYSTIME} is used.
+		 *<P>
+		 * This is null initially; {@link Clock#LAP_FMT_FLAG_ELAPSED} doesn't need it.
+		 * If {@link #setLapFormat(int, DateFormat)} changes {@link #lapFormatFlags} to
+		 * anything else, it's a required parameter, so it would be non-null when needed.
+		 */
+		private java.text.DateFormat lapFormatTimeOfDay;
+
+		/**
+		 * 2-digit number format for minutes and seconds;
+		 * <tt>nf.{@link NumberFormat#format(long) format}(3)</tt> gives "03".
+		 */
+		public NumberFormat nf;
+
+		public LapFormatter() {
+			nf = NumberFormat.getInstance();
+			nf.setMinimumIntegerDigits(2);  // The minimum Digits required is 2
+			nf.setMaximumIntegerDigits(2); // The maximum Digits required is 2			
+		}
+
+		/**
+		 * Set the lap format flags.
+		 * @param newFormatFlags  Collection of flags, such as {@link Clock#LAP_FMT_FLAG_DELTA}; not 0
+		 * @param formatForSysTime Short time format in case {@link Clock#LAP_FMT_FLAG_SYSTIME} is used; not null.
+		 *    Value should be <tt>android.text.format.DateFormat.getTimeFormat(getApplicationContext())</tt>.
+		 *    Note that <tt>getTimeFormat</tt> gives hours and minutes, it has no standard way to include the seconds;
+		 *    if more precision is needed, the user can get it from elapsed or delta seconds.
+		 * @throws IllegalArgumentException if flags &lt;= 0, or <tt>formatForSysTime == null</tt> 
+		 */
+		public void setLapFormat(final int newFormatFlags, final DateFormat formatForSysTime)
+			throws IllegalArgumentException
+		{
+			if ((newFormatFlags <= 0) || (formatForSysTime == null))
+				throw new IllegalArgumentException();
+			lapFormatFlags = newFormatFlags;
+			lapFormatTimeOfDay = formatForSysTime;
+		}
+
+		/**
+		 * Format one lap's time, appending it to a buffer.
+		 * @param sb   Buffer to append to; if null, do nothing
+		 * @param withLap  If true, append <tt>lapNum</tt>
+		 * @param h        Elapsed hours if known, or -1 to calculate from <tt>elapsedMillis</tt>;
+		 *                 used with flag {@link Clock#LAP_FMT_FLAG_ELAPSED}
+		 * @param m   Elapsed minutes if known; if <tt>h</tt> is -1, will calculate from <tt>elapsedMillis</tt>
+		 * @param s   Elapsed seconds if known; if <tt>h</tt> is -1, will calculate from <tt>elapsedMillis</tt>
+		 * @param ds  Elapsed deciseconds if known; if <tt>h</tt> is -1, will calculate from <tt>elapsedMillis</tt>
+		 * @param lapNum   Lap number
+		 * @param elapsedMillis  This lap's milliseconds representing h, m, s, ds
+		 * @param systimeMillis  This lap's system time; {@link System#currentTimeMillis()}
+		 * @param lap_elapsed  Array of previous laps' elapsed times;
+		 *    used with flag {@link Clock#LAP_FMT_FLAG_DELTA}
+		 */
+		public void formatTimeLap(StringBuilder sb, final boolean withLap,
+			int h, int m, int s, int ds,
+			final int lapNum, final long elapsedMillis, final long systimeMillis,
+			final long[] lap_elapsed)
+		{
+			if (sb == null)
+				return;
+
+			boolean sbNeedsSpace = false;  // true if appended anything that needs a space afterwards
+
+			if (withLap)
+			{
+				sb.append(lapNum);
+				sb.append(". ");
+			}
+			if (0 != (lapFormatFlags & LAP_FMT_FLAG_ELAPSED))
+			{
+				if (h == -1)
+				{
+					long elapsed = elapsedMillis / 100L;
+					ds = (int) (elapsed % 10);
+					elapsed /= 10L;
+					s = (int) (elapsed % 60);
+					elapsed /= 60L;
+					m = (int) (elapsed % 60);
+					elapsed /= 60L;
+					h = (int) elapsed;
+				}
+				sb.append(h);
+				sb.append("h ");
+				sb.append(nf.format(m));
+				sb.append(':');
+				sb.append(nf.format(s));
+				sb.append(':');
+				sb.append(ds);
+				sbNeedsSpace = true;
+			}
+
+			if (0 != (lapFormatFlags & LAP_FMT_FLAG_DELTA))
+			{
+				final long prevLap = (lapNum > 1) ? lap_elapsed[lapNum - 2] : 0;
+				long lapDelta = (elapsedMillis - prevLap) / 100;  // dsec, not msec
+				final int dds = (int) (lapDelta % 10);
+				lapDelta /= 10;
+				final int dsec = (int) (lapDelta % 60);
+				lapDelta /= 60;
+				final int dm = (int) (lapDelta % 60);
+				lapDelta /= 60;
+
+				if (sbNeedsSpace)
+					sb.append(' ');
+				sb.append("(+");
+				sb.append(lapDelta);
+				sb.append("h ");
+				sb.append(nf.format(dm));
+				sb.append(':');
+				sb.append(nf.format(dsec));
+				sb.append(':');
+				sb.append(dds);
+				sb.append(')');
+				sbNeedsSpace = true;
+			}
+
+			if ((0 != (lapFormatFlags & LAP_FMT_FLAG_SYSTIME))
+				&& (lapFormatTimeOfDay != null))
+			{
+				if (sbNeedsSpace)
+					sb.append(' ');
+				sb.append('@');
+				sb.append(lapFormatTimeOfDay.format(systimeMillis));
+			}
+		}
+
+		/**
+		 * Write all laps into <tt>sb</tt> using the current format flags.
+		 * If <tt>laps</tt> is 1, do nothing.
+		 * @param sb  StringBuffer to write into; not null
+		 * @param laps  Lap count + 1, same as {@link Clock#laps} field
+		 * @param lap_elapsed  Elapsed times, same format as {@link Clock#lap_elapsed}
+		 * @param lap_systime  System times, same format as {@link Clock#lap_systime}
+		 * @throws IllegalArgumentException if <tt>sb</tt> null
+		 */
+		public void formatTimeAllLaps
+			(StringBuilder sb, final int laps, final long[] lap_elapsed, final long[] lap_systime)
+			throws IllegalArgumentException
+		{
+			if (sb == null)
+				throw new IllegalArgumentException();
+
+			for (int i = 1; i < laps; ++i)
+			{
+				if (i > 1)
+					sb.append('\n');
+				formatTimeLap(sb, true, -1, 0, 0, 0, i,
+					lap_elapsed[i-1], lap_systime[i-1], lap_elapsed);
+			}
+		}
+
+	}
 	
 }

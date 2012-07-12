@@ -273,20 +273,14 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         try
         {
         	// read the flags, possibly just changed by user; default is LAP_FMT_FLAG_ELAPSED only
-        	final boolean lapFmtElapsed = settings.getBoolean("lap_format_elapsed", true),
-        	              lapFmtDelta   = settings.getBoolean("lap_format_delta", false),
-        	              lapFmtSystime = settings.getBoolean("lap_format_systime", false);
-        	int settingLap = 0;
-        	if (lapFmtElapsed) settingLap += Clock.LAP_FMT_FLAG_ELAPSED;
-        	if (lapFmtDelta)   settingLap += Clock.LAP_FMT_FLAG_DELTA;
-        	if (lapFmtSystime) settingLap += Clock.LAP_FMT_FLAG_SYSTIME;
+        	int settingLap = readLapFormatPrefFlags(settings);
         	if (settingLap == 0)
         	{
         		// Should not happen, but if it does, correct it to default
         		settings.edit().putBoolean("lap_format_elapsed", true).commit();
         		settingLap = Clock.LAP_FMT_FLAG_ELAPSED;
         	}
-        	if (settingLap != clock.lapFormatFlags)
+        	if (settingLap != clock.lapf.lapFormatFlags)
         	{
         		clock.setLapFormat
         			(settingLap, DateFormat.getTimeFormat(getApplicationContext()));
@@ -318,6 +312,32 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	outPref.commit();
         }
     }
+
+    /**
+     * Read the boolean lap format flags from shared preferences,
+     * and add them together in the format used by
+     * {@link Clock#setLapFormat(int, java.text.DateFormat)}.
+     *<UL>
+     *<LI> <tt>lap_format_elapsed</tt> -&gt; {@link Clock#LAP_FMT_FLAG_ELAPSED}
+     *<LI> <tT>lap_format_delta</tt> -&gt; {@link Clock#LAP_FMT_FLAG_DELTA}
+     *<LI> <tt>lap_format_systime</tt> -&gt; {@link Clock#LAP_FMT_FLAG_SYSTIME}
+     *</UL>
+     * @param settings  Shared preferences, from
+     *    {@link PreferenceManager#getDefaultSharedPreferences(Context)}
+     * @return Lap format flags, or 0 if none are set in <tt>settings</tt>.
+     *    If this method returns 0, assume the default of
+     *    {@link Clock#LAP_FMT_FLAG_ELAPSED}.
+     */
+	public static int readLapFormatPrefFlags(SharedPreferences settings) {
+		final boolean lapFmtElapsed = settings.getBoolean("lap_format_elapsed", true),
+		              lapFmtDelta   = settings.getBoolean("lap_format_delta", false),
+		              lapFmtSystime = settings.getBoolean("lap_format_systime", false);
+		int settingLap = 0;
+		if (lapFmtElapsed) settingLap += Clock.LAP_FMT_FLAG_ELAPSED;
+		if (lapFmtDelta)   settingLap += Clock.LAP_FMT_FLAG_DELTA;
+		if (lapFmtSystime) settingLap += Clock.LAP_FMT_FLAG_SYSTIME;
+		return settingLap;
+	}
 
     /**
      * Set the current mode, if the clock isn't currently started,
@@ -558,6 +578,20 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			newCurrent = STOP_LAP;
 		setCurrentMode(newCurrent);
 		clock.restoreFromSaveState(settings);
+		if (clock.laps > 1)
+		{
+			if (clock.lap_elapsed.length <= clock.laps)
+			{
+				clock.lap_elapsed = new long[clock.laps + 32];
+				clock.lap_systime = new long[clock.laps + 32];
+			}
+			if (dbHelper == null)
+			{
+				dbHelper = new AnstopDbAdapter(Anstop.this);
+				dbHelper.open();
+			}
+			dbHelper.fetchAllLaps(0, clock.lap_elapsed, clock.lap_systime);
+		}
 	}
 
 	/**
@@ -733,13 +767,17 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	saveBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
         		public void onClick(DialogInterface dialog, int whichButton) {
 		    			
-        				String body = createBodyFromCurrent();
         				if (dbHelper == null)
         				{
         					dbHelper = new AnstopDbAdapter(Anstop.this);
         					dbHelper.open();
-        				}        		        
-		    			dbHelper.createNew(input.getText().toString(), body);
+        				}
+        				final long id = dbHelper.createNew
+        					(input.getText().toString(), comment,
+        					 clock.getMode(), clock.getStartTimeActual(), clock.getStopTime());
+		    			if (clock.laps > 1)
+		    				dbHelper.createNewLaps(id, clock.laps - 1, clock.lap_elapsed, clock.lap_systime);
+
 		    			Toast toast = Toast.makeText(getApplicationContext(), R.string.saved_succes, Toast.LENGTH_SHORT);
 		    			toast.show();
         			}
@@ -832,6 +870,10 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	private String createBodyFromCurrent() {
 		// Start time, comment, and laps are all
 		// within startTimeView's or LapView's text.
+		// The same formatting is used in updateStartTimeCommentLapsView
+		// and ExportHelper.getRow. If you change this, change those to match.
+		// Code is not shared because this method doesn't need to re-read
+		// the laps or reformat them.
 
 		String body;
 		switch(clock.getMode()) {
@@ -843,8 +885,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 				+ ":" + dsecondsView.getText().toString() + "\n" + mContext.getResources().getString(R.string.start_time)
 				+ "\n" + hourSpinner.getSelectedItemPosition() + " "
 				+ mContext.getResources().getString(R.string.hour) + "\n"
-				+ clock.nf.format(secSpinner.getSelectedItemPosition()) + ":" 
-				+ clock.nf.format(minSpinner.getSelectedItemPosition()) + ".0"
+				+ clock.lapf.nf.format(secSpinner.getSelectedItemPosition()) + ":" 
+				+ clock.lapf.nf.format(minSpinner.getSelectedItemPosition()) + ".0"
 				+ "\n" + startTimeView.getText().toString();
 			break;
 		case STOP_LAP:
@@ -867,7 +909,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * @param ctx calling context
 	 * @return a StringBuffer usable in {@link DateFormat#format(CharSequence, long)}
 	 */
-	private static StringBuffer buildDateFormatDOWmedium(Context ctx)
+	static StringBuffer buildDateFormatDOWmedium(Context ctx)
 	{
 		StringBuffer fmt_dow_meddate = new StringBuffer();
 		final char da = DateFormat.DAY;
@@ -943,8 +985,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			          m = minSpinner.getSelectedItemPosition(),
 			          h = hourSpinner.getSelectedItemPosition();
 			clock.reset(-1, h, m, s);
-			secondsView.setText(clock.nf.format(s));
-			minView.setText(clock.nf.format(m));
+			secondsView.setText(clock.lapf.nf.format(s));
+			minView.setText(clock.lapf.nf.format(m));
 			hourView.setText(Integer.toString(h));
 	
 			wroteStartTime = false;
@@ -975,6 +1017,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		if(clock.isStarted)
 			return;
 
+		final boolean anyLaps = (clock.laps > 1);
 		clock.reset(-1, 0, 0, 0);
 
 		//reset all Views to zero
@@ -994,8 +1037,17 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		}
 		if(startTimeView != null)
 			startTimeView.setText("");
-		wroteStartTime = false;		
+		wroteStartTime = false;
 		comment = null;
+		if (anyLaps)
+		{
+			if (dbHelper == null)
+			{
+				dbHelper = new AnstopDbAdapter(Anstop.this);
+				dbHelper.open();
+			}
+			dbHelper.deleteTemporaryLaps();
+		}
 
 		// Check for an old anstop_in_use flag from previous runs
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -1011,6 +1063,14 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * Format and write the start time, {@link #comment},
 	 * and {@link #laps} (if applicable) displayed
 	 * in {@link #startTimeView} or {@link #lapView}.
+	 *<P>
+	 * The same formatting is used in {@link ExportHelper#getRow(long)}.
+	 * If you change this method, change that one to match.
+	 *<P>
+	 * {@link #createBodyFromCurrent()} also uses the same format;
+	 * code is not shared because that method doesn't need to re-read
+	 * the laps or reformat them.
+	 *
 	 * @param lapFormatChanged  True if the lap format flags have changed
 	 */
 	void updateStartTimeCommentLapsView(final boolean lapFormatChanged) {
@@ -1018,6 +1078,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			fmt_dow_meddate_time = buildDateFormatDOWmedium(Anstop.this);
 
 		StringBuffer sb = new StringBuffer();
+
 		final long sttime = clock.getStartTimeActual();
 		if (sttime != -1L)
 		{
@@ -1186,6 +1247,15 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	    	lapScroll.fullScroll(ScrollView.FOCUS_DOWN);
         	    }
         	});
+
+        	// Record new lap in the db
+        	if (dbHelper == null)
+        	{
+        		dbHelper = new AnstopDbAdapter(Anstop.this);
+        		dbHelper.open();
+        	}
+        	dbHelper.createNewLap
+        		(0, clock.lap_elapsed[clock.laps - 2], clock.lap_systime[clock.laps - 2]);
     	}
     }
 

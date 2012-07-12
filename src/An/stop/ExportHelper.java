@@ -1,7 +1,8 @@
 /***************************************************************************
- *   Copyright (C) 2009 by mj   										   *
- *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010 Jeremy Monin jeremy@nand.net *
+ *   Copyright (C) 2009-2010 by mj                                         *
+ *   fakeacc.mj@gmail.com                                                  *
+ *   Portions of this file Copyright (C) 2010,2012 Jeremy Monin            *
+ *     jeremy@nand.net                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -30,12 +31,24 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.Environment;
+import android.preference.PreferenceManager;
+import android.text.format.DateFormat;
 
+/**
+ * Helper class to format and export time and lap data.
+ * Does not hold any open db handles or cursors, so there is no Close method.
+ */
 public class ExportHelper {
 	
 	private FileOutputStream out;
 	Context mContext;
-	
+
+	/**
+	 * Date formatter for day of week + user's medium date format + hh:mm:ss;
+	 * used in {@link #getRow(long)} for "started at:".
+	 */
+	private StringBuffer fmt_dow_meddate_time;
+
 	public ExportHelper(Context context) {
 		this.mContext = context;
 	}
@@ -88,7 +101,15 @@ public class ExportHelper {
 	}
 
 	/**
-	 * Get this rowId's title and body from the database. 
+	 * Get this rowId's title and body from the database.
+	 * If the record has a mode, start time, etc (v3 db schema or later),
+	 * this data is retrieved and rendered into the returned body text,
+	 * along with the comment field if any.
+	 * Older records (v1 or v2) have these as text within body.
+	 *<P>
+	 * The same formatting is used in {@link Anstop#updateStartTimeCommentLapsView(boolean)}.
+	 * If you change this method, change that one to match.
+	 *
 	 * @param rowId The _id of the record to retrieve
 	 * @return String[] with [0]=title, [1]=body, or null if not found.
 	 */
@@ -102,7 +123,68 @@ public class ExportHelper {
 			Cursor time = dbHelper.fetch(rowId);
 			columns = new String[2];
 			columns[0] = time.getString(time.getColumnIndexOrThrow(AnstopDbAdapter.KEY_TITLE));
-			columns[1] = time.getString(time.getColumnIndexOrThrow(AnstopDbAdapter.KEY_BODY));
+
+			final int col_body = time.getColumnIndexOrThrow(AnstopDbAdapter.KEY_BODY),
+			          col_mode = time.getColumnIndex(AnstopDbAdapter.FIELD_TIMES_MODE),
+			          col_starttime = time.getColumnIndex(AnstopDbAdapter.FIELD_TIMES_START_SYSTIME);
+			// col_stoptime = time.getColumnIndex(AnstopDbAdapter.FIELD_TIMES_STOP_SYSTIME);
+			if (time.isNull(col_mode))
+			{
+				// Simple: no mode
+				columns[1] = time.getString(col_body);
+			} else {
+				// Mode, laps, start time are separate fields. Col_body contains the comment only.
+				// Mode was: ___
+				// duration
+				// Started at: ___
+				//\n
+				// comment
+				//\n
+				// Laps:
+				// lap info
+				if (fmt_dow_meddate_time == null)
+					fmt_dow_meddate_time = Anstop.buildDateFormatDOWmedium(mContext);
+				StringBuilder sb = new StringBuilder();
+
+				if (! time.isNull(col_starttime))
+				{
+					final long sttime = time.getLong(col_starttime);
+					if (sttime != -1L)
+					{
+						sb.append(mContext.getResources().getText(R.string.started_at));
+						sb.append(" ");
+						sb.append(DateFormat.format(fmt_dow_meddate_time, sttime));
+					}
+				}
+
+				final String comment = time.getString(col_body);
+				if ((comment != null) && (comment.length() > 0))
+				{
+					if (sb.length() > 0)
+						sb.append("\n\n");
+					sb.append(comment);
+				}
+
+				final int lapCount = dbHelper.countLaps(rowId);
+				if (lapCount > 0)
+				{
+					if (sb.length() > 0)
+						sb.append("\n\n");
+					long[] lap_elapsed = new long[lapCount],
+					       lap_systime = new long[lapCount];
+					dbHelper.fetchAllLaps(rowId, lap_elapsed, lap_systime);
+					Clock.LapFormatter lapf = new Clock.LapFormatter();
+					final int fmtFlags = Anstop.readLapFormatPrefFlags
+						(PreferenceManager.getDefaultSharedPreferences(mContext));
+					if ((fmtFlags != 0) && (fmtFlags != Clock.LAP_FMT_FLAG_ELAPSED))
+						lapf.setLapFormat
+							(fmtFlags, android.text.format.DateFormat.getTimeFormat(mContext));
+					lapf.formatTimeAllLaps(sb, lapCount, lap_elapsed, lap_systime);
+				}
+
+				// All done.
+				columns[1] = sb.toString();
+			}
 			
 			dbHelper.close();
 		} catch (SQLException e) {

@@ -1,6 +1,8 @@
 /***************************************************************************
- *   Copyright (C) 2009 by mj   										   *
+ *   Copyright (C) 2009-2010 by mj                                         *
  *   fakeacc.mj@gmail.com  												   *
+ *   Portions of this file Copyright (C) 2012 Jeremy Monin                 *
+ *     jeremy@nand.net                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -29,16 +31,63 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 
 public class AnstopDbAdapter {
-	
-    private static final int DATABASE_VERSION = 2;
-    
+
+	/**
+	 * Database schema version.
+	 * <UL>
+	 * <LI> 2 - Version for Anstop v1.4 and earlier
+	 * <LI> 3 - (2012-07-05) Add table {@link #TABLE_LAPS};
+	 *            Add fields to {@link #DATABASE_TABLE}:
+	 *            {@link #FIELD_TIMES_MODE}, {@link #FIELD_TIMES_START_SYSTIME},
+	 *            {@link #FIELD_TIMES_STOP_SYSTIME}.
+	 * </UL>
+	 */
+	private static final int DATABASE_VERSION = 3;
+
+    // Reminder: Keep table names and field names here synchronized with onCreate and onUpgrade.
+
     private static final String DATABASE_NAME = "Anstop_db";
+
+    /**
+     * Main times table, one row per saved stopwatch time.
+     * If the saved time has laps, they will be rows in {@link #TABLE_LAPS}
+     * associated with one row in this table.
+     */
     private static final String DATABASE_TABLE = "times";
+
+    /**
+     * Laps table, for lap information for one {@link #DATABASE_TABLE} row.
+     * @since v3
+     */
+    private static final String TABLE_LAPS = "laps";
     
     public static final String KEY_TITLE = "title";
     public static final String KEY_BODY = "body";
     public static final String KEY_ROWID = "_id";
 
+    /**
+     * Mode field, same values as {@link Clock#getMode()}
+     * @since v3
+     */
+    public static final String FIELD_TIMES_MODE = "mode";
+
+    /**
+     * Timer's starting system time (wall clock time), in milliseconds;
+     * same as {@link Clock#getStartTimeActual()}
+     * @since v3
+     */
+    public static final String FIELD_TIMES_START_SYSTIME = "start_systime";
+
+    /**
+     * System time when timing was stopped, in milliseconds.
+     * @since v3
+     */
+    public static final String FIELD_TIMES_STOP_SYSTIME = "stop_systime";
+
+    private static final String FIELD_LAPS_TIMES_ROWID = "times_id";
+    private static final String FIELD_LAPS_ELAPSED = "lap_elapsed";
+    private static final String FIELD_LAPS_SYSTIME = "lap_systime";
+    private static final String FIELD_LAPS_COMMENT = "lap_comment";
 
     private SQLiteDatabase mDb;
     private DataBaseHelper dbHelper;
@@ -54,13 +103,34 @@ public class AnstopDbAdapter {
         public void onCreate(SQLiteDatabase db) {
 
             db.execSQL("create table times (_id integer primary key autoincrement, "
-                    + "title text not null, body text not null);");
+                    + "title text not null, body text not null, "
+                    + "mode int not null, start_systime int null, stop_systime int null);" );
+
+            db.execSQL("create table laps (_id integer primary key autoincrement, "
+            		+ "times_id int not null, lap_elapsed int not null, "
+            		+ "lap_systime int not null, lap_comment text null);" );
+            db.execSQL("create index \"laps~t\" ON laps(times_id);" );
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            db.execSQL("DROP TABLE IF EXISTS times");
-            onCreate(db);
+        	switch (oldVersion)
+        	{
+        	case 0:
+        	case 1:
+	            db.execSQL("DROP TABLE IF EXISTS times");
+	            onCreate(db);
+	            break;  // onCreate takes the db up to schema version 3
+
+        	case 2:  // 2 -> 3
+                db.execSQL("create table laps (_id integer primary key autoincrement, "
+                		+ "times_id int not null, lap_elapsed int not null, "
+                		+ "lap_systime int not null, lap_comment text null);");
+                db.execSQL("create index \"laps~t\" ON laps(times_id);");
+                db.execSQL("alter table times add column mode int;");
+                db.execSQL("alter table times add column start_systime int;");
+                db.execSQL("alter table times add column stop_systime int;");
+        	}
         }
     }
     
@@ -78,34 +148,74 @@ public class AnstopDbAdapter {
     		dbHelper.close();
     	}
     
-    public long createNew(String title, String body) {
+    //
+    // Methods for #DATABASE_TABLE
+    //
+
+    /**
+     * Insert a new {@link #DATABASE_TABLE} record with the stopwatch current values.
+     * If there are laps, add them afterwards by calling {@link #createNewLaps(long, int, long[], long[])}.
+     * @param title  Title
+     * @param comment   Comment, or null. In v2 this body text also included the start time and laps.
+     * @param mode   Stopwatch mode used: {@link Anstop#STOP_LAP} or {@link Anstop#COUNTDOWN}
+     * @param startTime  Start time (milliseconds), or -1L if never started.
+     *    This same convention is returned by {@link Clock#getStartTimeActual()}.
+     * @param stopTime   Stop time (milliseconds), or -1L for none
+     * @return  the new rowID, from {@link SQLiteDatabase#insert(String, String, ContentValues)}.
+     */
+    public long createNew
+    	(final String title, final String comment,
+		 final int mode, final long startTime, final long stopTime)
+    {
     	ContentValues cl = new ContentValues();
     	cl.put(KEY_TITLE, title);
-    	cl.put(KEY_BODY, body);
-    	
-    	return mDb.insert(DATABASE_TABLE, null, cl);
-    	
-    	
-    }
-    
-    public boolean delete(long rowId) {
+    	if ((comment != null) && (comment.length() > 0))
+    		cl.put(KEY_BODY, comment);
+    	else
+    		cl.put(KEY_BODY, "");
+    	cl.put(FIELD_TIMES_MODE, mode);
+    	if (startTime != -1L)
+    		cl.put(FIELD_TIMES_START_SYSTIME, startTime);
+    	if (stopTime != -1L)
+    		cl.put(FIELD_TIMES_STOP_SYSTIME, stopTime);
 
-        return mDb.delete(DATABASE_TABLE, KEY_ROWID + "=" + rowId, null) > 0;
+    	return mDb.insert(DATABASE_TABLE, null, cl);
     }
     
+    /**
+     * Delete this entry from {@link #DATABASE_TABLE}, along with
+     * any corresponding {@link #TABLE_LAPS}.
+     * @param rowId  Row ID
+     * @return  True if deleted, false if not found in {@link #DATABASE_TABLE}
+     */
+    public boolean delete(long rowId) {
+    	final boolean didAny =
+            (mDb.delete(DATABASE_TABLE, KEY_ROWID + "=" + rowId, null) > 0);
+    	if (didAny)
+    	{
+    		mDb.delete(TABLE_LAPS, FIELD_LAPS_TIMES_ROWID + "=" + rowId, null);
+    	}
+    	return didAny;
+    }
+
     public Cursor fetchAll() {
     	
     	return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_TITLE,
                     KEY_BODY}, null, null, null, null, null);
     	
     }
-    
+
+    /**
+     * Fetch all fields of a {@link #DATABASE_TABLE} record.
+     * @param rowId  Record ID
+     * @return The cursor, or null
+     */
     public Cursor fetch(long rowId) throws SQLException {
 
         Cursor mCursor =
-
-                mDb.query(true, DATABASE_TABLE, new String[] {KEY_ROWID,
-                		KEY_TITLE, KEY_BODY}, KEY_ROWID + "=" + rowId, null,
+                mDb.query(true, DATABASE_TABLE,
+                		new String[] {KEY_ROWID, KEY_TITLE, KEY_BODY, FIELD_TIMES_MODE, FIELD_TIMES_START_SYSTIME, FIELD_TIMES_STOP_SYSTIME},
+                		KEY_ROWID + "=" + rowId, null,
                         null, null, null, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
@@ -113,5 +223,119 @@ public class AnstopDbAdapter {
         return mCursor;
 
     }
-    
+
+    //
+    // Methods for #TABLE_LAPS
+    //
+
+    /**
+     * Insert the {@link #TABLE_LAPS} entries for all the active laps.
+     * @param id  Row ID from {@link #createNew(String, String, int, long, long)}
+     * @param laps  Number of laps to use from the arrays; {@link Clock#laps} - 1
+     *     since that field is the <em>next</em> lap number
+     * @param elapsed  Per-lap elapsed-time array, like {@link Clock#lap_elapsed}
+     * @param systimes  Per-lap system-time (wall clock time) array, like {@link Clock#lap_systime}
+     * @throws IllegalArgumentException  if array length is &lt; <tt>laps</tt>
+     * @see #createNewLap(long, long, long)
+     */
+    public void createNewLaps
+    	(final long id, final int laps, final long[] elapsed, final long[] systimes)
+    	throws IllegalArgumentException
+    {
+    	if ((elapsed.length < laps) || (systimes.length < laps))
+    		throw new IllegalArgumentException();
+    	for (int i = 0; i < laps; ++i)
+    		createNewLap(id, elapsed[i], systimes[i]);
+    }
+
+    /**
+     * Insert a new {@link #TABLE_LAPS} entry for a new lap.
+     * @param times_id  Row ID from {@link #createNew(String, String, int, long, long)},
+     *    or 0 for temporary lap storage for the currently active timing.
+     * @param elapsed  Per-lap elapsed-time
+     * @param systime  Per-lap system-time
+     * @see #createNewLaps(long, int, long[], long[])
+     */
+    public void createNewLap
+    	(final long times_id, final long elapsed, final long systime)
+    {
+    	ContentValues cl = new ContentValues();
+    	cl.put(FIELD_LAPS_TIMES_ROWID, times_id);
+    	cl.put(FIELD_LAPS_ELAPSED, elapsed);
+    	cl.put(FIELD_LAPS_SYSTIME, systime);
+
+    	mDb.insert(TABLE_LAPS, null, cl);
+    }
+
+    /**
+     * Delete any temporarily stored laps ({@link #FIELD_LAPS_TIMES_ROWID Table Row-ID} 0).
+     */
+    public void deleteTemporaryLaps() {
+    	mDb.delete(TABLE_LAPS, FIELD_LAPS_TIMES_ROWID + "=0", null);    	
+    }
+
+    /**
+     * Count the number of laps stored for a given {@link #DATABASE_TABLE} ID.
+     * @param times_id  ID to fetch, or 0 for the currently active laps
+     * @return  Number of laps, or 0 if not found
+     * @see #fetchAllLaps(long, long[], long[])
+     */
+    public int countLaps(final long times_id) {
+        Cursor mCursor =
+            mDb.query(TABLE_LAPS,
+        		new String[] { "count(" + KEY_ROWID + ')' },
+        		FIELD_LAPS_TIMES_ROWID + "=" + times_id, null,
+                null, null, null);    	
+    	if (mCursor == null)
+    		return 0;
+    	if (! mCursor.moveToFirst())
+    	{
+    		mCursor.close();
+    		return 0;
+    	}
+    	final int lapCount = mCursor.getInt(0);
+    	mCursor.close();
+    	return lapCount;
+    }
+
+    /**
+     * Fetch all laps for a given {@link #DATABASE_TABLE} ID.
+     * To ensure <tt>elapsed[]</tt> and <tt>systimes[]</tt> are large
+     * enough, call {@link #countLaps(long) countLaps(times_id)} first.
+     * @param times_id  ID to fetch, or 0 for the currently active laps
+     * @param elapsed  Array to hold each lap's elapsed
+     * @param systimes  Array to hold each lap's systime
+     * @return  The number of laps retrieved;
+     *    if <tt>elapsed</tt> and <tt>systimes</tt> aren't large enough
+     *    for all laps, this will be the size of the arrays.
+     */
+    public int fetchAllLaps(final long times_id, long[] elapsed, long[] systimes) {
+    	
+        Cursor mCursor =
+            mDb.query(TABLE_LAPS,
+        		new String[] { FIELD_LAPS_ELAPSED, FIELD_LAPS_SYSTIME},
+        		FIELD_LAPS_TIMES_ROWID + "=" + times_id, null,
+                null, null, KEY_ROWID);
+    	if (mCursor == null)
+    		return 0;
+
+    	int lapCount = 0;
+        if (! mCursor.moveToFirst())
+        {
+        	mCursor.close();
+        	return 0;
+        }
+        do {
+        	if (lapCount >= elapsed.length)
+        		break;  // array too small
+        	elapsed[lapCount] = mCursor.getLong(0);
+        	systimes[lapCount] = mCursor.getLong(1);
+        	++lapCount;        	
+        }
+        while (mCursor.moveToNext());
+        mCursor.close();
+
+        return lapCount;
+    }
+
 }
