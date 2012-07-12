@@ -688,13 +688,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	return true;
 
         case MODE_STOP:
-        	stopwatch();
-        	updateModeMenuFromCurrent();
+        	changeModeOrPopupConfirm(true, clock.getMode(), STOP_LAP);
             return true;
             
         case MODE_COUNTDOWN:
-        	countdown(); //set the layout to the countdown Layout
-        	updateModeMenuFromCurrent();
+        	changeModeOrPopupConfirm(false, clock.getMode(), COUNTDOWN);
         	return true;
 
         case ABOUT_ITEM:
@@ -1267,10 +1265,6 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		if(clock.isStarted)
 			return;
 
-		final boolean wasStartedOrCommented
-			= clock.wasStarted
-			  || ((comment != null) && (comment.length() > 0));
-
 		List<Prediction> predictions = gestureLibrary.recognize(gesture);
 	    for(Prediction prediction : predictions) {
 	    	if(prediction.score > 1.0) {
@@ -1281,13 +1275,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	    				newMode = 0;
 	    			else
 	    				newMode = cprev + 1;
-	    			if (wasStartedOrCommented)
-	    			{
-	    				popupConfirmChangeModeFromSwipe(false, cprev, newMode);
-	    			} else {
-		    			clock.changeMode(newMode);
-		    			animateSwitch(false, cprev);
-	    			}
+	    			changeModeOrPopupConfirm(false, cprev, newMode);
 	    		}
 	    		if(prediction.name.equals("SwipeLeft")) {
 	    			final int cprev = clock.getMode();
@@ -1296,27 +1284,58 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	    				newMode = 1;
 	    			else
 	    				newMode = cprev - 1;
-	    			if (wasStartedOrCommented)
-	    			{
-	    				popupConfirmChangeModeFromSwipe(true, cprev, newMode);
-	    			} else {
-		    			clock.changeMode(newMode);
-		    			animateSwitch(true, cprev);
-	    			}
+	    			changeModeOrPopupConfirm(true, cprev, newMode);
 	    		}
 	    	}
 	    }
 	}    
 
 	/**
+	 * Either change the mode immediately, or bring up a popup dialog to
+	 * have the user confirm the mode change because clock.wasStarted or
+	 * a comment was typed.
+	 * Calls {@link #popupConfirmChangeModeFromSwipe(boolean, int, int)}.
+	 *<P>
+	 * Assumes clock is not currently running, or mode change menu items
+	 * would be disabled and swipes ignored.
+	 *
+	 * @param animateToLeft  True if decrementing the mode, false if incrementing 
+	 * @param currMode  The current mode; passed to {@link #animateSwitch(boolean, int)}
+	 * @param newMode  The new mode if confirmed; passed to {@link Clock#changeMode(int)}
+	 */
+	private void changeModeOrPopupConfirm
+		(final boolean animateToLeft, final int currMode, final int newMode)
+	{
+		if (clock.wasStarted
+			|| ((comment != null) && (comment.length() > 0)))
+		{
+			popupConfirmChangeModeFromSwipe(animateToLeft, currMode, newMode);
+		} else {
+			clock.changeMode(newMode);
+			if (currMode != newMode)
+			{
+				animateSwitch(animateToLeft, currMode);
+			} else {
+				if (newMode == STOP_LAP)
+					stopwatch();
+				else
+					countdown();
+			}
+		}
+	}
+
+	/**
 	 * Show a popup dialog to have the user confirm swiping to a different mode,
 	 * which will clear the current laps and comment (if any).
 	 *<P>
-	 * If the swipe is confirmed, will call {@link #animateSwitch(boolean, int)}.
+	 * If the mode change is confirmed: Will call {@link #animateSwitch(boolean, int)}
+	 * only if the modes are different, otherwise will reset the layout without animation.
 	 *<P>
-	 * Call only if we need to ask, because clock.wasStarted or a comment was typed.
+	 * Call this method only if we need to ask, because clock.wasStarted or a comment was typed.
 	 * @param toRight  True if the old mode is exiting to the right, and the new mode coming in from the left;
-	 *                     passed to {@link #animateSwitch(boolean, int)}
+	 *           passed to {@link #animateSwitch(boolean, int)}.
+	 *           Opposite direction from the swipe direction;
+	 *           incrementing the mode passes <tt>false</tt> here.
 	 * @param currMode  The current mode; passed to {@link #animateSwitch(boolean, int)}
 	 * @param newMode  The new mode if confirmed; passed to {@link Clock#changeMode(int)}
 	 */
@@ -1330,7 +1349,15 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		alert.setPositiveButton(R.string.change, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
 				clock.changeMode(newMode);
-				animateSwitch(toRight, currMode);		
+				if (currMode != newMode)
+				{
+					animateSwitch(toRight, currMode);
+				} else {
+					if (newMode == STOP_LAP)
+						stopwatch();
+					else
+						countdown();
+				}
 			}
 		});
 
@@ -1344,6 +1371,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     /**
      * Animate changing the current mode after a SwipeRight or SwipeLeft gesture.
      * You must call {@link Clock#changeMode(int)} before calling.  Uses {@link AnimationUtils}.
+     * Calls {@link #updateModeMenuFromCurrent()} for the new mode.
      *<P>
      * Note: This method's animations do not cause {@link #onPause()} or {@link #onResume()}.
      * 
