@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2009-2010 by mj                                         *
+ *   Copyright (C) 2009-2011 by mj                                         *
  *     fakeacc.mj@gmail.com                                                *
  *   Portions of this file Copyright (C) 2010,2012 Jeremy Monin            *
  *     jeremy@nand.net                                                     *
