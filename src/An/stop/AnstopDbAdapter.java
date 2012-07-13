@@ -63,8 +63,19 @@ public class AnstopDbAdapter {
      */
     private static final String TABLE_LAPS = "laps";
     
+    /**
+     * Title for one entry in {@link #DATABASE_TABLE}.
+     */
     public static final String KEY_TITLE = "title";
+
+    /**
+     * Body (v2) or optional comment (v3+) for one entry in {@link #DATABASE_TABLE}.
+     */
     public static final String KEY_BODY = "body";
+
+    /**
+     * Row ID field name in any table.
+     */
     public static final String KEY_ROWID = "_id";
 
     /**
@@ -82,13 +93,35 @@ public class AnstopDbAdapter {
 
     /**
      * System time when timing was stopped, in milliseconds.
+     * Same as {@link Clock#getStartTimeActual()}.
      * @since v3
      */
     public static final String FIELD_TIMES_STOP_SYSTIME = "stop_systime";
 
+    /**
+     * The {@link #DATABASE_TABLE} row id that a lap in {@link #TABLE_LAPS} belongs to.
+     * @since v3
+     */
     private static final String FIELD_LAPS_TIMES_ROWID = "times_id";
+
+    /**
+     * Lap's elapsed time, milliseconds for h:mm:ss:d, same format as
+     * {@link Clock#getCurrentValueMillis(StringBuilder, boolean)}
+     * or {@link Clock#lap_elapsed}.
+     * @since v3
+     */
     private static final String FIELD_LAPS_ELAPSED = "lap_elapsed";
+
+    /**
+     * Lap's time of day; {@link System#currentTimeMillis()} or {@link Clock#lap_systime}.
+     * @since v3
+     */
     private static final String FIELD_LAPS_SYSTIME = "lap_systime";
+
+    /**
+     * Optional lap comment.
+     * @since v3
+     */
     private static final String FIELD_LAPS_COMMENT = "lap_comment";
 
     private SQLiteDatabase mDb;
