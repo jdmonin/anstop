@@ -1106,7 +1106,7 @@ public class Clock {
 	 * Flags, settings, and methods to format laps.
 	 * Each {@link Clock} has one <tt>LapFormatter</tt>.
 	 * Used by {@link Clock#lap(StringBuilder)}
-	 * and by {@link ExportHelper}.
+	 * and by {@link AnstopDbAdapter#getRowAndFormat(long)}.
 	 * The currently active flags are {@link #lapFormatFlags}.
 	 */
 	public static class LapFormatter {

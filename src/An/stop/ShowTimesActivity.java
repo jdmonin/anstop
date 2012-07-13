@@ -83,12 +83,10 @@ public class ShowTimesActivity extends Activity {
 			bodyView.setText(time.getString(col_body));
 		} else {
 			// Mode, laps, start time are separate fields. Col_body contains the comment only.
-			ExportHelper fmtBody = new ExportHelper(this);
-			final String[] formatted = fmtBody.getRow(mRowId);
+			final String[] formatted = dbHelper.getRowAndFormat(mRowId);
 			bodyView.setText(formatted[1]);
 		}
-		
-		
+
 		dbHelper.close();
 		
 		titleView.setTextSize(VIEW_SIZE);

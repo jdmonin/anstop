@@ -1,7 +1,8 @@
 /***************************************************************************
- *   Copyright (C) 2009 by mj   										   *
- *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010 Jeremy Monin jeremy@nand.net *
+ *   Copyright (C) 2009-2010 by mj                                         *
+ *     fakeacc.mj@gmail.com                                                *
+ *   Portions of this file Copyright (C) 2010,2012 Jeremy Monin            *
+ *     jeremy@nand.net                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -134,8 +135,7 @@ public class LoadActivity extends ListActivity {
 
     	case SEND_ITEM:
 	    	{
-	    		ExportHelper seHelp = new ExportHelper(this);
-	    		String[] columns = seHelp.getRow(info.id);
+	    		final String[] columns = dbHelper.getRowAndFormat(info.id);
 	    		if (columns != null)
 	    	        Anstop.startSendMailIntent
 		            (this, getResources().getString(R.string.app_name) + ": " + columns[0], columns[1]);

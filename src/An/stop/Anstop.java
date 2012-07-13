@@ -869,7 +869,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		// Start time, comment, and laps are all
 		// within startTimeView's or LapView's text.
 		// The same formatting is used in updateStartTimeCommentLapsView
-		// and ExportHelper.getRow. If you change this, change those to match.
+		// and AnstopDbAdapter.getRowAndFormat. If you change this, change those to match.
 		// Code is not shared because this method doesn't need to re-read
 		// the laps or reformat them.
 
@@ -1062,7 +1062,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * and {@link #laps} (if applicable) displayed
 	 * in {@link #startTimeView} or {@link #lapView}.
 	 *<P>
-	 * The same formatting is used in {@link ExportHelper#getRow(long)}.
+	 * The same formatting is used in {@link AnstopDbAdapter#getRowAndFormat(long)}.
 	 * If you change this method, change that one to match.
 	 *<P>
 	 * {@link #createBodyFromCurrent()} also uses the same format;
@@ -1294,7 +1294,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * Either change the mode immediately, or bring up a popup dialog to
 	 * have the user confirm the mode change because clock.wasStarted or
 	 * a comment was typed.
-	 * Calls {@link #popupConfirmChangeModeFromSwipe(boolean, int, int)}.
+	 * Calls {@link #popupConfirmChangeMode(boolean, int, int)}.
 	 *<P>
 	 * Assumes clock is not currently running, or mode change menu items
 	 * would be disabled and swipes ignored.
@@ -1309,7 +1309,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		if (clock.wasStarted
 			|| ((comment != null) && (comment.length() > 0)))
 		{
-			popupConfirmChangeModeFromSwipe(animateToLeft, currMode, newMode);
+			popupConfirmChangeMode(animateToLeft, currMode, newMode);
 		} else {
 			clock.changeMode(newMode);
 			if (currMode != newMode)
@@ -1339,7 +1339,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * @param currMode  The current mode; passed to {@link #animateSwitch(boolean, int)}
 	 * @param newMode  The new mode if confirmed; passed to {@link Clock#changeMode(int)}
 	 */
-	private void popupConfirmChangeModeFromSwipe
+	private void popupConfirmChangeMode
 		(final boolean toRight, final int currMode, final int newMode)
 	{
 		AlertDialog.Builder alert = new AlertDialog.Builder(Anstop.this);

@@ -28,6 +28,8 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.preference.PreferenceManager;
+import android.text.format.DateFormat;
 
 
 public class AnstopDbAdapter {
@@ -92,7 +94,13 @@ public class AnstopDbAdapter {
     private SQLiteDatabase mDb;
     private DataBaseHelper dbHelper;
     private Context mContext;
-    
+
+    /**
+     * Date formatter for day of week + user's medium date format + hh:mm:ss;
+     * used in {@link #getRowAndFormat(long)} for "started at:".
+     */
+    private StringBuffer fmt_dow_meddate_time;
+
     private static class DataBaseHelper extends SQLiteOpenHelper {
 
         DataBaseHelper(Context context) {
@@ -134,6 +142,7 @@ public class AnstopDbAdapter {
         }
     }
     
+    /** Don't forget to call {@link #open()} before use, and {@link #close()} when done. */
     AnstopDbAdapter(Context context) {
     	this.mContext = context;
     }
@@ -223,6 +232,100 @@ public class AnstopDbAdapter {
         return mCursor;
 
     }
+
+	/**
+	 * Get this rowId's title and body from the database, including any lap data.
+	 * If the record has a mode, start time, etc (v3 db schema or later),
+	 * this data is retrieved and rendered into the returned body text,
+	 * along with the comment field if any.
+	 * Older records (v1 or v2) have these as text within body.
+	 *<P>
+	 * The same formatting is used in {@link Anstop#updateStartTimeCommentLapsView(boolean)}.
+	 * If you change this method, change that one to match.
+	 *
+	 * @param rowId  The _id of the {@link #DATABASE_TABLE} record to retrieve
+	 * @return String[] with [0]=title, [1]=body, or <tt>null</tt> if not found.
+	 */
+	public String[] getRowAndFormat(final long rowId) {
+		String[] columns = null;
+		Cursor time = null;
+		try {
+			time = fetch(rowId);
+			columns = new String[2];
+			columns[0] = time.getString(time.getColumnIndexOrThrow(KEY_TITLE));
+
+			final int col_body = time.getColumnIndexOrThrow(KEY_BODY),
+			          col_mode = time.getColumnIndex(FIELD_TIMES_MODE),
+			          col_starttime = time.getColumnIndex(FIELD_TIMES_START_SYSTIME);
+			// col_stoptime = time.getColumnIndex(FIELD_TIMES_STOP_SYSTIME);
+			if (time.isNull(col_mode))
+			{
+				// Simple: no mode
+				columns[1] = time.getString(col_body);
+			} else {
+				// Mode, laps, start time are separate fields. Col_body contains the comment only.
+				// Mode was: ___
+				// duration
+				// Started at: ___
+				//\n
+				// comment
+				//\n
+				// Laps:
+				// lap info
+				if (fmt_dow_meddate_time == null)
+					fmt_dow_meddate_time = Anstop.buildDateFormatDOWmedium(mContext);
+				StringBuilder sb = new StringBuilder();
+
+				if (! time.isNull(col_starttime))
+				{
+					final long sttime = time.getLong(col_starttime);
+					if (sttime != -1L)
+					{
+						sb.append(mContext.getResources().getText(R.string.started_at));
+						sb.append(" ");
+						sb.append(DateFormat.format(fmt_dow_meddate_time, sttime));
+					}
+				}
+
+				final String comment = time.getString(col_body);
+				if ((comment != null) && (comment.length() > 0))
+				{
+					if (sb.length() > 0)
+						sb.append("\n\n");
+					sb.append(comment);
+				}
+
+				final int lapCount = countLaps(rowId);
+				if (lapCount > 0)
+				{
+					if (sb.length() > 0)
+						sb.append("\n\n");
+					long[] lap_elapsed = new long[lapCount],
+					       lap_systime = new long[lapCount];
+					fetchAllLaps(rowId, lap_elapsed, lap_systime);
+					Clock.LapFormatter lapf = new Clock.LapFormatter();
+					final int fmtFlags = Anstop.readLapFormatPrefFlags
+						(PreferenceManager.getDefaultSharedPreferences(mContext));
+					if ((fmtFlags != 0) && (fmtFlags != Clock.LAP_FMT_FLAG_ELAPSED))
+						lapf.setLapFormat
+							(fmtFlags, android.text.format.DateFormat.getTimeFormat(mContext));
+					lapf.formatTimeAllLaps(sb, lapCount, lap_elapsed, lap_systime);
+				}
+
+				// All done.
+				columns[1] = sb.toString();
+			}
+
+			time.close();
+
+		} catch (SQLException e) {
+			if (time != null)
+				time.close();
+		}
+
+		return columns;
+	}
+
 
     //
     // Methods for #TABLE_LAPS
