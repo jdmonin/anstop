@@ -375,7 +375,15 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     public void countdown() {
         comment = null;
         if ((laps != null) && (laps.length() > 0))
+        {
         	laps.delete(0, laps.length());
+        	if (dbHelper == null)
+        	{
+        		dbHelper = new AnstopDbAdapter(Anstop.this);
+        		dbHelper.open();
+        	}
+        	dbHelper.deleteTemporaryLaps();
+        }
 
     	//set the Layout to the countdown layout
     	setContentView(R.layout.countdown);
@@ -442,7 +450,15 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         if (laps == null)
         	laps = new StringBuilder();
         else if (laps.length() > 0)
+        {
         	laps.delete(0, laps.length());
+        	if (dbHelper == null)
+        	{
+        		dbHelper = new AnstopDbAdapter(Anstop.this);
+        		dbHelper.open();
+        	}
+        	dbHelper.deleteTemporaryLaps();
+        }
         laps.append(getResources().getString(R.string.laps));
 
     	//set the Layout to the stopwatch/lap-mode layout
