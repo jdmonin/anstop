@@ -342,7 +342,7 @@ public class AnstopDbAdapter {
 					if ((fmtFlags != 0) && (fmtFlags != Clock.LAP_FMT_FLAG_ELAPSED))
 						lapf.setLapFormat
 							(fmtFlags, android.text.format.DateFormat.getTimeFormat(mContext));
-					lapf.formatTimeAllLaps(sb, lapCount, lap_elapsed, lap_systime);
+					lapf.formatTimeAllLaps(sb, lapCount + 1, lap_elapsed, lap_systime);
 				}
 
 				// All done.
