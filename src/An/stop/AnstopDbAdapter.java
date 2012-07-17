@@ -35,16 +35,18 @@ import android.text.format.DateFormat;
 public class AnstopDbAdapter {
 
 	/**
-	 * Database schema version.
+	 * Current database schema version.
 	 * <UL>
 	 * <LI> 2 - Version for Anstop v1.4 and earlier
 	 * <LI> 3 - (2012-07-05) Add table {@link #TABLE_LAPS};
 	 *            Add fields to {@link #DATABASE_TABLE}:
 	 *            {@link #FIELD_TIMES_MODE}, {@link #FIELD_TIMES_START_SYSTIME},
 	 *            {@link #FIELD_TIMES_STOP_SYSTIME}.
+	 * <LI> 4 - (2012-07-17) Add {@link #DATABASE_TABLE} field {@link #FIELD_TIMES_ELAPSED};
+	 *            add table {@link #TABLE_TEMP_LAPS}.
 	 * </UL>
 	 */
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 
     // Reminder: Keep table names and field names here synchronized with onCreate and onUpgrade.
 
@@ -59,10 +61,18 @@ public class AnstopDbAdapter {
 
     /**
      * Laps table, for lap information for one {@link #DATABASE_TABLE} row.
+     * Same fields as {@link #TABLE_TEMP_LAPS}, plus {@link #FIELD_LAPS_TIMES_ROWID}.
      * @since v3
      */
     private static final String TABLE_LAPS = "laps";
-    
+
+    /**
+     * temp_laps table, for lap information for the currently running timer.
+     * Same fields as {@link #TABLE_LAPS}, omitting {@link #FIELD_LAPS_TIMES_ROWID}.
+     * @since v4
+     */
+    private static final String TABLE_TEMP_LAPS = "temp_laps";
+
     /**
      * Title for one entry in {@link #DATABASE_TABLE}.
      */
@@ -97,6 +107,13 @@ public class AnstopDbAdapter {
      * @since v3
      */
     public static final String FIELD_TIMES_STOP_SYSTIME = "stop_systime";
+
+    /**
+     * Timer's elapsed (counting up) or remaining (counting down) time, in
+     * milliseconds; same as {@link Clock#getCurrentValueMillis(StringBuilder, boolean)}.
+     * @since v4
+     */
+    public static final String FIELD_TIMES_ELAPSED = "elapsed";
 
     /**
      * The {@link #DATABASE_TABLE} row id that a lap in {@link #TABLE_LAPS} belongs to.
@@ -145,12 +162,19 @@ public class AnstopDbAdapter {
 
             db.execSQL("create table times (_id integer primary key autoincrement, "
                     + "title text not null, body text not null, "
-                    + "mode int not null, start_systime int null, stop_systime int null);" );
+                    + "mode int not null, start_systime int null, stop_systime int null, "
+            		+ "elapsed int not null);" );
+
+            // Use the same fields for laps and temp_laps, except times_id.
 
             db.execSQL("create table laps (_id integer primary key autoincrement, "
             		+ "times_id int not null, lap_elapsed int not null, "
             		+ "lap_systime int not null, lap_comment text null);" );
             db.execSQL("create index \"laps~t\" ON laps(times_id);" );
+
+            db.execSQL("create table temp_laps (_id integer primary key autoincrement, "
+            		+ "lap_elapsed int not null, "
+            		+ "lap_systime int not null, lap_comment text null);" );
         }
 
         @Override
@@ -161,7 +185,7 @@ public class AnstopDbAdapter {
         	case 1:
 	            db.execSQL("DROP TABLE IF EXISTS times");
 	            onCreate(db);
-	            break;  // onCreate takes the db up to schema version 3
+	            break;  // onCreate creates the db at latest schema version
 
         	case 2:  // 2 -> 3
                 db.execSQL("create table laps (_id integer primary key autoincrement, "
@@ -171,6 +195,13 @@ public class AnstopDbAdapter {
                 db.execSQL("alter table times add column mode int;");
                 db.execSQL("alter table times add column start_systime int;");
                 db.execSQL("alter table times add column stop_systime int;");
+                // fall through
+
+        	case 3:  // 3 -> 4
+                db.execSQL("create table temp_laps (_id integer primary key autoincrement, "
+                		+ "lap_elapsed int not null, "
+                		+ "lap_systime int not null, lap_comment text null);" );
+                db.execSQL("alter table times add column elapsed int;");
         	}
         }
     }
@@ -203,11 +234,13 @@ public class AnstopDbAdapter {
      * @param startTime  Start time (milliseconds), or -1L if never started.
      *    This same convention is returned by {@link Clock#getStartTimeActual()}.
      * @param stopTime   Stop time (milliseconds), or -1L for none
+     * @param elapsed  Current elapsed time (counting up or down),
+     *    from {@link Clock#getCurrentValueMillis(StringBuilder, boolean)}
      * @return  the new rowID, from {@link SQLiteDatabase#insert(String, String, ContentValues)}.
      */
     public long createNew
     	(final String title, final String comment,
-		 final int mode, final long startTime, final long stopTime)
+		 final int mode, final long startTime, final long stopTime, final long elapsed)
     {
     	ContentValues cl = new ContentValues();
     	cl.put(KEY_TITLE, title);
@@ -220,6 +253,7 @@ public class AnstopDbAdapter {
     		cl.put(FIELD_TIMES_START_SYSTIME, startTime);
     	if (stopTime != -1L)
     		cl.put(FIELD_TIMES_STOP_SYSTIME, stopTime);
+    	cl.put(FIELD_TIMES_ELAPSED, elapsed);
 
     	return mDb.insert(DATABASE_TABLE, null, cl);
     }
@@ -256,7 +290,8 @@ public class AnstopDbAdapter {
 
         Cursor mCursor =
                 mDb.query(true, DATABASE_TABLE,
-                		new String[] {KEY_ROWID, KEY_TITLE, KEY_BODY, FIELD_TIMES_MODE, FIELD_TIMES_START_SYSTIME, FIELD_TIMES_STOP_SYSTIME},
+                		new String[] {KEY_ROWID, KEY_TITLE, KEY_BODY, FIELD_TIMES_MODE,
+                			FIELD_TIMES_START_SYSTIME, FIELD_TIMES_STOP_SYSTIME, FIELD_TIMES_ELAPSED},
                 		KEY_ROWID + "=" + rowId, null,
                         null, null, null, null);
         if (mCursor != null) {
@@ -289,6 +324,7 @@ public class AnstopDbAdapter {
 
 			final int col_body = time.getColumnIndexOrThrow(KEY_BODY),
 			          col_mode = time.getColumnIndex(FIELD_TIMES_MODE),
+			          col_elapsed = time.getColumnIndex(FIELD_TIMES_ELAPSED),
 			          col_starttime = time.getColumnIndex(FIELD_TIMES_START_SYSTIME);
 			// col_stoptime = time.getColumnIndex(FIELD_TIMES_STOP_SYSTIME);
 			if (time.isNull(col_mode))
@@ -309,6 +345,25 @@ public class AnstopDbAdapter {
 					fmt_dow_meddate_time = Anstop.buildDateFormatDOWmedium(mContext);
 				StringBuilder sb = new StringBuilder();
 
+				Clock.LapFormatter lapf = new Clock.LapFormatter();
+
+				// mode
+				sb.append(mContext.getResources().getString(R.string.mode_was));
+				sb.append(' ');
+				if (Anstop.COUNTDOWN == time.getInt(col_mode))
+					sb.append(mContext.getResources().getString(R.string.countdown));
+				else
+					sb.append(mContext.getResources().getString(R.string.stop));
+				sb.append("\n\n");
+
+				// duration
+				if (! time.isNull(col_elapsed))
+				{
+					lapf.formatTimeLap(sb, false, -1, 0, 0, 0, 0, time.getLong(col_elapsed), 0, null);
+					sb.append("\n\n");
+				}
+
+				// started at
 				if (! time.isNull(col_starttime))
 				{
 					final long sttime = time.getLong(col_starttime);
@@ -320,6 +375,7 @@ public class AnstopDbAdapter {
 					}
 				}
 
+				// comment
 				final String comment = time.getString(col_body);
 				if ((comment != null) && (comment.length() > 0))
 				{
@@ -328,6 +384,7 @@ public class AnstopDbAdapter {
 					sb.append(comment);
 				}
 
+				// laps
 				final int lapCount = countLaps(rowId);
 				if (lapCount > 0)
 				{
@@ -336,7 +393,6 @@ public class AnstopDbAdapter {
 					long[] lap_elapsed = new long[lapCount],
 					       lap_systime = new long[lapCount];
 					fetchAllLaps(rowId, lap_elapsed, lap_systime);
-					Clock.LapFormatter lapf = new Clock.LapFormatter();
 					final int fmtFlags = Anstop.readLapFormatPrefFlags
 						(PreferenceManager.getDefaultSharedPreferences(mContext));
 					if ((fmtFlags != 0) && (fmtFlags != Clock.LAP_FMT_FLAG_ELAPSED))
@@ -366,7 +422,7 @@ public class AnstopDbAdapter {
 
     /**
      * Insert the {@link #TABLE_LAPS} entries for all the active laps.
-     * @param id  Row ID from {@link #createNew(String, String, int, long, long)}
+     * @param id  Row ID from {@link #createNew(String, String, int, long, long, long)}
      * @param laps  Number of laps to use from the arrays; {@link Clock#laps} - 1
      *     since that field is the <em>next</em> lap number
      * @param elapsed  Per-lap elapsed-time array, like {@link Clock#lap_elapsed}
@@ -386,7 +442,7 @@ public class AnstopDbAdapter {
 
     /**
      * Insert a new {@link #TABLE_LAPS} entry for a new lap.
-     * @param times_id  Row ID from {@link #createNew(String, String, int, long, long)},
+     * @param times_id  Row ID from {@link #createNew(String, String, int, long, long, long)},
      *    or 0 for temporary lap storage for the currently active timing.
      * @param elapsed  Per-lap elapsed-time
      * @param systime  Per-lap system-time
@@ -396,18 +452,19 @@ public class AnstopDbAdapter {
     	(final long times_id, final long elapsed, final long systime)
     {
     	ContentValues cl = new ContentValues();
-    	cl.put(FIELD_LAPS_TIMES_ROWID, times_id);
+    	if (times_id != 0)
+    		cl.put(FIELD_LAPS_TIMES_ROWID, times_id);
     	cl.put(FIELD_LAPS_ELAPSED, elapsed);
     	cl.put(FIELD_LAPS_SYSTIME, systime);
 
-    	mDb.insert(TABLE_LAPS, null, cl);
+    	mDb.insert( ((times_id != 0) ? TABLE_LAPS : TABLE_TEMP_LAPS), null, cl);
     }
 
     /**
-     * Delete any temporarily stored laps ({@link #FIELD_LAPS_TIMES_ROWID Table Row-ID} 0).
+     * Delete any temporarily stored laps (table {@link #TABLE_TEMP_LAPS}).
      */
     public void deleteTemporaryLaps() {
-    	mDb.delete(TABLE_LAPS, FIELD_LAPS_TIMES_ROWID + "=0", null);    	
+    	mDb.delete(TABLE_TEMP_LAPS, null, null);    	
     }
 
     /**
@@ -418,9 +475,10 @@ public class AnstopDbAdapter {
      */
     public int countLaps(final long times_id) {
         Cursor mCursor =
-            mDb.query(TABLE_LAPS,
+            mDb.query( ((times_id != 0) ? TABLE_LAPS : TABLE_TEMP_LAPS),
         		new String[] { "count(" + KEY_ROWID + ')' },
-        		FIELD_LAPS_TIMES_ROWID + "=" + times_id, null,
+        		((times_id != 0) ? FIELD_LAPS_TIMES_ROWID + "=" + times_id : null),
+        		null,
                 null, null, null);    	
     	if (mCursor == null)
     		return 0;
@@ -448,9 +506,10 @@ public class AnstopDbAdapter {
     public int fetchAllLaps(final long times_id, long[] elapsed, long[] systimes) {
     	
         Cursor mCursor =
-            mDb.query(TABLE_LAPS,
+            mDb.query( ((times_id != 0) ? TABLE_LAPS : TABLE_TEMP_LAPS),
         		new String[] { FIELD_LAPS_ELAPSED, FIELD_LAPS_SYSTIME},
-        		FIELD_LAPS_TIMES_ROWID + "=" + times_id, null,
+        		((times_id != 0) ? FIELD_LAPS_TIMES_ROWID + "=" + times_id : null),
+        		null,
                 null, null, KEY_ROWID);
     	if (mCursor == null)
     		return 0;
