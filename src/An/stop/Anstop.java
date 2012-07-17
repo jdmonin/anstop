@@ -787,7 +787,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         					dbHelper.open();
         				}
         				final long id = dbHelper.createNew
-        					(input.getText().toString(), comment,
+        					(input.getText().toString().trim(), comment,
         					 clock.getMode(), clock.getStartTimeActual(), clock.getStopTime(),
         					 clock.getCurrentValueMillis(null, false));
 		    			if (clock.laps > 1)
