@@ -274,10 +274,11 @@ public class AnstopDbAdapter {
     	return didAny;
     }
 
+    /** Get basic info about all tracks: id, title, comment. */
     public Cursor fetchAll() {
     	
     	return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_TITLE,
-                    KEY_BODY}, null, null, null, null, null);
+                    KEY_BODY}, null, null, null, null, KEY_ROWID);
     	
     }
 
@@ -422,7 +423,7 @@ public class AnstopDbAdapter {
 
     /**
      * Insert the {@link #TABLE_LAPS} entries for all the active laps.
-     * @param id  Row ID from {@link #createNew(String, String, int, long, long, long)}
+     * @param times_id  Row ID from {@link #createNew(String, String, int, long, long, long)}
      * @param laps  Number of laps to use from the arrays; {@link Clock#laps} - 1
      *     since that field is the <em>next</em> lap number
      * @param elapsed  Per-lap elapsed-time array, like {@link Clock#lap_elapsed}
@@ -431,13 +432,13 @@ public class AnstopDbAdapter {
      * @see #createNewLap(long, long, long)
      */
     public void createNewLaps
-    	(final long id, final int laps, final long[] elapsed, final long[] systimes)
+    	(final long times_id, final int laps, final long[] elapsed, final long[] systimes)
     	throws IllegalArgumentException
     {
     	if ((elapsed.length < laps) || (systimes.length < laps))
     		throw new IllegalArgumentException();
     	for (int i = 0; i < laps; ++i)
-    		createNewLap(id, elapsed[i], systimes[i]);
+    		createNewLap(times_id, elapsed[i], systimes[i]);
     }
 
     /**
@@ -478,8 +479,7 @@ public class AnstopDbAdapter {
             mDb.query( ((times_id != 0) ? TABLE_LAPS : TABLE_TEMP_LAPS),
         		new String[] { "count(" + KEY_ROWID + ')' },
         		((times_id != 0) ? FIELD_LAPS_TIMES_ROWID + "=" + times_id : null),
-        		null,
-                null, null, null);    	
+        		null, null, null, null);    	
     	if (mCursor == null)
     		return 0;
     	if (! mCursor.moveToFirst())
@@ -509,8 +509,7 @@ public class AnstopDbAdapter {
             mDb.query( ((times_id != 0) ? TABLE_LAPS : TABLE_TEMP_LAPS),
         		new String[] { FIELD_LAPS_ELAPSED, FIELD_LAPS_SYSTIME},
         		((times_id != 0) ? FIELD_LAPS_TIMES_ROWID + "=" + times_id : null),
-        		null,
-                null, null, KEY_ROWID);
+        		null, null, null, KEY_ROWID);
     	if (mCursor == null)
     		return 0;
 
