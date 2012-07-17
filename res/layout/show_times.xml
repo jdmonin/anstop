@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Layout for ShowTimesActivity, to show one time saved in the database. -->
 <LinearLayout
 android:id="@+id/widget28"
 android:layout_width="fill_parent"
@@ -14,9 +15,9 @@ android:text="TextView" android:id="@+id/titleView">
 <ScrollView android:id="@+id/ScrollView01" 
 android:layout_width="fill_parent" 
 android:layout_height="fill_parent">
-<TextView android:layout_width="wrap_content" 
-android:layout_height="wrap_content"
- android:text="TextView" android:id="@+id/bodyView">
-</TextView></ScrollView>
+	<TextView android:layout_width="wrap_content" 
+		android:layout_height="wrap_content"
+		android:text="TextView" android:id="@+id/bodyView" />
+</ScrollView>
 
 </LinearLayout>

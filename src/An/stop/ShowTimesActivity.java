@@ -33,6 +33,7 @@ import android.widget.Toast;
 /**
  * Shows a previously saved time in the database,
  * with options to delete, export or send.
+ * Called from {@link LoadActivity} list item clicks.
  */
 public class ShowTimesActivity extends Activity {
 	
@@ -83,6 +84,7 @@ public class ShowTimesActivity extends Activity {
 			bodyView.setText(time.getString(col_body));
 		} else {
 			// Mode, laps, start time are separate fields. Col_body contains the comment only.
+			// getRowAndFormat combines and formats those db fields into one body string.
 			final String[] formatted = dbHelper.getRowAndFormat(mRowId);
 			bodyView.setText(formatted[1]);
 		}

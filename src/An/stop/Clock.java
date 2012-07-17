@@ -1108,6 +1108,7 @@ public class Clock {
 	 * Used by {@link Clock#lap(StringBuilder)}
 	 * and by {@link AnstopDbAdapter#getRowAndFormat(long)}.
 	 * The currently active flags are {@link #lapFormatFlags}.
+	 * By default, the formatter flags are {@link Clock#LAP_FMT_FLAG_ELAPSED} only.
 	 */
 	public static class LapFormatter {
 
@@ -1139,6 +1140,10 @@ public class Clock {
 		 */
 		public NumberFormat nf;
 
+		/**
+		 * Create a LapFormatter with the default flags.
+		 * ({@link Clock#LAP_FMT_FLAG_ELAPSED} only)
+		 */
 		public LapFormatter() {
 			nf = NumberFormat.getInstance();
 			nf.setMinimumIntegerDigits(2);  // The minimum Digits required is 2

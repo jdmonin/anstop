@@ -41,6 +41,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 /**
  * Presents the list of previously saved times in the database,
  * with options to view, delete, export or send.
+ * Clicking a list item takes you to {@link ShowTimesActivity}.
  */
 public class LoadActivity extends ListActivity {
 	
