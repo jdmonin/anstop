@@ -24,7 +24,6 @@ package An.stop;
 
 import java.util.List;
 
-
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
