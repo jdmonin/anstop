@@ -23,8 +23,6 @@
 
 package An.stop;
 
-import java.util.List;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -33,12 +31,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.gesture.Gesture;
-import android.gesture.GestureLibraries;
-import android.gesture.GestureLibrary;
-import android.gesture.GestureOverlayView;
-import android.gesture.Prediction;
-import android.gesture.GestureOverlayView.OnGesturePerformedListener;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -47,20 +39,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Animation.AnimationListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.LinearLayout.LayoutParams;
 
 /**
  * Anstop's main activity, showing the current clock, lap times, etc.
@@ -72,7 +58,7 @@ import android.widget.LinearLayout.LayoutParams;
  * Many fields' visibility are non-private for use by
  * {@link Clock#fillSaveState(Bundle)} and {@link Clock#restoreFromSaveState(Bundle)}.
  */
-public class Anstop extends Activity implements OnGesturePerformedListener {
+public class Anstop extends Activity {
 
 
 	private static final int MENU_MODE_GROUP = 0;
@@ -178,8 +164,6 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	Vibrator vib;
 	
 	AccelerometerListener al;
-	GestureOverlayView gestureOverlay;
-	GestureLibrary gestureLibrary;
 	
 	/**
 	 * DatabaseHelper, if opened.
@@ -239,9 +223,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         	onRestoreInstanceState(settings);
         }
-        
-        gestureLibrary = GestureLibraries.fromRawResource(this, R.raw.gestures);
-        gestureLibrary.load();
+       
     }
 
     /**
@@ -437,8 +419,6 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
         // inform clock class to count down now
         clock.changeMode(COUNTDOWN);
-
-        setupGesture();
     }
 
     /**
@@ -501,27 +481,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
         // inform clock of the new mode
         clock.changeMode(STOP_LAP);
-
-        setupGesture();
     }
-
-    /**
-     * Set up swipe gesture, based on the current mode and layout.
-     */
-    private void setupGesture() {
-		ViewGroup layout = getLayout(clock.getMode());  // layout for entire activity
-    	gestureOverlay = new GestureOverlayView(this);
-		ViewGroup mainViewGroup = (ViewGroup) findViewById(R.id.mainLayout);
-
-		// remove before add, in case layout is ScrollView and can have only 1 child:
-		((ViewGroup)mainViewGroup.getParent()).removeView(mainViewGroup);  // avoid "specified child already has a parent"
-		layout.removeAllViews();  // avoid "ScrollView can host only one direct child"
-		layout.addView(gestureOverlay, new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT, 1));
-
-		gestureOverlay.addView(mainViewGroup);
-		gestureOverlay.addOnGesturePerformedListener(this);
-		gestureOverlay.setGestureVisible(false);
-	}
 
 	/**
 	 * Set up long-press on the read-only start time / lap textview
@@ -536,25 +496,6 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			}
 		});		
 	}
-
-    /**
-     * Get the activity layout corresponding to a counting mode.
-     * <tt>mainLayout</tt> is contained inside this one.
-     * @param index  Mode number: a valid mode for {@link Clock#getMode()}
-     * @return the layout (LinearLayout or ScrollView) for
-     *   <tt>countdownLayout</tt> or <tt>stopwatchLayout</tt>
-     */
-    private ViewGroup getLayout(final int index) {
-    	switch(index) {
-		case COUNTDOWN:
-			return (ViewGroup) findViewById(R.id.countDownLayout);
-			
-		case STOP_LAP:
-			return (ViewGroup) findViewById(R.id.stopwatchLayout);
-			
-		}
-    	return null;
-    }
 
 	/**
 	 * Save our state before an Android pause or stop.
@@ -704,11 +645,13 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	return true;
 
         case MODE_STOP:
-        	changeModeOrPopupConfirm(true, clock.getMode(), STOP_LAP);
+        	// TODO mae this via VIewPager
+        	stopwatch();
             return true;
             
         case MODE_COUNTDOWN:
-        	changeModeOrPopupConfirm(false, clock.getMode(), COUNTDOWN);
+        	// TODO mae this via VIewPager
+        	countdown();
         	return true;
 
         case ABOUT_ITEM:
@@ -1272,159 +1215,5 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	dbHelper.createNewLap
         		(0, clock.lap_elapsed[clock.laps - 2], clock.lap_systime[clock.laps - 2]);
     	}
-    }
-
-	/**
-	 * When the user swipes left or right, change to the previous/next mode
-	 * only if the clock isn't running.
-	 */
-	public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture) {
-		if(clock.isStarted)
-			return;
-
-		List<Prediction> predictions = gestureLibrary.recognize(gesture);
-	    for(Prediction prediction : predictions) {
-	    	if(prediction.score > 1.0) {
-	    		if(prediction.name.equals("SwipeRight")) {
-	    			final int cprev = clock.getMode();
-	    			final int newMode;
-	    			if(cprev == 1)
-	    				newMode = 0;
-	    			else
-	    				newMode = cprev + 1;
-	    			changeModeOrPopupConfirm(false, cprev, newMode);
-	    		}
-	    		if(prediction.name.equals("SwipeLeft")) {
-	    			final int cprev = clock.getMode();
-	    			final int newMode;
-	    			if(cprev == 0)
-	    				newMode = 1;
-	    			else
-	    				newMode = cprev - 1;
-	    			changeModeOrPopupConfirm(true, cprev, newMode);
-	    		}
-	    	}
-	    }
-	}    
-
-	/**
-	 * Either change the mode immediately, or bring up a popup dialog to
-	 * have the user confirm the mode change because clock.wasStarted or
-	 * a comment was typed.
-	 * Calls {@link #popupConfirmChangeMode(boolean, int, int)}.
-	 *<P>
-	 * Assumes clock is not currently running, or mode change menu items
-	 * would be disabled and swipes ignored.
-	 *
-	 * @param animateToLeft  True if decrementing the mode, false if incrementing 
-	 * @param currMode  The current mode; passed to {@link #animateSwitch(boolean, int)}
-	 * @param newMode  The new mode if confirmed; passed to {@link Clock#changeMode(int)}
-	 */
-	private void changeModeOrPopupConfirm
-		(final boolean animateToLeft, final int currMode, final int newMode)
-	{
-		if (clock.wasStarted
-			|| ((comment != null) && (comment.length() > 0)))
-		{
-			popupConfirmChangeMode(animateToLeft, currMode, newMode);
-		} else {
-			clock.changeMode(newMode);
-			if (currMode != newMode)
-			{
-				animateSwitch(animateToLeft, currMode);
-			} else {
-				if (newMode == STOP_LAP)
-					stopwatch();
-				else
-					countdown();
-			}
-		}
-	}
-
-	/**
-	 * Show a popup dialog to have the user confirm swiping to a different mode,
-	 * which will clear the current laps and comment (if any).
-	 *<P>
-	 * If the mode change is confirmed: Will call {@link #animateSwitch(boolean, int)}
-	 * only if the modes are different, otherwise will reset the layout without animation.
-	 *<P>
-	 * Call this method only if we need to ask, because clock.wasStarted or a comment was typed.
-	 * @param toRight  True if the old mode is exiting to the right, and the new mode coming in from the left;
-	 *           passed to {@link #animateSwitch(boolean, int)}.
-	 *           Opposite direction from the swipe direction;
-	 *           incrementing the mode passes <tt>false</tt> here.
-	 * @param currMode  The current mode; passed to {@link #animateSwitch(boolean, int)}
-	 * @param newMode  The new mode if confirmed; passed to {@link Clock#changeMode(int)}
-	 */
-	private void popupConfirmChangeMode
-		(final boolean toRight, final int currMode, final int newMode)
-	{
-		AlertDialog.Builder alert = new AlertDialog.Builder(Anstop.this);
-		alert.setTitle(R.string.confirm);
-		alert.setMessage(R.string.confirm_change_mode_message);
-
-		alert.setPositiveButton(R.string.change, new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				clock.changeMode(newMode);
-				if (currMode != newMode)
-				{
-					animateSwitch(toRight, currMode);
-				} else {
-					if (newMode == STOP_LAP)
-						stopwatch();
-					else
-						countdown();
-				}
-			}
-		});
-
-		alert.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) { }
-		});
-
-		alert.show();
-	}
-
-    /**
-     * Animate changing the current mode after a SwipeRight or SwipeLeft gesture.
-     * You must call {@link Clock#changeMode(int)} before calling.  Uses {@link AnimationUtils}.
-     * Calls {@link #updateModeMenuFromCurrent()} for the new mode.
-     *<P>
-     * Note: This method's animations do not cause {@link #onPause()} or {@link #onResume()}.
-     * 
-     * @param toRight  True if the old mode is exiting to the right, and the new mode coming in from the left
-     * @param modeBefore  The previous mode, before {@link Clock#changeMode(int)} was called
-     * @see #onGesturePerformed(GestureOverlayView, Gesture)
-     */
-    private void animateSwitch(final boolean toRight, final int modeBefore) {
-    	
-    	Animation animation = AnimationUtils.makeOutAnimation(this, toRight);
-
-    	ViewGroup layout = getLayout(modeBefore);
-		animation.setAnimationListener(new AnimationListener() {
-			//@Override
-			public void onAnimationStart(Animation animation) {
-			}
-			//@Override
-			public void onAnimationRepeat(Animation animation) {
-			}
-			//@Override
-			public void onAnimationEnd(Animation animation) {
-				switch(clock.getMode()) {
-				case COUNTDOWN:
-					countdown();
-					break;
-				case STOP_LAP:
-					stopwatch();
-					break;
-				}
-				updateModeMenuFromCurrent();
-				Animation inAnim = AnimationUtils.makeInAnimation(Anstop.this, toRight); 
-				getLayout(clock.getMode()).startAnimation(inAnim);
-			}
-		});
-		layout.startAnimation(animation);
-		
-    }
-    
+    }    
 }
