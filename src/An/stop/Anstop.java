@@ -371,11 +371,11 @@ public class Anstop extends Activity {
     	setContentView(R.layout.countdown);
     	
     	//set Views Buttons and Listeners for the new Layout
-    	dsecondsView = (TextView) findViewById(R.id.dsecondsView);
-        secondsView = (TextView) findViewById(R.id.secondsView); 
-        minView = (TextView) findViewById(R.id.minView);
-        hourView = (TextView) findViewById(R.id.hourView);
-        startTimeView = (TextView) findViewById(R.id.countdown_startTimeView);
+    	dsecondsView = (TextView) findViewById(R.id.dseconds_view);
+        secondsView = (TextView) findViewById(R.id.seconds_view); 
+        minView = (TextView) findViewById(R.id.min_view);
+        hourView = (TextView) findViewById(R.id.hour_view);
+        startTimeView = (TextView) findViewById(R.id.countdown_start_time_view);
         setupCommentLongPress(startTimeView);
         lapView = null;
         lapScroll = null;
@@ -383,10 +383,10 @@ public class Anstop extends Activity {
         	wroteStartTime = false;
 
         //set the size
-        TextView sepView = (TextView) findViewById(R.id.sepView1);
+        TextView sepView = (TextView) findViewById(R.id.sep_view1);
         sepView.setTextSize(VIEW_SIZE - 10);
         
-        sepView = (TextView) findViewById(R.id.sepView2);
+        sepView = (TextView) findViewById(R.id.sep_view2);
         sepView.setTextSize(VIEW_SIZE - 10);
         
         dsecondsView.setTextSize(VIEW_SIZE);
@@ -396,9 +396,9 @@ public class Anstop extends Activity {
         startTimeView.setTextSize(VIEW_SIZE - 30);
         
         //adding spinners
-        secSpinner = (Spinner) findViewById(R.id.secSpinner);
-        minSpinner = (Spinner) findViewById(R.id.minSpinner);
-        hourSpinner = (Spinner) findViewById(R.id.hourSpinner);
+        secSpinner = (Spinner) findViewById(R.id.sec_spinner);
+        minSpinner = (Spinner) findViewById(R.id.min_spinner);
+        hourSpinner = (Spinner) findViewById(R.id.hour_spinner);
         
         //creating Adapter for Spinners
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
@@ -411,10 +411,10 @@ public class Anstop extends Activity {
         hourSpinner.setAdapter(adapter);
         
         //set onlicklisteners
-        startButton = (Button) findViewById(R.id.startButton);
+        startButton = (Button) findViewById(R.id.start_button);
         startButton.setOnClickListener(new startButtonListener());
         
-        refreshButton  = (Button) findViewById(R.id.refreshButton);
+        refreshButton  = (Button) findViewById(R.id.refresh_button);
         refreshButton.setOnClickListener(new refreshButtonListener());
 
         // inform clock class to count down now
@@ -445,16 +445,16 @@ public class Anstop extends Activity {
     	setContentView(R.layout.main);
     	
     	//set Views Buttons and Listeners for the new Layout
-    	dsecondsView = (TextView) findViewById(R.id.dsecondsView);
-        secondsView = (TextView) findViewById(R.id.secondsView); 
-        minView = (TextView) findViewById(R.id.minView);
-        hourView = (TextView) findViewById(R.id.hourView);
+    	dsecondsView = (TextView) findViewById(R.id.dseconds_view);
+        secondsView = (TextView) findViewById(R.id.seconds_view); 
+        minView = (TextView) findViewById(R.id.min_view);
+        hourView = (TextView) findViewById(R.id.hour_view);
         
         //set the size
-        TextView sepView = (TextView) findViewById(R.id.sepView1);
+        TextView sepView = (TextView) findViewById(R.id.sep_view1);
         sepView.setTextSize(VIEW_SIZE - 10);
         
-        sepView = (TextView) findViewById(R.id.sepView2);
+        sepView = (TextView) findViewById(R.id.sep_view2);
         sepView.setTextSize(VIEW_SIZE - 10);
         
         dsecondsView.setTextSize(VIEW_SIZE);
@@ -463,21 +463,21 @@ public class Anstop extends Activity {
         hourView.setTextSize(VIEW_SIZE - 30);
 
         startTimeView = null;
-        lapView = (TextView) findViewById(R.id.lapView);
+        lapView = (TextView) findViewById(R.id.lap_view);
         lapView.setTextSize(VIEW_SIZE - 30);
         setupCommentLongPress(lapView);
         wroteStartTime = false;
 
-        lapButton = (Button) findViewById(R.id.lapButton);
+        lapButton = (Button) findViewById(R.id.lap_button);
         lapButton.setOnClickListener(new lapButtonListener());
         
-        startButton = (Button) findViewById(R.id.startButton);
+        startButton = (Button) findViewById(R.id.start_button);
         startButton.setOnClickListener(new startButtonListener());
         
-        resetButton = (Button) findViewById(R.id.resetButton);
+        resetButton = (Button) findViewById(R.id.reset_button);
         resetButton.setOnClickListener(new resetButtonListener());
 
-        lapScroll = (ScrollView) findViewById(R.id.lapScrollView);
+        lapScroll = (ScrollView) findViewById(R.id.lap_scroll_view);
 
         // inform clock of the new mode
         clock.changeMode(STOP_LAP);
