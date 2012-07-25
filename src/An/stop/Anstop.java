@@ -36,8 +36,8 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -60,29 +60,6 @@ import android.widget.Toast;
  */
 public class Anstop extends Activity {
 
-
-	private static final int MENU_MODE_GROUP = 0;
-	/** Menu item to choose {@link #STOP_LAP} mode */
-	private static final int MODE_STOP = 1;
-	// private static final int MODE_LAP = 2;  // removed in r47
-	/** Menu item to choose {@link #COUNTDOWN} mode */
-	private static final int MODE_COUNTDOWN = 3;
-	
-	private static final int MENU_SETTINGS = 4;
-	private static final int SETTINGS_ITEM = 5;
-	
-	private static final int MENU_ABOUT = 6;
-	private static final int ABOUT_ITEM = 7;
-	
-	private static final int MENU_SAVE = 8;
-	private static final int SAVE_ITEM = 9;
-	
-	private static final int MENU_LOAD = 10;
-	private static final int LOAD_ITEM = 11;
-
-	private static final int MENU_SEND = 12;
-	private static final int SEND_ITEM = 13;
-
 	/** Stopwatch/lap mode (and layout), for {@link Clock#getMode()} */
 	public static final int STOP_LAP = 0;  // STOP,LAP combined after v1.4 (see svn r47)
 
@@ -96,8 +73,6 @@ public class Anstop extends Activity {
 	private static final int SAVE_DIALOG = 1;
 	/** Dialog to set the optional {@link #comment} */
 	private static final int COMMENT_DIALOG = 2;
-	
-	private static final int SETTINGS_ACTIVITY = 0;
 	
 	private static final int VIEW_SIZE = 60;
 
@@ -590,30 +565,8 @@ public class Anstop extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-    	
-    	//Save Send & Load
-    	saveMenuItem = menu.add(MENU_SAVE, SAVE_ITEM, 0, R.string.save).setIcon(android.R.drawable.ic_menu_save);
-    	menu.add(MENU_SEND, SEND_ITEM, 0, R.string.send).setIcon(android.R.drawable.ic_menu_send);
-    	menu.add(MENU_LOAD, LOAD_ITEM, 0, R.string.load).setIcon(android.R.drawable.ic_menu_upload);
-    	
-    	//Mode Submenu
-    	SubMenu modeMenu = menu.addSubMenu(R.string.mode).setIcon(android.R.drawable.ic_menu_more);
-    	modeMenu_itemStop = modeMenu.add(MENU_MODE_GROUP, MODE_STOP, 0, R.string.stop);
-    	modeMenu_itemCountdown = modeMenu.add(MENU_MODE_GROUP, MODE_COUNTDOWN, 0, R.string.countdown);
-    	modeMenu.setGroupCheckable(MENU_MODE_GROUP, true, true);
-    	updateModeMenuFromCurrent();
-    	modeMenuItem = modeMenu.getItem();
-    	
-    	if(clock.isStarted) {
-    		modeMenuItem.setEnabled(false);
-    		saveMenuItem.setEnabled(false);
-    	}
-
-    	//Settings Menu
-    	menu.add(MENU_SETTINGS, SETTINGS_ITEM, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
-    	
-    	//about
-    	menu.add(MENU_ABOUT, ABOUT_ITEM, 0, R.string.about).setIcon(android.R.drawable.ic_menu_info_details);
+    	MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
         return true;
     }
 
@@ -638,36 +591,36 @@ public class Anstop extends Activity {
     	Intent i = new Intent();
     	
     	switch (item.getItemId()) {
-        case SETTINGS_ITEM:
+        case R.id.menu_settings:
         	i.setClass(this, SettingsActivity.class);
-        	startActivityForResult(i, SETTINGS_ACTIVITY);
+        	startActivityForResult(i, R.id.menu_settings);
         	  // on result, will call readSettings(false).
         	return true;
 
-        case MODE_STOP:
+        case R.id.menu_item_stop:
         	// TODO mae this via VIewPager
         	stopwatch();
             return true;
             
-        case MODE_COUNTDOWN:
+        case R.id.menu_item_countdown:
         	// TODO mae this via VIewPager
         	countdown();
         	return true;
 
-        case ABOUT_ITEM:
+        case R.id.menu_about:
         	showDialog(ABOUT_DIALOG);
         	return true;
         	
-        case SAVE_ITEM:
+        case R.id.menu_save:
         	showDialog(SAVE_DIALOG);
         	return true;
         	
-        case SEND_ITEM:
+        case R.id.menu_send:
 	        startSendMailIntent
 	            (this, getResources().getString(R.string.app_name) + ": " + currentModeAsString(), createBodyFromCurrent());
         	return true;
 
-        case LOAD_ITEM:
+        case R.id.menu_load:
         	i.setClass(this, LoadActivity.class);
         	startActivity(i);
         	return true;
