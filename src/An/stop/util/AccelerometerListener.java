@@ -19,11 +19,12 @@
  ***************************************************************************/
 
 
-package An.stop;
+package An.stop.util;
 
 
 import java.util.List;
 
+import An.stop.Clock;
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
