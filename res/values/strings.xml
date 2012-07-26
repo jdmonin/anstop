@@ -55,9 +55,9 @@
 <string name="confirm_reset_message">Are you sure you want to reset?</string>
 <string name="lap_display_format">Lap display format</string>
 <string name="lap_display_format_must_select_one">You must select at least one lap display format.</string>
-<string name="lap_format_delta">Delta: (+ h:mm:ss:d)</string>
+<string name="lap_format_delta">Lap: (+ h:mm:ss:d)</string>
 <string name="lap_format_delta_summary">Time since previous lap</string>
-<string name="lap_format_elapsed">Elapsed: h mm:ss:d</string>
+<string name="lap_format_elapsed">Split: h mm:ss:d</string>
 <string name="lap_format_elapsed_summary">Time since the stopwatch began</string>
 <string name="lap_format_wallclock">Wall clock: @ hh:mm</string>
 <string name="lap_format_wallclock_summary">Time of day</string>
