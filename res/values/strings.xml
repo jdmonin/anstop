@@ -54,7 +54,7 @@
 <string name="confirm_refresh_message">Are you sure you want to refresh?</string>
 <string name="confirm_reset_message">Are you sure you want to reset?</string>
 <string name="lap_display_format">Lap display format</string>
-<string name="lap_display_format_must_select_one">You must select at least one lap display format.</string>
+<string name="lap_display_format_must_select_one">You must select at least one display format.</string>
 <string name="lap_format_delta">Lap: (+ h:mm:ss:d)</string>
 <string name="lap_format_delta_summary">Time since previous lap</string>
 <string name="lap_format_elapsed">Split: h mm:ss:d</string>
