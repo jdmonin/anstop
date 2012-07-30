@@ -18,7 +18,7 @@
 <string name="countdown">Countdown</string>
 <string name="countdown_please_set_hms">Please select the hours, minutes, and seconds to count down.</string>
 <string name="countdown_completed_please_refresh">The countdown to 0 has completed.\nPlease hit Refresh to start again.</string>
-<string name="about_dialog">Anstop v1.4, a small application to stop and countdown time.\nCopyright (C) 2009-2012 MJ and Jeremy Monin &lt;anstop.googlecode.com&gt;\nLicense is GPLv2 (http://www.gnu.org/licenses/gpl-2.0.html)\nFor the source code look at anstop.googlecode.com</string>
+<string name="about_dialog">Anstop v1.5, a small application to stop and countdown time.\nCopyright (C) 2009-2012 MJ and Jeremy Monin &lt;anstop.googlecode.com&gt;\nLicense is GPLv2 (http://www.gnu.org/licenses/gpl-2.0.html)\nFor the source code look at anstop.googlecode.com</string>
 
 <string name="save">Save</string>
 <string name="load">Load</string>
