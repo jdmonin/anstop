@@ -705,7 +705,7 @@ public class Clock {
 	 *    sb's appended format will be "lap. #h mm:ss:d"
 	 * @return the number of milliseconds representing the timer's
 	 *    current hours, minutes, seconds, and dsec
-	 * @since 1.xx
+	 * @since 1.5
 	 * @see #getCurrentValue()
 	 */
 	public long getCurrentValueMillis(StringBuilder sb, final boolean withLap)
@@ -785,7 +785,7 @@ public class Clock {
 	 *    will be appended, in the format "lap. #h mm:ss:d"
 	 *    depending on {@link #lapFormatFlags}.
 	 * @return the lap number; the first lap number is 1.
-	 * @since 1.xx
+	 * @since 1.5
 	 */
 	public int lap(StringBuilder sb)
 	{
