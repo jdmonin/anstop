@@ -53,4 +53,12 @@
 <string name="confirm_change_mode_message">Cambiar el modo de que reiniciar el cronómetro.</string>
 <string name="confirm_refresh_message">¿Seguro de que desea recargar?</string>
 <string name="confirm_reset_message">¿Seguro de que desea reajustar?</string>
+<string name="lap_display_format">Formato de visualización de vueltas</string>
+<string name="lap_display_format_must_select_one">Debe seleccionar al menos un formato de visualización.</string>
+<string name="lap_format_delta">Vuelta: (+ h:mm:ss:d)</string>
+<string name="lap_format_delta_summary">El tiempo transcurrido desde la vuelta anterior</string>
+<string name="lap_format_elapsed">División: h mm:ss:d</string>
+<string name="lap_format_elapsed_summary">El tiempo transcurrido desde el cronómetro empezó</string>
+<string name="lap_format_wallclock">Hora: @ hh:mm</string>
+<string name="lap_format_wallclock_summary">La hora del día</string>
 </resources>
