@@ -31,7 +31,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 
 
@@ -345,25 +344,30 @@ public class AnstopDbAdapter {
 				//\n
 				// Laps:
 				// lap info
-				if (fmt_dow_meddate_time == null)
-					fmt_dow_meddate_time = AnstopActivity.buildDateFormatDOWmedium(mContext);
+				// TODO
+				//if (fmt_dow_meddate_time == null)
+				//	fmt_dow_meddate_time = AnstopActivity.buildDateFormatDOWmedium(mContext);
 				StringBuilder sb = new StringBuilder();
 
-				Clock.LapFormatter lapf = new Clock.LapFormatter();
+				//TODO
+				//Clock.LapFormatter lapf = new Clock.LapFormatter();
 
+				
 				// mode
 				sb.append(mContext.getResources().getString(R.string.mode_was));
 				sb.append(' ');
-				if (AnstopActivity.COUNTDOWN == time.getInt(col_mode))
-					sb.append(mContext.getResources().getString(R.string.countdown));
-				else
-					sb.append(mContext.getResources().getString(R.string.stop));
+				//TODO
+				//if (AnstopActivity.COUNTDOWN == time.getInt(col_mode))
+				//	sb.append(mContext.getResources().getString(R.string.countdown));
+				//else
+				//	sb.append(mContext.getResources().getString(R.string.stop));
 				sb.append("\n\n");
 
 				// duration
 				if (! time.isNull(col_elapsed))
 				{
-					lapf.formatTimeLap(sb, false, -1, 0, 0, 0, 0, time.getLong(col_elapsed), 0, null);
+					//TODO
+					//lapf.formatTimeLap(sb, false, -1, 0, 0, 0, 0, time.getLong(col_elapsed), 0, null);
 					sb.append("\n\n");
 				}
 
@@ -397,12 +401,13 @@ public class AnstopDbAdapter {
 					long[] lap_elapsed = new long[lapCount],
 					       lap_systime = new long[lapCount];
 					fetchAllLaps(rowId, lap_elapsed, lap_systime);
-					final int fmtFlags = AnstopActivity.readLapFormatPrefFlags
-						(PreferenceManager.getDefaultSharedPreferences(mContext));
-					if ((fmtFlags != 0) && (fmtFlags != Clock.LAP_FMT_FLAG_ELAPSED))
-						lapf.setLapFormat
-							(fmtFlags, android.text.format.DateFormat.getTimeFormat(mContext));
-					lapf.formatTimeAllLaps(sb, lapCount + 1, lap_elapsed, lap_systime);
+					//TODO
+					//final int fmtFlags = AnstopActivity.readLapFormatPrefFlags
+					//	(PreferenceManager.getDefaultSharedPreferences(mContext));
+//					if ((fmtFlags != 0) && (fmtFlags != Clock.LAP_FMT_FLAG_ELAPSED))
+//						lapf.setLapFormat
+//							(fmtFlags, android.text.format.DateFormat.getTimeFormat(mContext));
+					//lapf.formatTimeAllLaps(sb, lapCount + 1, lap_elapsed, lap_systime);
 				}
 
 				// All done.

@@ -25,6 +25,7 @@ package An.stop;
 
 import An.stop.util.AnstopDbAdapter;
 import An.stop.util.ExportHelper;
+import An.stop.util.Util;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -128,7 +129,7 @@ public class LoadActivity extends ListActivity {
 	    	{
 	    		final String[] columns = dbHelper.getRowAndFormat(info.id);
 	    		if (columns != null)
-	    	        AnstopActivity.startSendMailIntent
+	    	        Util.startSendMailIntent
 		            (this, getResources().getString(R.string.app_name) + ": " + columns[0], columns[1]);
 	    	}
 	    	return true;

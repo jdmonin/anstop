@@ -24,6 +24,7 @@ package An.stop;
 
 import An.stop.util.AnstopDbAdapter;
 import An.stop.util.ExportHelper;
+import An.stop.util.Util;
 import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -122,7 +123,7 @@ public class ShowTimesActivity extends Activity {
 			return true;
 
 		case R.id.menu_send:
-	        AnstopActivity.startSendMailIntent
+	        Util.startSendMailIntent
 	        	(this, getResources().getString(R.string.app_name) + ": " + titleView.getText().toString(), bodyView.getText().toString());
 	    	return true;
 		}

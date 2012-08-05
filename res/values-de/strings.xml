@@ -1,57 +1,60 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    
+
     <string name="app_name">Anstop</string>
-<string name="reset">Zurücksetzen</string>
-<string name="settings">Einstellungen</string>
-<string name="reset_during_count">Kann nicht während des Zählens zurücksetzen!</string>
-<string name="hour"> Stunde(n)</string>
-<string name="motion_checkbox">Beschleunigungssensor zum Starten und Stoppen benutzen</string>
-
-<string name="refresh">Erneuern</string>
-<string name="refresh_during_count">Kann nicht während des Zählens erneuern!</string>
-<string name="start_stop">Start/Stop</string>
-<string name="lap">Runde!</string>
-<string name="laps">Runden:</string>
-<string name="about">Über</string>
-<string name="stop">Stoppuhr</string>
-<string name="countdown">Countdown</string>
-<string name="countdown_please_set_hms">Bitte wählen Sie die Stunden, Minuten und Sekunden.</string>
-<string name="countdown_completed_please_refresh">Der Countdown ist beendet.\nBitte drücken Sie auf Start, um ihn erneut zu starten.</string>
-<string name="about_dialog">Anstop v1.4, Eine kleine Anwendung zum Stoppen der Zeit.\nCopyright (C) 2009-2012 MJ und Jeremy Monin &lt;anstop.googlecode.com&gt;\nLizenz: GPLv2 (http://www.gnu.org/licenses/gpl-2.0.html)\nFür den Quellcode gehen sie bitte auf anstop.googlecode.com</string>
-
-<string name="save">Speichern</string>
-<string name="load">Laden</string>
-<string name="save_dialog">Bitte geben sie einen Namen an um die Zeit zu speichern</string>
-<string name="no_entry">Keine Einträge!</string>
-<string name="delete">Löschen</string>
-<string name="export">Exportieren ...</string>
-<string name="export_succes">Speichern auf der SD Karte war erfolgreich!</string>
-<string name="export_fail">Exportieren fehlgeschlagen!</string>
-<string name="export_all">Alle exportieren ...</string>
-<string name="mode_was">Modus war:</string>
-<string name="start_time">Startzeit war: </string>
-<string name="started_at">Begann um:</string>
-<string name="vibrate_checkbox">Vibriere bei Klick auf Start oder Stopp</string>
-<string name="saved_succes">Erfolgreich gespeichert!</string>
-<string name="mode">Modus</string>
-<string name="cancel">Abbrechen</string>
-<string name="vibrate">Vibrieren</string>
-<string name="motion_sensor">Beschleunigungssensor</string>
-<string name="send">Senden...</string>
-<string name="startup_mode">Modus beim Start</string>
-<string name="hours">Stunden:</string>
-<string name="minutes">Minuten:</string>
-<string name="seconds">Sekunden:</string>
-<string-array name="modes_strings"><item>Stoppuhr</item>
-<item>Countdown</item>
-</string-array>
-<string name="first_start">Tipp: Sie können nach links oder rechts mit dem Finger wischen, um den Modus zu ändern!</string>
-<string name="change">Ändern</string>
-<string name="comment">Kommentar</string>
-<string name="confirm">Bestätigen</string>
-<string name="confirm_change_mode_message">Ändern des Modus wird die Stoppuhr zurückzustellen.</string>
-<string name="confirm_refresh_message">Sind Sie sicher, dass Sie erneuern möchten?</string>
-<string name="confirm_reset_message">Sind Sie sicher, dass Sie zurücksetzen möchten?</string>
+    <string name="reset">Zurücksetzen</string>
+    <string name="settings">Einstellungen</string>
+    <string name="reset_during_count">Kann nicht während des Zählens zurücksetzen!</string>
+    <string name="hour"> Stunde(n)</string>
+    <string name="motion_checkbox">Beschleunigungssensor zum Starten und Stoppen benutzen</string>
+    <string name="refresh">Erneuern</string>
+    <string name="refresh_during_count">Kann nicht während des Zählens erneuern!</string>
+    <string name="start_stop">Start/Stop</string>
+    <string name="lap">Runde!</string>
+    <string name="laps">Runden:</string>
+    <string name="about">Über</string>
+    <string name="stop">Stoppuhr</string>
+    <string name="countdown">Countdown</string>
+    <string name="countdown_please_set_hms">Bitte wählen Sie die Stunden, Minuten und Sekunden.</string>
+    <string name="countdown_completed_please_refresh">Der Countdown ist beendet.\nBitte drücken Sie auf Start, um ihn erneut zu starten.</string>
+    <string name="about_dialog">Anstop v1.4, Eine kleine Anwendung zum Stoppen der Zeit.\nCopyright (C) 2009-2012 MJ und Jeremy Monin </string>
+    <string name="save">Speichern</string>
+    <string name="load">Laden</string>
+    <string name="save_dialog">Bitte geben sie einen Namen an um die Zeit zu speichern</string>
+    <string name="no_entry">Keine Einträge!</string>
+    <string name="delete">Löschen</string>
+    <string name="export">Exportieren ...</string>
+    <string name="export_succes">Speichern auf der SD Karte war erfolgreich!</string>
+    <string name="export_fail">Exportieren fehlgeschlagen!</string>
+    <string name="export_all">Alle exportieren ...</string>
+    <string name="mode_was">Modus war:</string>
+    <string name="start_time">Startzeit war: </string>
+    <string name="started_at">Begann um:</string>
+    <string name="vibrate_checkbox">Vibriere bei Klick auf Start oder Stopp</string>
+    <string name="saved_succes">Erfolgreich gespeichert!</string>
+    <string name="mode">Modus</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="vibrate">Vibrieren</string>
+    <string name="motion_sensor">Beschleunigungssensor</string>
+    <string name="send">Senden...</string>
+    <string name="startup_mode">Modus beim Start</string>
+    <string name="hours">Stunden:</string>
+    <string name="minutes">Minuten:</string>
+    <string name="seconds">Sekunden:</string>
+    <string name="first_start">Tipp: Sie können nach links oder rechts mit dem Finger wischen, um den Modus zu ändern!</string>
+    <string name="change">Ändern</string>
+    <string name="comment">Kommentar</string>
+    <string name="confirm">Bestätigen</string>
+    <string name="confirm_change_mode_message">Ändern des Modus wird die Stoppuhr zurückzustellen.</string>
+    <string name="confirm_refresh_message">Sind Sie sicher, dass Sie erneuern möchten?</string>
+    <string name="confirm_reset_message">Sind Sie sicher, dass Sie zurücksetzen möchten?</string>
+    <string name="lap_display_format">Format für Rundenanzeige</string>
+    <string name="lap_display_format_must_select_one">Sie müssen mindestens ein Format wählen!</string>
+    <string name="lap_format_delta">Runde: (+ h:mm:ss:d)</string>
+    <string name="lap_format_delta_summary">Zeit seit letzter Runde</string>
+    <string name="lap_format_elapsed">Getrennt: h mm:ss:d</string>
+    <string name="lap_format_elapsed_summary">Zeit seit Beginn der Stoppuhr</string>
+    <string name="lap_format_wallclock">Uhrzeit: @ hh:mm</string>
+    <string name="lap_format_wallclock_summary">Zeit des Tages</string>
 
 </resources>
