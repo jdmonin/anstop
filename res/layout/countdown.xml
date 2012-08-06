@@ -10,154 +10,17 @@
         android:layout_height="fill_parent"
         android:orientation="vertical" >
 
-        <LinearLayout
-            android:id="@+id/mainLayout"
+        <include
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical" >
+            android:layout_height="wrap_content"
+            layout="@layout/clock" />
 
-            <LinearLayout
-                android:id="@+id/LinearLayout03"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/hour_view"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:text="0" />
-
-                <TextView
-                    android:id="@+id/Text_view03"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/hour" >
-                </TextView>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/LinearLayout02"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/min_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="00" >
-                </TextView>
-
-                <TextView
-                    android:id="@+id/sep_view1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=":" >
-                </TextView>
-
-                <TextView
-                    android:id="@+id/seconds_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="00" >
-                </TextView>
-
-                <TextView
-                    android:id="@+id/sep_view2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=":" >
-                </TextView>
-
-                <TextView
-                    android:id="@+id/dseconds_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0" >
-                </TextView>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/LinearLayout01"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <Button
-                    android:id="@+id/start_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/start_stop" >
-                </Button>
-
-                <Button
-                    android:id="@+id/refresh_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/refresh" >
-                </Button>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/LinearLayout04"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/TextView04"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/hours" >
-                </TextView>
-
-                <Spinner
-                    android:id="@+id/hour_spinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" >
-                </Spinner>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/LinearLayout05"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/TextView05"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/minutes" >
-                </TextView>
-
-                <Spinner
-                    android:id="@+id/min_spinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" >
-                </Spinner>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/LinearLayout06"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/TextView06"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/seconds" >
-                </TextView>
-
-                <Spinner
-                    android:id="@+id/sec_spinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" >
-                </Spinner>
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/countdown_start_time_view"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/refresh_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/refresh" >
+        </Button>
     </LinearLayout>
 
 </ScrollView>

@@ -75,7 +75,7 @@ public class AnstopActivity extends FragmentActivity {
         	
 			@Override
 			public int getCount() {
-				return 2;
+				return fragments.length;
 			}
 			
 			@Override
