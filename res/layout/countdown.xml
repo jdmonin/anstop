@@ -2,18 +2,41 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/countDownLayout"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:fillViewport="true" >
+    android:layout_height="fill_parent" >
 
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical" >
 
         <include
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             layout="@layout/clock" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <An.stop.widgets.CountdownPicker
+                android:id="@+id/hour_picker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+            </An.stop.widgets.CountdownPicker>
+
+            <An.stop.widgets.CountdownPicker
+                android:id="@+id/minute_picker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+            </An.stop.widgets.CountdownPicker>
+
+            <An.stop.widgets.CountdownPicker
+                android:id="@+id/second_picker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+            </An.stop.widgets.CountdownPicker>
+        </LinearLayout>
 
         <Button
             android:id="@+id/refresh_button"
