@@ -15,7 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-public class CountdownPicker extends LinearLayout implements OnClickListener {
+public class TimePicker extends LinearLayout implements OnClickListener {
 	
 	private static String TAG = "CountdownPicker";
 	
@@ -26,10 +26,10 @@ public class CountdownPicker extends LinearLayout implements OnClickListener {
 	private NumberFormat nf;
 	private int maximumValue = 60;
 
-	public CountdownPicker(Context context, AttributeSet attrs) {
+	public TimePicker(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		LayoutInflater inflater = LayoutInflater.from(context);
-        inflater.inflate(R.layout.countdown_picker, this, true);
+        inflater.inflate(R.layout.time_picker, this, true);
         
         nf = NumberFormat.getInstance();
         nf.setMinimumIntegerDigits(2);

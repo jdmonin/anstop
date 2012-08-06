@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/stopwatch_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <include
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            layout="@layout/clock" />
+
+        <Button
+            android:id="@+id/lap_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lap" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/lap_list_view"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent" >
+    </ListView>
+
+</LinearLayout>

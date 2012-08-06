@@ -16,4 +16,10 @@
         android:layout_height="wrap_content"
         android:text="@string/lap" />
 
+    <ListView
+        android:id="@+id/lap_list_view"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+    </ListView>
+
 </LinearLayout>

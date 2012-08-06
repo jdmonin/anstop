@@ -1,25 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:orientation="horizontal" >
 
-    <Button
-        android:id="@+id/add_button"
-        android:layout_width="fill_parent"
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="+" />
+        android:orientation="vertical" >
 
-    <EditText
-        android:id="@+id/countdown_edittext"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
-    </EditText>
+        <TextView
+            android:id="@+id/Text_view03"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/hours"
+            android:textSize="16dp" >
+        </TextView>
 
-    <Button
-        android:id="@+id/minus_button"
-        android:layout_width="fill_parent"
+        <An.stop.widgets.TimePicker
+            android:id="@+id/hour_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </An.stop.widgets.TimePicker>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="-" />
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/Text_view03"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/minutes"
+            android:textSize="16dp" >
+        </TextView>
+
+        <An.stop.widgets.TimePicker
+            android:id="@+id/minute_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </An.stop.widgets.TimePicker>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/Text_view03"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/seconds"
+            android:textSize="16dp" >
+        </TextView>
+
+        <An.stop.widgets.TimePicker
+            android:id="@+id/second_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </An.stop.widgets.TimePicker>
+    </LinearLayout>
 
 </LinearLayout>

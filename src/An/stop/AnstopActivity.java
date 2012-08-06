@@ -55,6 +55,8 @@ public class AnstopActivity extends FragmentActivity {
 	
 	private static final int ABOUT_DIALOG = 0;
 	private static final int SAVE_DIALOG = 1;
+	
+	ViewPager viewPager;
 
 	/**
 	 * Called when the activity is first created.
@@ -67,7 +69,7 @@ public class AnstopActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
+        viewPager = (ViewPager) findViewById(R.id.view_pager);
         
         viewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
         	
@@ -93,7 +95,7 @@ public class AnstopActivity extends FragmentActivity {
      *
      * @param isStartup Are we just starting now, not already running?
      */
-    private void readSettings(final boolean isStartup) {
+    private void readSettings() {
 
     	
     }
@@ -107,47 +109,45 @@ public class AnstopActivity extends FragmentActivity {
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent i = new Intent();
-        
-        switch (item.getItemId()) {
-        case R.id.menu_settings:
-                i.setClass(this, SettingsActivity.class);
-                startActivityForResult(i, R.id.menu_settings);
-                  // on result, will call readSettings(false).
-                return true;
+    	Intent i = new Intent();
 
-        case R.id.menu_item_stop:
-                // TODO mae this via VIewPager
-                //stopwatch();
-            return true;
-            
-        case R.id.menu_item_countdown:
-                // TODO mae this via VIewPager
-                //countdown();
-                return true;
+    	switch (item.getItemId()) {
+    	case R.id.menu_settings:
+    		i.setClass(this, SettingsActivity.class);
+    		startActivityForResult(i, R.id.menu_settings);
+    		// on result, will call readSettings(false).
+    		return true;
 
-        case R.id.menu_about:
-                showDialog(ABOUT_DIALOG);
-                return true;
-                
-        case R.id.menu_save:
-                showDialog(SAVE_DIALOG);
-                return true;
-                
-        case R.id.menu_send:
-        	//TODO
-                Util.startSendMailIntent
-                    (this, getResources().getString(R.string.app_name) + ": " , ""); //currentModeAsString(), createBodyFromCurrent());
-                return true;
+    	case R.id.menu_item_stop:
+    		viewPager.setCurrentItem(0);
+    		return true;
 
-        case R.id.menu_load:
-                i.setClass(this, LoadActivity.class);
-                startActivity(i);
-                return true;
-                
-        
-        }
-        return false;
+    	case R.id.menu_item_countdown:
+    		viewPager.setCurrentItem(1);
+    		return true;
+
+    	case R.id.menu_about:
+    		showDialog(ABOUT_DIALOG);
+    		return true;
+
+    	case R.id.menu_save:
+    		showDialog(SAVE_DIALOG);
+    		return true;
+
+    	case R.id.menu_send:
+    		//TODO
+    		Util.startSendMailIntent
+    		(this, getResources().getString(R.string.app_name) + ": " , ""); //currentModeAsString(), createBodyFromCurrent());
+    		return true;
+
+    	case R.id.menu_load:
+    		i.setClass(this, LoadActivity.class);
+    		startActivity(i);
+    		return true;
+
+
+    	}
+    	return false;
     }
 
     @Override
@@ -203,7 +203,7 @@ public class AnstopActivity extends FragmentActivity {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	readSettings(false); // because only settingsactivity is started for
+    	readSettings(); // because only settingsactivity is started for
     	// result, we can launch that without checking the parameters.
     }
 }

@@ -66,4 +66,26 @@ import android.os.Bundle;
  */
 public class Clock {
 	
+	private Thread clockThread;
+	private int hours;
+	private int minutes;
+	private int seconds;
+	
+	public Clock() {
+		
+	}
+	
+	public void count() {
+		if(isStarted()) return;
+		
+		
+	}
+	
+	public void stop() {
+		clockThread.interrupt();
+	}
+	
+	public boolean isStarted() {
+		return clockThread.isAlive();
+	}
 }
