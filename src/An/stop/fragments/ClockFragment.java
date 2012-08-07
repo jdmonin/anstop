@@ -33,7 +33,7 @@ public abstract class ClockFragment extends Fragment {
 				minutesView.setText(nf.format(msg.arg2));
 				break;
 			case Clock.UPDATE_HOURS:
-				hoursView.setText(nf.format(msg.arg2));
+				hoursView.setText("" + msg.arg2);
 				break;
 			}
 		}

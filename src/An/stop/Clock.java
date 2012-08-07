@@ -121,7 +121,7 @@ public class Clock {
 				callback.sendMessage(message);
 			}
 			
-			Log.d(TAG, "returng from stopwatch thread");
+			Log.d(TAG, "returning from stopwatch thread");
 		}
 		
 	};
@@ -142,7 +142,7 @@ public class Clock {
 				
 				
 				if(deciSeconds == 0) {
-					deciSeconds = 10;
+					deciSeconds = 9;
 					
 					if(seconds == 0) {
 						if(minutes == 0) {
@@ -151,19 +151,35 @@ public class Clock {
 								break;
 							} else {
 								hours--;
-								minutes = 60;
+								minutes = 59;
+								seconds = 59;
 								
 								message = Message.obtain();
 								message.arg1 = UPDATE_HOURS;
 								message.arg2 = hours;
 								callback.sendMessage(message);
+								
+								message = Message.obtain();
+								message.arg1 = UPDATE_MINUTES;
+								message.arg2 = minutes;
+								callback.sendMessage(message);
+								
+								message = Message.obtain();
+								message.arg1 = UPDATE_SECONDS;
+								message.arg2 = seconds;
+								callback.sendMessage(message);
 							}
 						} else {
 							minutes--;
-							seconds = 60;
+							seconds = 59;
 							
 							message = Message.obtain();
 							message.arg1 = UPDATE_MINUTES;
+							message.arg2 = minutes;
+							callback.sendMessage(message);
+							
+							message = Message.obtain();
+							message.arg1 = UPDATE_SECONDS;
 							message.arg2 = seconds;
 							callback.sendMessage(message);
 						}
@@ -174,17 +190,23 @@ public class Clock {
 						message.arg1 = UPDATE_SECONDS;
 						message.arg2 = seconds;
 						callback.sendMessage(message);
+						
+						message = Message.obtain();
+						message.arg1 = UPDATE_DECI_SECONDS;
+						message.arg2 = deciSeconds;
+						callback.sendMessage(message);
 					}
+				} else {
+	
+					deciSeconds--;
+					message = Message.obtain();
+					message.arg1 = UPDATE_DECI_SECONDS;
+					message.arg2 = deciSeconds;
+					callback.sendMessage(message);
 				}
-
-				deciSeconds--;
-				message = Message.obtain();
-				message.arg1 = UPDATE_DECI_SECONDS;
-				message.arg2 = deciSeconds;
-				callback.sendMessage(message);
 			}
 			
-			Log.d(TAG, "returng from countdown thread");
+			Log.d(TAG, "returning from countdown thread");
 		}
 		
 	};
