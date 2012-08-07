@@ -26,6 +26,8 @@ package An.stop;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 
 /**
  * Timer object and thread.
@@ -66,26 +68,109 @@ import android.os.Bundle;
  */
 public class Clock {
 	
+	private Runnable stopwatchRunnable = new Runnable() {
+		
+		public void run() {
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY);
+			Message message;
+			while(!clockThread.isInterrupted()) {
+				
+				try {
+					Thread.sleep(100);
+				} catch ( InterruptedException e) {
+					return;
+				}
+				
+				deciSeconds++;
+				
+				if(deciSeconds == 10) {
+					deciSeconds = 0;
+					seconds++;
+					
+					message = Message.obtain();
+					message.arg1 = UPDATE_SECONDS;
+					message.arg2 = seconds;
+					callback.sendMessage(message);
+					
+					if(seconds == 60) {
+						seconds = 0;
+						minutes++;
+						
+						message = Message.obtain();
+						message.arg1 = UPDATE_MINUTES;
+						message.arg2 = seconds;
+						callback.sendMessage(message);
+						
+						if(minutes == 60) {
+							minutes = 0;
+							hours++;
+							
+							message = Message.obtain();
+							message.arg1 = UPDATE_HOURS;
+							message.arg2 = hours;
+							callback.sendMessage(message);
+						}
+					}
+					
+					message = Message.obtain();
+					message.arg1 = UPDATE_DECI_SECONDS;
+					message.arg2 = seconds;
+					callback.sendMessage(message);
+				}
+				
+				message = Message.obtain();
+				message.arg1 = UPDATE_DECI_SECONDS;
+				message.arg2 = deciSeconds;
+				callback.sendMessage(message);
+			}
+		}
+		
+	};
+	
+	public static final int MODE_STOPWATCH = 0;
+	public static final int MODE_COUNTDOWN = 1;
+	
+	public static final int UPDATE_DECI_SECONDS = 0;
+	public static final int UPDATE_SECONDS = 1;
+	public static final int UPDATE_MINUTES = 2;
+	public static final int UPDATE_HOURS = 3;
+	
+	private int mode;
+	private Handler callback;
+	
 	private Thread clockThread;
 	private int hours;
 	private int minutes;
 	private int seconds;
+	private int deciSeconds;
 	
-	public Clock() {
+	public Clock(int mode, Handler callback) {
+		this.mode = mode;
+		this.callback = callback;
 		
+		if(mode != MODE_STOPWATCH && mode != MODE_STOPWATCH)
+			throw new IllegalArgumentException("mode has illegal value!");
 	}
 	
 	public void count() {
-		if(isStarted()) return;
+		if(isActive()) return;
 		
+		switch(mode) {
+		case MODE_STOPWATCH:
+			clockThread = new Thread(stopwatchRunnable);
+			break;
+		case MODE_COUNTDOWN:
+			break;
+		}
 		
+		clockThread.start();
 	}
 	
 	public void stop() {
 		clockThread.interrupt();
 	}
 	
-	public boolean isStarted() {
-		return clockThread.isAlive();
+	public boolean isActive() {
+		return clockThread != null && clockThread.isAlive();
 	}
 }

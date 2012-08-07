@@ -42,7 +42,7 @@ public class TimePicker extends LinearLayout implements OnClickListener {
         minusButton.setOnClickListener(this);
         
         numberEditText.setKeyListener(new DigitsKeyListener() {
-
+        	@Override
         	public CharSequence filter(CharSequence source, int start, int end,
         			Spanned dest, int dstart, int dend) {
         		Log.d(TAG, "filter ...");
