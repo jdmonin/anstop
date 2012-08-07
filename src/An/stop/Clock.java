@@ -144,6 +144,19 @@ public class Clock {
 	private int seconds;
 	private int deciSeconds;
 	
+	/**
+	 * Constructs a new Clock Object. The mode indicates how the clock 
+	 * should count. If there is an update, the background Thread will
+	 * send a Message to the handler. The first Argument of the Message
+	 * <code>(msg.arg1)</code> will be what should be updated (eg. 
+	 * {@link #UPDATE_DECI_SECONDS}), the second to which value.
+	 * @param mode {@link #MODE_STOPWATCH} or {@link #MODE_COUNTDOWN}
+	 * @param callback Handler to update UI
+	 * @see #UPDATE_DECI_SECONDS
+	 * @see #UPDATE_SECONDS
+	 * @see #UPDATE_MINUTES
+	 * @see #UPDATE_HOURS
+	 */
 	public Clock(int mode, Handler callback) {
 		this.mode = mode;
 		this.callback = callback;
@@ -152,6 +165,9 @@ public class Clock {
 			throw new IllegalArgumentException("mode has illegal value!");
 	}
 	
+	/**
+	 * Starts counting in a background thread
+	 */
 	public void count() {
 		if(isActive()) return;
 		
@@ -166,11 +182,30 @@ public class Clock {
 		clockThread.start();
 	}
 	
+	/**
+	 * Interrupts the counting Thread.
+	 */
 	public void stop() {
 		clockThread.interrupt();
 	}
 	
+	/**
+	 * Indicates if the Clock is currently counting and a Background Thread
+	 * is running.
+	 * @return true if active
+	 */
 	public boolean isActive() {
 		return clockThread != null && clockThread.isAlive();
+	}
+	
+	/**
+	 * Resets hours, minutes, seconds, and deci seconds to zero.
+	 * Only resets, if not running (ie. {@link #isActive()} returns 
+	 * <code>false</code>)
+	 */
+	public void reset() {
+		if(isActive()) return;
+		
+		hours = minutes = seconds = deciSeconds = 0;
 	}
 }

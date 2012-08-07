@@ -4,6 +4,7 @@ import java.text.NumberFormat;
 
 import An.stop.Clock;
 import An.stop.R;
+import An.stop.util.Util;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -42,18 +43,18 @@ public abstract class ClockFragment extends Fragment {
 	private int layoutId;
 	
 	private Button startButton;
-	private TextView hoursView;
-	private TextView minutesView;
-	private TextView secondsView;
-	private TextView deciSecondsView;
+	private Button resetButton;
+	protected TextView hoursView;
+	protected TextView minutesView;
+	protected TextView secondsView;
+	protected TextView deciSecondsView;
 	
 	private NumberFormat nf;
 	
 	ClockFragment(int layoutId, int mode) {
 		clock = new Clock(mode, updateHandler);
 		this.layoutId = layoutId;
-		nf = NumberFormat.getInstance();
-		nf.setMinimumIntegerDigits(2);
+		nf = Util.getTwoDigitFormat();
 	}
 	
 	@Override
@@ -62,6 +63,7 @@ public abstract class ClockFragment extends Fragment {
         // Inflate the layout for this fragment
 		View view = inflater.inflate(layoutId, container, false);
 		startButton = (Button) view.findViewById(R.id.start_button);
+		resetButton = (Button) view.findViewById(R.id.reset_button);
 		hoursView = (TextView) view.findViewById(R.id.hour_view);
 		minutesView = (TextView) view.findViewById(R.id.min_view);
 		secondsView = (TextView) view.findViewById(R.id.seconds_view);
@@ -78,6 +80,20 @@ public abstract class ClockFragment extends Fragment {
 			
 		});
 		
+		resetButton.setOnClickListener(new OnClickListener() {
+			
+			public void onClick(View v) {
+				if(!clock.isActive())
+					reset();
+			}
+		});
+		
         return view;
     }
+	
+	/**
+	 * Resets the current time. This can be to zero or maybe to the time
+	 * which should be counted down!
+	 */
+	protected abstract void reset();
 }

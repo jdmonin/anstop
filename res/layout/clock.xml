@@ -29,14 +29,13 @@
         android:id="@+id/LinearLayout02"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" >
-
+
         <TextView
             android:id="@+id/min_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="00"
             android:textSize="64dp" >
-
         </TextView>
 
         <TextView
@@ -82,6 +81,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/start_stop" >
+        </Button>
+
+        <Button
+            android:id="@+id/reset_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reset" >
         </Button>
     </LinearLayout>
 

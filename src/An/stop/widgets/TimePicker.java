@@ -3,6 +3,7 @@
 import java.text.NumberFormat;
 
 import An.stop.R;
+import An.stop.util.Util;
 import android.content.Context;
 import android.text.Spanned;
 import android.text.method.DigitsKeyListener;
@@ -31,8 +32,7 @@ public class TimePicker extends LinearLayout implements OnClickListener {
 		LayoutInflater inflater = LayoutInflater.from(context);
         inflater.inflate(R.layout.time_picker, this, true);
         
-        nf = NumberFormat.getInstance();
-        nf.setMinimumIntegerDigits(2);
+        nf = Util.getTwoDigitFormat();
         
         addButton = (Button) findViewById(R.id.add_button);
         minusButton = (Button) findViewById(R.id.minus_button);

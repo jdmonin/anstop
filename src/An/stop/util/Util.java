@@ -1,5 +1,7 @@
 package An.stop.util;
 
+import java.text.NumberFormat;
+
 import An.stop.R;
 import android.app.Activity;
 import android.content.Intent;
@@ -26,5 +28,11 @@ public class Util {
             emailIntent.setType("text/plain");
             // use Chooser, in case multiple apps are installed
             caller.startActivity(Intent.createChooser(emailIntent, caller.getResources().getString(R.string.send)));  
+    }
+    
+    public static NumberFormat getTwoDigitFormat() {
+    	NumberFormat format = NumberFormat.getInstance();
+    	format.setMinimumIntegerDigits(2);
+    	return format;
     }
 }
