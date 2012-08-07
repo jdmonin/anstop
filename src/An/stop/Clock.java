@@ -28,6 +28,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 /**
  * Timer object and thread.
@@ -67,18 +68,19 @@ import android.os.Message;
  * and the nested class {@link Clock.LapFormatter}.
  */
 public class Clock {
-	
+
 	private Runnable stopwatchRunnable = new Runnable() {
 		
 		public void run() {
 			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY);
 			Message message;
+			
 			while(!clockThread.isInterrupted()) {
 				
 				try {
 					Thread.sleep(100);
-				} catch ( InterruptedException e) {
-					return;
+				} catch (InterruptedException e) {
+					break;
 				}
 				
 				deciSeconds++;
@@ -111,11 +113,6 @@ public class Clock {
 							callback.sendMessage(message);
 						}
 					}
-					
-					message = Message.obtain();
-					message.arg1 = UPDATE_DECI_SECONDS;
-					message.arg2 = seconds;
-					callback.sendMessage(message);
 				}
 				
 				message = Message.obtain();
@@ -123,9 +120,76 @@ public class Clock {
 				message.arg2 = deciSeconds;
 				callback.sendMessage(message);
 			}
+			
+			Log.d(TAG, "returng from stopwatch thread");
 		}
 		
 	};
+	
+	private Runnable countdownRunnable = new Runnable() {
+
+		public void run() {
+			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY);
+			Message message;
+			
+			while(!clockThread.isInterrupted()) {
+				
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					break;
+				}
+				
+				
+				if(deciSeconds == 0) {
+					deciSeconds = 10;
+					
+					if(seconds == 0) {
+						if(minutes == 0) {
+							if(hours == 0) {
+								// we are finished
+								break;
+							} else {
+								hours--;
+								minutes = 60;
+								
+								message = Message.obtain();
+								message.arg1 = UPDATE_HOURS;
+								message.arg2 = hours;
+								callback.sendMessage(message);
+							}
+						} else {
+							minutes--;
+							seconds = 60;
+							
+							message = Message.obtain();
+							message.arg1 = UPDATE_MINUTES;
+							message.arg2 = seconds;
+							callback.sendMessage(message);
+						}
+					} else {
+						seconds--;
+						
+						message = Message.obtain();
+						message.arg1 = UPDATE_SECONDS;
+						message.arg2 = seconds;
+						callback.sendMessage(message);
+					}
+				}
+
+				deciSeconds--;
+				message = Message.obtain();
+				message.arg1 = UPDATE_DECI_SECONDS;
+				message.arg2 = deciSeconds;
+				callback.sendMessage(message);
+			}
+			
+			Log.d(TAG, "returng from countdown thread");
+		}
+		
+	};
+	
+	private static final String TAG = "Clock";
 	
 	public static final int MODE_STOPWATCH = 0;
 	public static final int MODE_COUNTDOWN = 1;
@@ -161,7 +225,7 @@ public class Clock {
 		this.mode = mode;
 		this.callback = callback;
 		
-		if(mode != MODE_STOPWATCH && mode != MODE_STOPWATCH)
+		if(mode != MODE_STOPWATCH && mode != MODE_COUNTDOWN)
 			throw new IllegalArgumentException("mode has illegal value!");
 	}
 	
@@ -176,6 +240,7 @@ public class Clock {
 			clockThread = new Thread(stopwatchRunnable);
 			break;
 		case MODE_COUNTDOWN:
+			clockThread = new Thread(countdownRunnable);
 			break;
 		}
 		
@@ -207,5 +272,32 @@ public class Clock {
 		if(isActive()) return;
 		
 		hours = minutes = seconds = deciSeconds = 0;
+	}
+	
+	/**
+	 * Sets the values from which should be counted down.
+	 * @param hours
+	 * @param minutes
+	 * @param seconds
+	 */
+	public void setCountdown(int hours, int minutes, int seconds) {
+		this.hours = hours;
+		this.minutes = minutes;
+		this.seconds = seconds;
+	}
+	
+	/**
+	 * Returns the current time values. The first value are the hours,
+	 * the second the minutes, third the seconds and the last the deci
+	 * seconds.
+	 * <p>
+	 * That means for example you can get with <code>getValues()[2]</code>
+	 * the current seconds.
+	 * <p>
+	 * Attention: Not thread safe!
+	 * @return array representing the current values.
+	 */
+	public int[] getValues() {
+		return new int[] { hours, minutes, seconds, deciSeconds };
 	}
 }

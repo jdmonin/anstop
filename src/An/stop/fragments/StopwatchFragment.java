@@ -11,11 +11,12 @@ public class StopwatchFragment extends ClockFragment {
 		super(R.layout.stopwatch, Clock.MODE_STOPWATCH);
 	}
 	
+	@Override
 	protected void reset() {
 		clock.reset();
-		hoursView.setText("0");
-		minutesView.setText("00");
-		secondsView.setText("00");
-		deciSecondsView.setText("0");
+		setDeciSeconds(0);
+		setSeconds(0);
+		setMinutes(0);
+		setHours(0);
 	}
 }

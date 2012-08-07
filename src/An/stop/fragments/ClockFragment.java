@@ -44,10 +44,10 @@ public abstract class ClockFragment extends Fragment {
 	
 	private Button startButton;
 	private Button resetButton;
-	protected TextView hoursView;
-	protected TextView minutesView;
-	protected TextView secondsView;
-	protected TextView deciSecondsView;
+	private TextView hoursView;
+	private TextView minutesView;
+	private TextView secondsView;
+	private TextView deciSecondsView;
 	
 	private NumberFormat nf;
 	
@@ -72,10 +72,7 @@ public abstract class ClockFragment extends Fragment {
 		startButton.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View v) {
-				if(!clock.isActive())
-					clock.count();
-				else
-					clock.stop();
+				count();
 			}
 			
 		});
@@ -90,6 +87,45 @@ public abstract class ClockFragment extends Fragment {
 		
         return view;
     }
+	
+	protected void count() {
+		if(!clock.isActive())
+			clock.count();
+		else
+			clock.stop();
+	}
+	
+	/**
+	 * Sets the text of deci seconds TextView to the specified value.
+	 * @param value
+	 */
+	protected void setDeciSeconds(int value) {
+		deciSecondsView.setText("" + value);
+	}
+	
+	/**
+	 * Sets the text of seconds TextView to the specified value.
+	 * @param value
+	 */
+	protected void setSeconds(int value) {
+		secondsView.setText(nf.format(value));
+	}
+	
+	/**
+	 * Sets the text of minutes TextView to the specified value.
+	 * @param value
+	 */
+	protected void setMinutes(int value) {
+		minutesView.setText(nf.format(value));
+	}
+	
+	/**
+	 * Sets the text of hours TextView to the specified value.
+	 * @param value
+	 */
+	protected void setHours(int value) {
+		hoursView.setText("" + value);
+	}
 	
 	/**
 	 * Resets the current time. This can be to zero or maybe to the time
