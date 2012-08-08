@@ -85,23 +85,13 @@ public class Clock {
 				
 				deciSeconds++;
 				
-				if(deciSeconds == 10) {
+				if(deciSeconds == 9) {
 					deciSeconds = 0;
 					seconds++;
-					
-					message = Message.obtain();
-					message.arg1 = UPDATE_SECONDS;
-					message.arg2 = seconds;
-					callback.sendMessage(message);
 					
 					if(seconds == 60) {
 						seconds = 0;
 						minutes++;
-						
-						message = Message.obtain();
-						message.arg1 = UPDATE_MINUTES;
-						message.arg2 = seconds;
-						callback.sendMessage(message);
 						
 						if(minutes == 60) {
 							minutes = 0;
@@ -112,7 +102,17 @@ public class Clock {
 							message.arg2 = hours;
 							callback.sendMessage(message);
 						}
+						
+						message = Message.obtain();
+						message.arg1 = UPDATE_MINUTES;
+						message.arg2 = minutes;
+						callback.sendMessage(message);
 					}
+					
+					message = Message.obtain();
+					message.arg1 = UPDATE_SECONDS;
+					message.arg2 = seconds;
+					callback.sendMessage(message);
 				}
 				
 				message = Message.obtain();

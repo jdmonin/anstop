@@ -56,6 +56,8 @@ public class AnstopActivity extends FragmentActivity {
 	private static final int ABOUT_DIALOG = 0;
 	private static final int SAVE_DIALOG = 1;
 	
+	private static final int SETTINGS_REQUEST_CODE = 0; 
+	
 	ViewPager viewPager;
 
 	/**
@@ -114,7 +116,7 @@ public class AnstopActivity extends FragmentActivity {
     	switch (item.getItemId()) {
     	case R.id.menu_settings:
     		i.setClass(this, SettingsActivity.class);
-    		startActivityForResult(i, R.id.menu_settings);
+    		startActivityForResult(i, SETTINGS_REQUEST_CODE);
     		// on result, will call readSettings(false).
     		return true;
 
