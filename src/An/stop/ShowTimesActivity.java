@@ -1,9 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2009-2010 by mj                                         *
- *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010,2012 Jeremy Monin            *
- *     jeremy@nand.net                                                     *
- *                                                                         *
+ *   Copyright (C) 2009-2012 by mj <fakeacc.mj@gmail.com>, 				   *
+ *   							Jeremy Monin <jeremy@nand.net>             *
+ *                                                          			   *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *

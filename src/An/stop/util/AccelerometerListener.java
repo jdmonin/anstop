@@ -1,7 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2009 by mj   										   *
- *   fakeacc.mj@gmail.com  												   *
- *                                                                         *
+ *   Copyright (C) 2009-2012 by mj <fakeacc.mj@gmail.com>, 				   *
+ *   							Jeremy Monin <jeremy@nand.net>             *
+ *                                                          			   *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
@@ -30,6 +30,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+/**
+ * Helper class which indicates when the phone has been shaken.
+ */
 public class AccelerometerListener implements SensorEventListener {
 	
 	interface OnPhoneShakenListener {
@@ -71,7 +74,6 @@ public class AccelerometerListener implements SensorEventListener {
 	public void onAccuracyChanged(Sensor s, int value) {
 		
 	}
-	
 	
 	public void onSensorChanged(SensorEvent event) {
 		

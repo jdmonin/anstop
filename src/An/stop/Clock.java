@@ -1,9 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2009-2011 by mj   									   *
- *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010-2012 Jeremy Monin            *
- *    jeremy@nand.net                                                      *
- *                                                                         *
+ *   Copyright (C) 2009-2012 by mj <fakeacc.mj@gmail.com>, 				   *
+ *   							Jeremy Monin <jeremy@nand.net>             *
+ *                                                          			   *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
@@ -33,9 +31,9 @@ import android.util.Log;
 /**
  * Timer object and thread.
  *<P>
- * Has two modes ({@link AnstopActivity#STOP_LAP} and {@link AnstopActivity#COUNTDOWN}); clock's mode field is {@link #v}.
- * Has accessible fields for the current {@link #hour}, {@link #min}, {@link #sec}, {@link #dsec}.
- * Has a link to the {@link #parent} Anstop, and will sometimes read or set parent's text field contents.
+ * Has two modes ({@link #MODE_STOPWATCH} and {@link #MODE_COUNTDOWN}); clock's mode field is {@link #mode}.
+ * Access to the fields via {@link #getValues()}
+ * The Handler {@link #callback} will be notified about changes.
  *<P>
  * Because of device power saving, there are methods to adjust the clock
  * when our app is paused/resumed: {@link #onAppPause()}, {@link #onAppResume()}.
@@ -52,12 +50,13 @@ import android.util.Log;
  *        the initial values.  That is, the clock is paused, and the user
  *        can start it to continue counting.
  *</UL>
- * You can examine the current state by reading {@link #isStarted} and {@link #wasStarted}.
- * To reset the clock again, and/or change the mode, call {@link #reset(int, int, int, int)}.
+ * You can examine the current state by reading {@link #isActive} and {@link #wasStarted}.
+ * To reset the clock again, and/or change the mode, call {@link #reset()} or 
+ * {@link #setCountdown(int, int, int)}.
  *<P>
- * When running, a thread either counts up ({@link #threadS}) or down ({@link #threadC}),
- * firing every 100ms.  The {@link #parent}'s hour:minute:second.dsec displays are updated
- * through {@link #hourh} and the rest of the handlers here.
+ * When running, a thread ({@link #clockThread}) either counts up ({@link #stopwatchRunnable})
+ * or down ({@link #countdownRunnable}), firing every 100ms. The {@link #callback} handler will be
+ * notified. See {@link #Clock(int, Handler)} for details about how.
  *<P>
  * To lap, call {@link #lap(StringBuffer)}.  Note that persisting the lap data arrays
  * at Activity.onStop must be done in {@link AnstopActivity}, not here.
@@ -306,6 +305,7 @@ public class Clock {
 		this.hours = hours;
 		this.minutes = minutes;
 		this.seconds = seconds;
+		deciSeconds = 0;
 	}
 	
 	/**

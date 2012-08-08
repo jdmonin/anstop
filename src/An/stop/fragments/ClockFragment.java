@@ -1,7 +1,28 @@
+/***************************************************************************
+ *   Copyright (C) 2009-2012 by mj <fakeacc.mj@gmail.com>, 				   *
+ *   							Jeremy Monin <jeremy@nand.net>             *
+ *                                                          			   *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
 package An.stop.fragments;
 
 import java.text.NumberFormat;
 
+import An.stop.AnstopActivity;
 import An.stop.Clock;
 import An.stop.R;
 import An.stop.util.Util;
@@ -16,6 +37,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+/**
+ * Abstract class which represents a Fragment played in the ViewPager from
+ * {@link AnstopActivity}.
+ * Handles basic things like starting and stopping the clock ({@link #clock},
+ * and updating the labels ({@link #hoursView}, ...).
+ */
 public abstract class ClockFragment extends Fragment {
 	
 	private Handler updateHandler = new Handler() {
@@ -51,6 +78,11 @@ public abstract class ClockFragment extends Fragment {
 	
 	private NumberFormat nf;
 	
+	/**
+	 * Initializes a new ClockFragment.
+	 * @param layoutId the layout which should be inflated
+	 * @param mode The mode the clock should have
+	 */
 	ClockFragment(int layoutId, int mode) {
 		clock = new Clock(mode, updateHandler);
 		this.layoutId = layoutId;
@@ -88,6 +120,11 @@ public abstract class ClockFragment extends Fragment {
         return view;
     }
 	
+	/**
+	 * Starts counting if clock is not active
+	 * @see #clock
+	 * @see Clock#isActive()
+	 */
 	protected void count() {
 		if(!clock.isActive())
 			clock.count();
