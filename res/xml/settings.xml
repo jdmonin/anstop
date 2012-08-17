@@ -9,38 +9,52 @@
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 2 of the License, or
  (at your option) any later version.
- -->
-<PreferenceScreen
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:key="first_preferencescreen">
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="first_preferencescreen" >
+
     <CheckBoxPreference
-            android:key="use_motion_sensor" android:summary="@string/motion_checkbox" android:title="@string/motion_sensor"/>
-     <CheckBoxPreference
-            android:key="vibrate" android:summary="@string/vibrate_checkbox" android:title="@string/vibrate" android:defaultValue="true"/>
-<ListPreference android:key="mode" android:title="@string/startup_mode" android:entryValues="@array/modes_ints" android:summary="@string/startup_mode" android:defaultValue="0" android:entries="@array/modes_strings"></ListPreference>
-<PreferenceCategory
-    android:title="@string/lap_display_format">
-	<!--
+        android:key="use_motion_sensor"
+        android:summary="@string/motion_checkbox"
+        android:title="@string/motion_sensor" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="vibrate"
+        android:summary="@string/vibrate_checkbox"
+        android:title="@string/vibrate" />
+
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/modes_strings"
+        android:key="mode"
+        android:summary="@string/startup_mode"
+        android:title="@string/startup_mode" >
+    </ListPreference>
+
+    <PreferenceCategory android:title="@string/lap_display_format" >
+
+        <!--
 		Note: code and xml both assume that by default,
 		lap_format_elapsed is the only flag set.
-	 -->
-	<!-- Anstop.LAP_FMT_FLAG_ELAPSED -->
-	<CheckBoxPreference
-		android:key="lap_format_elapsed"
-		android:defaultValue="true"
-		android:title="@string/lap_format_elapsed"
-		android:summary="@string/lap_format_elapsed_summary" />
-	<!-- Anstop.LAP_FMT_FLAG_DELTA -->
-	<CheckBoxPreference
-		android:key="lap_format_delta"
-		android:defaultValue="false"
-		android:title="@string/lap_format_delta"
-		android:summary="@string/lap_format_delta_summary" />
-	<!-- Anstop.LAP_FMT_FLAG_SYSTIME -->
-	<CheckBoxPreference
-		android:key="lap_format_systime"
-		android:defaultValue="false"
-		android:title="@string/lap_format_wallclock"
-		android:summary="@string/lap_format_wallclock_summary" />
-</PreferenceCategory>
-</PreferenceScreen> 
+        -->
+        <!-- Anstop.LAP_FMT_FLAG_ELAPSED -->
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="lap_format_elapsed"
+            android:summary="@string/lap_format_elapsed_summary"
+            android:title="@string/lap_format_elapsed" />
+        <!-- Anstop.LAP_FMT_FLAG_DELTA -->
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="lap_format_delta"
+            android:summary="@string/lap_format_delta_summary"
+            android:title="@string/lap_format_delta" />
+        <!-- Anstop.LAP_FMT_FLAG_SYSTIME -->
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="lap_format_systime"
+            android:summary="@string/lap_format_wallclock_summary"
+            android:title="@string/lap_format_wallclock" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -119,7 +119,41 @@ public abstract class ClockFragment extends Fragment {
 		
         return view;
     }
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		restoreState();
+	}
 	
+	@Override
+	public void onPause() {
+		super.onPause();
+		saveState();
+	}
+	
+	/**
+	 * Saves the state to the Preferences.
+	 */
+	protected void saveState() {
+		clock.saveState(getActivity());
+	}
+	
+	/**
+	 * Restores the state from the Preferences.
+	 */
+	protected void restoreState() {
+		clock.restoreState(getActivity());
+		
+		// make values visible to user
+		int[] times = clock.getValues();
+		
+		setHours(times[0]);
+		setMinutes(times[1]);
+		setSeconds(times[2]);
+		setDeciSeconds(times[3]);
+	}
+
 	/**
 	 * Starts counting if clock is not active
 	 * @see #clock

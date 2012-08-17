@@ -22,6 +22,8 @@
 package An.stop;
 
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -195,8 +197,8 @@ public class Clock {
 						message.arg2 = deciSeconds;
 						callback.sendMessage(message);
 					}
+					
 				} else {
-	
 					deciSeconds--;
 					message = Message.obtain();
 					message.arg1 = UPDATE_DECI_SECONDS;
@@ -220,6 +222,15 @@ public class Clock {
 	public static final int UPDATE_MINUTES = 2;
 	public static final int UPDATE_HOURS = 3;
 	
+//	private static final String HOURS = "hours";
+//	private static final String MINUTES = "minutes";
+//	private static final String SECONDS = "seconds";
+//	private static final String DECI_SECONDS = "deci_seconds";
+	private static final String ACTIVE = "is_active";
+	private static final String STARTED = "started_at";
+	
+	private String clockName;
+	
 	private int mode;
 	private Handler callback;
 	
@@ -228,6 +239,9 @@ public class Clock {
 	private int minutes;
 	private int seconds;
 	private int deciSeconds;
+	
+	private long timeStarted;
+	
 	
 	/**
 	 * Constructs a new Clock Object. The mode indicates how the clock 
@@ -246,6 +260,8 @@ public class Clock {
 		this.mode = mode;
 		this.callback = callback;
 		
+		clockName = "clock_" + mode;
+		
 		if(mode != MODE_STOPWATCH && mode != MODE_COUNTDOWN)
 			throw new IllegalArgumentException("mode has illegal value!");
 	}
@@ -255,6 +271,9 @@ public class Clock {
 	 */
 	public void count() {
 		if(isActive()) return;
+		
+		if(timeStarted == 0)
+			timeStarted = System.currentTimeMillis();
 		
 		switch(mode) {
 		case MODE_STOPWATCH:
@@ -272,7 +291,8 @@ public class Clock {
 	 * Interrupts the counting Thread.
 	 */
 	public void stop() {
-		clockThread.interrupt();
+		if(isActive())
+			clockThread.interrupt();
 	}
 	
 	/**
@@ -292,7 +312,7 @@ public class Clock {
 	public void reset() {
 		if(isActive()) return;
 		
-		hours = minutes = seconds = deciSeconds = 0;
+		timeStarted = hours = minutes = seconds = deciSeconds = 0;
 	}
 	
 	/**
@@ -306,6 +326,7 @@ public class Clock {
 		this.minutes = minutes;
 		this.seconds = seconds;
 		deciSeconds = 0;
+		timeStarted = 0;
 	}
 	
 	/**
@@ -313,13 +334,51 @@ public class Clock {
 	 * the second the minutes, third the seconds and the last the deci
 	 * seconds.
 	 * <p>
-	 * That means for example you can get with <code>getValues()[2]</code>
-	 * the current seconds.
+	 * That means, for example you can get the current seconds with 
+	 * <code>getValues()[2]</code>
 	 * <p>
 	 * Attention: Not thread safe!
 	 * @return array representing the current values.
 	 */
 	public int[] getValues() {
 		return new int[] { hours, minutes, seconds, deciSeconds };
+	}
+
+	/**
+	 * Saves the state to the Preferences. Stops the clock.
+	 */
+	public void saveState(Context context) {
+		SharedPreferences.Editor editor = context.getSharedPreferences(clockName, Activity.MODE_PRIVATE).edit();
+		
+		editor.putBoolean(ACTIVE, isActive());
+		editor.putLong(STARTED, timeStarted);
+		
+		// stop the clock now
+		stop();
+		
+		if(!editor.commit())
+			Log.e(TAG, "could not sae state!");
+	}
+	
+	/**
+	 * Restores the state from the Preferences. Starts the clock if was active.
+	 */
+	public void restoreState(Context context) {
+		SharedPreferences prefs = context.getSharedPreferences(clockName, Activity.MODE_PRIVATE);
+		
+		boolean wasActive = prefs.getBoolean(ACTIVE, false);
+		timeStarted = prefs.getLong(STARTED, 0);
+		
+		if(timeStarted == 0) return;
+		
+		long diffTime = System.currentTimeMillis() - timeStarted;
+		
+		deciSeconds = (int) (diffTime / 100) % 10;
+		seconds = (int) (diffTime / 1000) % 60 ;
+		minutes = (int) ((diffTime / (1000 * 60)) % 60);
+		hours   = (int) (diffTime / (1000 * 60 * 60));
+		
+		if(wasActive)
+			count();
 	}
 }
