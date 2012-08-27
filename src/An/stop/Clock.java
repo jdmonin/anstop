@@ -222,12 +222,12 @@ public class Clock {
 	public static final int UPDATE_MINUTES = 2;
 	public static final int UPDATE_HOURS = 3;
 	
-//	private static final String HOURS = "hours";
-//	private static final String MINUTES = "minutes";
-//	private static final String SECONDS = "seconds";
-//	private static final String DECI_SECONDS = "deci_seconds";
+	private static final String HOURS = "hours";
+	private static final String MINUTES = "minutes";
+	private static final String SECONDS = "seconds";
+	private static final String DECI_SECONDS = "deci_seconds";
 	private static final String ACTIVE = "is_active";
-	private static final String STARTED = "started_at";
+	private static final String PAUSED = "paused_at";
 	
 	private String clockName;
 	
@@ -239,8 +239,6 @@ public class Clock {
 	private int minutes;
 	private int seconds;
 	private int deciSeconds;
-	
-	private long timeStarted;
 	
 	
 	/**
@@ -271,9 +269,6 @@ public class Clock {
 	 */
 	public void count() {
 		if(isActive()) return;
-		
-		if(timeStarted == 0)
-			timeStarted = System.currentTimeMillis();
 		
 		switch(mode) {
 		case MODE_STOPWATCH:
@@ -312,7 +307,7 @@ public class Clock {
 	public void reset() {
 		if(isActive()) return;
 		
-		timeStarted = hours = minutes = seconds = deciSeconds = 0;
+		hours = minutes = seconds = deciSeconds = 0;
 	}
 	
 	/**
@@ -322,11 +317,13 @@ public class Clock {
 	 * @param seconds
 	 */
 	public void setCountdown(int hours, int minutes, int seconds) {
+		if(mode != MODE_COUNTDOWN)
+			throw new IllegalArgumentException("mode is not set to countdown!");
+		
 		this.hours = hours;
 		this.minutes = minutes;
 		this.seconds = seconds;
 		deciSeconds = 0;
-		timeStarted = 0;
 	}
 	
 	/**
@@ -351,13 +348,18 @@ public class Clock {
 		SharedPreferences.Editor editor = context.getSharedPreferences(clockName, Activity.MODE_PRIVATE).edit();
 		
 		editor.putBoolean(ACTIVE, isActive());
-		editor.putLong(STARTED, timeStarted);
-		
+
 		// stop the clock now
 		stop();
+		editor.putLong(PAUSED, System.currentTimeMillis());
+		
+		editor.putInt(DECI_SECONDS, deciSeconds);
+		editor.putInt(SECONDS, seconds);
+		editor.putInt(MINUTES, minutes);
+		editor.putInt(HOURS, hours);
 		
 		if(!editor.commit())
-			Log.e(TAG, "could not sae state!");
+			Log.e(TAG, "could not save state!");
 	}
 	
 	/**
@@ -367,17 +369,44 @@ public class Clock {
 		SharedPreferences prefs = context.getSharedPreferences(clockName, Activity.MODE_PRIVATE);
 		
 		boolean wasActive = prefs.getBoolean(ACTIVE, false);
-		timeStarted = prefs.getLong(STARTED, 0);
+		long pausedTime = prefs.getLong(PAUSED, 0);
 		
-		if(timeStarted == 0) return;
+		if(pausedTime == 0) {
+			Log.i(TAG, "paused time = 0");
+			return;
+		}
 		
-		long diffTime = System.currentTimeMillis() - timeStarted;
+		long diffTime = System.currentTimeMillis() - pausedTime;
 		
 		deciSeconds = (int) (diffTime / 100) % 10;
 		seconds = (int) (diffTime / 1000) % 60 ;
 		minutes = (int) ((diffTime / (1000 * 60)) % 60);
 		hours   = (int) (diffTime / (1000 * 60 * 60));
 		
+		
+		if(!wasActive) {
+			// we are not active, so we just use the saved values
+			deciSeconds = prefs.getInt(DECI_SECONDS, 0);
+			seconds = prefs.getInt(SECONDS, 0);
+			minutes = prefs.getInt(MINUTES, 0);
+			hours = prefs.getInt(HOURS, 0);
+		} else {
+			if(mode == MODE_STOPWATCH) {
+				// just add the values
+				deciSeconds += prefs.getInt(DECI_SECONDS, 0);
+				seconds += prefs.getInt(SECONDS, 0);
+				minutes += prefs.getInt(MINUTES, 0);
+				hours += prefs.getInt(HOURS, 0);
+			} else {
+				// just subtract the values
+				deciSeconds = prefs.getInt(DECI_SECONDS, 0) - deciSeconds;
+				seconds = prefs.getInt(SECONDS, 0) - seconds;
+				minutes = prefs.getInt(MINUTES, 0) - minutes;
+				hours = prefs.getInt(HOURS, 0) - hours;
+			}
+		}
+		
+		// start clock again if needed
 		if(wasActive)
 			count();
 	}
