@@ -342,7 +342,13 @@ public class Clock {
 	}
 
 	/**
-	 * Saves the state to the Preferences. Stops the clock.
+	 * Saves the state to the Preferences. Stops the clock. Saves the current
+	 * time vaules like minutes, seconds, hours and deci seconds. Saves the state
+	 * ({@link #isActive()}) and the time this method was called 
+	 * ({@link System#currentTimeMillis()}). Prints an error to android Log system
+	 * if saving fails.
+	 * @param context Context needed to access settings.
+	 * @see #restoreState(Context)
 	 */
 	public void saveState(Context context) {
 		SharedPreferences.Editor editor = context.getSharedPreferences(clockName, Activity.MODE_PRIVATE).edit();
@@ -364,6 +370,8 @@ public class Clock {
 	
 	/**
 	 * Restores the state from the Preferences. Starts the clock if was active.
+	 * @param context Context needed to access settings.
+	 * @see #saveState(Context)
 	 */
 	public void restoreState(Context context) {
 		SharedPreferences prefs = context.getSharedPreferences(clockName, Activity.MODE_PRIVATE);

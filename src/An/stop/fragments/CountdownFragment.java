@@ -23,7 +23,10 @@ package An.stop.fragments;
 import An.stop.Clock;
 import An.stop.R;
 import An.stop.widgets.TimePicker;
+import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +37,12 @@ import android.view.ViewGroup;
  * @see Clock#MODE_COUNTDOWN
  */
 public class CountdownFragment extends ClockFragment {
+	
+	private static final String TAG = "CD_FRAG";
+	
+	private static final String SEC_PICKER = "sec_picker";
+	private static final String MIN_PICKER = "min_picker";
+	private static final String HOURS_PICKER = "hours_picker";
 	
 	private TimePicker secondsPicker;
 	private TimePicker minutesPicker;
@@ -55,6 +64,30 @@ public class CountdownFragment extends ClockFragment {
 		return view;
 	}
 	
+	@Override
+	protected void saveState() {
+		super.saveState();
+		
+		// we also save the current picker values
+		SharedPreferences.Editor editor = getActivity().getSharedPreferences(TAG, Activity.MODE_PRIVATE).edit();
+		editor.putInt(SEC_PICKER, secondsPicker.getValue());
+		editor.putInt(MIN_PICKER, minutesPicker.getValue());
+		editor.putInt(HOURS_PICKER, hoursPicker.getValue());
+		
+		if(!editor.commit())
+			Log.e(TAG, "could not save state!");
+	}
+	
+	@Override
+	protected void restoreState() {
+		super.restoreState();
+		SharedPreferences prefs = getActivity().getSharedPreferences(TAG, Activity.MODE_PRIVATE);
+		
+		secondsPicker.setValue(prefs.getInt(SEC_PICKER, 0));
+		minutesPicker.setValue(prefs.getInt(MIN_PICKER, 0));
+		hoursPicker.setValue(prefs.getInt(HOURS_PICKER, 0));
+	}
+
 	@Override
 	protected void count() {
 		// check if the values are okay

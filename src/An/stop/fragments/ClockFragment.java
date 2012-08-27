@@ -133,14 +133,20 @@ public abstract class ClockFragment extends Fragment {
 	}
 	
 	/**
-	 * Saves the state to the Preferences.
+	 * Saves the current state to the Preferences.
+	 * <br>
+	 * If you override this method be sure to call this method!
+	 * @see #restoreState()
 	 */
 	protected void saveState() {
 		clock.saveState(getActivity());
 	}
 	
 	/**
-	 * Restores the state from the Preferences.
+	 * Restores the previous state from the Preferences.
+	 * <br>
+	 * If you override this method be sure to call this method!
+	 * @see #saveState()
 	 */
 	protected void restoreState() {
 		clock.restoreState(getActivity());

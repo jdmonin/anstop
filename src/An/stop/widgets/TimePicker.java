@@ -117,6 +117,7 @@ public class TimePicker extends LinearLayout implements OnClickListener {
 
 	public void setValue(int value) {
 		this.value = value;
+		setNumberText();
 	}
 
 	public int getMaximumValue() {
