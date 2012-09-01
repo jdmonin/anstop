@@ -22,6 +22,12 @@ package An.stop.fragments;
 
 import An.stop.Clock;
 import An.stop.R;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ListView;
 
 /**
  * Fragment for the stopwatch mode. Uses the stopwatch layout.
@@ -29,9 +35,23 @@ import An.stop.R;
  * @see Clock#MODE_STOPWATCH
  */
 public class StopwatchFragment extends ClockFragment {
+	
+	ListView lapListView;
+	Button lapButton;
 
 	public StopwatchFragment() {
 		super(R.layout.stopwatch, Clock.MODE_STOPWATCH);
+	}
+	
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = super.onCreateView(inflater, container, savedInstanceState);
+		
+		lapListView = (ListView) view.findViewById(R.id.lap_list_view);
+		lapButton = (Button) view.findViewById(R.id.lap_button);
+		
+		return view;
 	}
 	
 	@Override

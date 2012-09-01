@@ -86,7 +86,7 @@ public class Clock {
 				
 				deciSeconds++;
 				
-				if(deciSeconds == 9) {
+				if(deciSeconds == 10) {
 					deciSeconds = 0;
 					seconds++;
 					
@@ -386,36 +386,47 @@ public class Clock {
 		
 		long diffTime = System.currentTimeMillis() - pausedTime;
 		
-		deciSeconds = (int) (diffTime / 100) % 10;
-		seconds = (int) (diffTime / 1000) % 60 ;
-		minutes = (int) ((diffTime / (1000 * 60)) % 60);
-		hours   = (int) (diffTime / (1000 * 60 * 60));
+
+		// restore the values
+		deciSeconds = prefs.getInt(DECI_SECONDS, 0);
+		seconds = prefs.getInt(SECONDS, 0);
+		minutes = prefs.getInt(MINUTES, 0);
+		hours = prefs.getInt(HOURS, 0);
 		
-		
-		if(!wasActive) {
-			// we are not active, so we just use the saved values
-			deciSeconds = prefs.getInt(DECI_SECONDS, 0);
-			seconds = prefs.getInt(SECONDS, 0);
-			minutes = prefs.getInt(MINUTES, 0);
-			hours = prefs.getInt(HOURS, 0);
-		} else {
+		// if clock was active we have to add/substract the diff time
+		if(wasActive) {
+			
+			int diffDeciSeconds = (int) (diffTime / 100) % 10;
+			int diffSeconds = (int) (diffTime / 1000) % 60;
+			int diffMinutes = (int) ((diffTime / (1000 * 60)) % 60);
+			int diffHours   = (int) (diffTime / (1000 * 60 * 60));
+			
 			if(mode == MODE_STOPWATCH) {
 				// just add the values
-				deciSeconds += prefs.getInt(DECI_SECONDS, 0);
-				seconds += prefs.getInt(SECONDS, 0);
-				minutes += prefs.getInt(MINUTES, 0);
-				hours += prefs.getInt(HOURS, 0);
+				deciSeconds += diffDeciSeconds;
+				seconds += diffSeconds;
+				minutes += diffMinutes;
+				hours += diffHours;
+				
+				// due to inaccuracy we have to check range
+				deciSeconds = Math.min(deciSeconds, 9);
+				seconds = Math.min(seconds, 59);
+				minutes = Math.min(minutes, 59);
 			} else {
 				// just subtract the values
-				deciSeconds = prefs.getInt(DECI_SECONDS, 0) - deciSeconds;
-				seconds = prefs.getInt(SECONDS, 0) - seconds;
-				minutes = prefs.getInt(MINUTES, 0) - minutes;
-				hours = prefs.getInt(HOURS, 0) - hours;
+				deciSeconds -= diffDeciSeconds;
+				seconds -= diffSeconds;
+				minutes -= diffMinutes;
+				hours -= diffHours;
+				
+				// due to inaccuracy we have to check range
+				deciSeconds = Math.max(deciSeconds, 0);
+				seconds = Math.max(seconds, 0);
+				minutes = Math.max(minutes, 0);
 			}
-		}
-		
-		// start clock again if needed
-		if(wasActive)
+			
+			// start again
 			count();
+		}
 	}
 }

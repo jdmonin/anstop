@@ -49,6 +49,10 @@ public class Util {
             caller.startActivity(Intent.createChooser(emailIntent, caller.getResources().getString(R.string.send)));  
     }
     
+    /**
+     * Returns a NumberFormat with two minimum digits.
+     * @return the NumberFormat
+     */
     public static NumberFormat getTwoDigitFormat() {
     	NumberFormat format = NumberFormat.getInstance();
     	format.setMinimumIntegerDigits(2);
