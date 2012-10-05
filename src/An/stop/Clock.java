@@ -22,6 +22,10 @@
 package An.stop;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -69,6 +73,13 @@ import android.util.Log;
  * and the nested class {@link Clock.LapFormatter}.
  */
 public class Clock {
+	
+	public static class Lap {
+		public int hours;
+		public int minutes;
+		public int seconds;
+		public int deciSeconds;
+	}
 
 	private Runnable stopwatchRunnable = new Runnable() {
 		
@@ -239,6 +250,9 @@ public class Clock {
 	private int minutes;
 	private int seconds;
 	private int deciSeconds;
+	//private long timeStarted;
+	
+	List<Lap> laps;
 	
 	
 	/**
@@ -255,13 +269,16 @@ public class Clock {
 	 * @see #UPDATE_HOURS
 	 */
 	public Clock(int mode, Handler callback) {
+		if(mode != MODE_STOPWATCH && mode != MODE_COUNTDOWN)
+			throw new IllegalArgumentException("mode has illegal value!");
+		
 		this.mode = mode;
 		this.callback = callback;
 		
 		clockName = "clock_" + mode;
 		
-		if(mode != MODE_STOPWATCH && mode != MODE_COUNTDOWN)
-			throw new IllegalArgumentException("mode has illegal value!");
+		if(mode == MODE_STOPWATCH)
+			laps = new ArrayList<Lap>();
 	}
 	
 	/**
@@ -269,6 +286,9 @@ public class Clock {
 	 */
 	public void count() {
 		if(isActive()) return;
+		
+		//if(timeStarted == 0)
+		//	timeStarted = System.currentTimeMillis();
 		
 		switch(mode) {
 		case MODE_STOPWATCH:
@@ -308,6 +328,9 @@ public class Clock {
 		if(isActive()) return;
 		
 		hours = minutes = seconds = deciSeconds = 0;
+		//timeStarted = 0;
+		
+		laps.clear();
 	}
 	
 	/**
@@ -318,7 +341,7 @@ public class Clock {
 	 */
 	public void setCountdown(int hours, int minutes, int seconds) {
 		if(mode != MODE_COUNTDOWN)
-			throw new IllegalArgumentException("mode is not set to countdown!");
+			throw new IllegalStateException("mode is not set to countdown!");
 		
 		this.hours = hours;
 		this.minutes = minutes;
@@ -428,5 +451,19 @@ public class Clock {
 			// start again
 			count();
 		}
+	}
+	
+	public Lap newLap() {
+		Lap l = new Lap();
+		l.hours = hours;
+		l.minutes = minutes;
+		l.seconds = seconds;
+		l.deciSeconds = deciSeconds;
+		laps.add(l);
+		return l;
+	}
+	
+	public List<Lap> getLaps() {
+		return Collections.unmodifiableList(laps);
 	}
 }

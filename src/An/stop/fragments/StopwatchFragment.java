@@ -22,9 +22,11 @@ package An.stop.fragments;
 
 import An.stop.Clock;
 import An.stop.R;
+import An.stop.widgets.LapAdapter;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
@@ -38,6 +40,7 @@ public class StopwatchFragment extends ClockFragment {
 	
 	ListView lapListView;
 	Button lapButton;
+	LapAdapter lapAdapter;
 
 	public StopwatchFragment() {
 		super(R.layout.stopwatch, Clock.MODE_STOPWATCH);
@@ -51,6 +54,21 @@ public class StopwatchFragment extends ClockFragment {
 		lapListView = (ListView) view.findViewById(R.id.lap_list_view);
 		lapButton = (Button) view.findViewById(R.id.lap_button);
 		
+		lapButton.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View v) {
+				clock.newLap();
+				lapAdapter.notifyDataSetChanged();
+			}
+			
+		});
+
+		lapAdapter = new LapAdapter(getActivity(), clock.getLaps());
+		lapListView.setAdapter(lapAdapter);
+		// scroll to bottom if lap added
+		lapListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+		lapListView.setStackFromBottom(true);
+		
 		return view;
 	}
 	
@@ -61,5 +79,6 @@ public class StopwatchFragment extends ClockFragment {
 		setSeconds(0);
 		setMinutes(0);
 		setHours(0);
+		lapAdapter.notifyDataSetChanged();
 	}
 }
