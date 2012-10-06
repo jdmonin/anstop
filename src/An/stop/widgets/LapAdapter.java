@@ -50,7 +50,7 @@ public class LapAdapter extends ArrayAdapter<Lap> {
 		
 		ViewHolder holder = (ViewHolder) rowView.getTag();
 		holder.numberTextView.setText((position + 1) + ".");
-		holder.lapTextView.setText(lap.hours > 0 ? (lap.hours + "h ") : "" + nf.format(lap.minutes) + ":" + nf.format(lap.seconds) + ":" + lap.deciSeconds);
+		holder.lapTextView.setText((lap.hours > 0 ? (lap.hours + "h ") : "") + nf.format(lap.minutes) + ":" + nf.format(lap.seconds) + ":" + lap.deciSeconds);
 		
 		if(position > 0) {
 			Lap previousLap = laps.get(position - 1);
@@ -62,7 +62,7 @@ public class LapAdapter extends ArrayAdapter<Lap> {
 			int diffMinutes = (int) ((diffTime / (10 * 60)) % 60);
 			int diffHours   = (int) (diffTime / (1000 * 60 * 60));
 
-			holder.previousTextView.setText(diffHours > 0 ? (diffHours + "h ") : "" + nf.format(diffMinutes) + ":" + nf.format(diffSeconds) + ":" + diffDeciSeconds);
+			holder.previousTextView.setText((lap.hours > 0 ? (diffHours + "h ") : "") + nf.format(diffMinutes) + ":" + nf.format(diffSeconds) + ":" + diffDeciSeconds);
 		} else {
 			holder.previousTextView.setText("");
 		}
