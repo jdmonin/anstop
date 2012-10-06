@@ -7,6 +7,7 @@ import An.stop.Clock.Lap;
 import An.stop.R;
 import An.stop.util.Util;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +35,7 @@ public class LapAdapter extends ArrayAdapter<Lap> {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+		long time = System.currentTimeMillis();
 		Lap lap = laps.get(position);
 		View rowView = convertView;
 		
@@ -48,7 +50,7 @@ public class LapAdapter extends ArrayAdapter<Lap> {
 		
 		ViewHolder holder = (ViewHolder) rowView.getTag();
 		holder.numberTextView.setText((position + 1) + ".");
-		holder.lapTextView.setText(nf.format(lap.minutes) + ":" + nf.format(lap.seconds) + ":" + lap.deciSeconds);
+		holder.lapTextView.setText(lap.hours > 0 ? (lap.hours + "h ") : "" + nf.format(lap.minutes) + ":" + nf.format(lap.seconds) + ":" + lap.deciSeconds);
 		
 		if(position > 0) {
 			Lap previousLap = laps.get(position - 1);
@@ -65,6 +67,7 @@ public class LapAdapter extends ArrayAdapter<Lap> {
 			holder.previousTextView.setText("");
 		}
 		
+		Log.d("LapAdapter", "getView took: " + (System.currentTimeMillis() - time) + " ms");
 		return rowView;
 	}
 }
