@@ -52,13 +52,15 @@ public class LapAdapter extends ArrayAdapter<Lap> {
 		
 		if(position > 0) {
 			Lap previousLap = laps.get(position - 1);
-			int now = lap.deciSeconds + 10 * lap.seconds + 100 * lap.minutes;
-			int prev = previousLap.deciSeconds + 10 * previousLap.seconds + 100 * previousLap.minutes;
-			int diff = now - prev;
-			int diffMinutes = diff / 100;
-			int diffSeconds = diff / 10 % 100;
-			int diffDeciSeconds = diff % 10;
-			holder.previousTextView.setText(nf.format(diffMinutes) + ":" + nf.format(diffSeconds) + ":" + diffDeciSeconds);
+			int now = lap.deciSeconds + 10 * lap.seconds + 60 * 10 * lap.minutes;
+			int prev = previousLap.deciSeconds + 10 * previousLap.seconds + 60 * 10 * previousLap.minutes;
+			int diffTime = now - prev;
+			int diffDeciSeconds = diffTime % 10;
+			int diffSeconds = (int) (diffTime / 10) % 60;
+			int diffMinutes = (int) ((diffTime / (10 * 60)) % 60);
+			int diffHours   = (int) (diffTime / (1000 * 60 * 60));
+
+			holder.previousTextView.setText(diffHours > 0 ? (diffHours + "h ") : "" + nf.format(diffMinutes) + ":" + nf.format(diffSeconds) + ":" + diffDeciSeconds);
 		} else {
 			holder.previousTextView.setText("");
 		}
