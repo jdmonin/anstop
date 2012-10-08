@@ -42,12 +42,11 @@ import android.widget.Toast;
 /**
  * Anstop's main activity, showing the current getClock(), lap times, etc.
  *<P>
- * Uses either of 2 layouts, depending on the {@link getClock()#getMode() current mode}:
- * <tt>main</tt> or <tt>countdown</tt>.
- * Main implements {@link #STOP_LAP} which includes Lap mode.
- *<P>
- * Many fields' visibility are non-private for use by
- * {@link getClock()#fillSaveState(Bundle)} and {@link getClock()#restoreFromSaveState(Bundle)}.
+ * Shows two Fragments ({@link StopwatchFragment} and @link {@link CountdownFragment})
+ * in a ViewPager ({@link AnstopActivity#viewPager})
+ * <p>
+ * Creates also the menu and deals with selected items and loads the users settings
+ * (@link {@link AnstopActivity#readSettings()}).
  */
 public class AnstopActivity extends FragmentActivity {
 	

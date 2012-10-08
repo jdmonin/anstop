@@ -74,6 +74,9 @@ import android.util.Log;
  */
 public class Clock {
 	
+	/**
+	 * A simple class which holds the values for a lap.
+	 */
 	public static class Lap {
 		public int hours;
 		public int minutes;
@@ -241,7 +244,9 @@ public class Clock {
 	private static final String PAUSED = "paused_at";
 	
 	private String clockName;
-	
+	/**
+	 * {@link #MODE_STOPWATCH} or {@link #MODE_COUNTDOWN}
+	 */
 	private int mode;
 	private Handler callback;
 	
@@ -252,7 +257,7 @@ public class Clock {
 	private int deciSeconds;
 	//private long timeStarted;
 	
-	List<Lap> laps;
+	private List<Lap> laps;
 	
 	
 	/**
@@ -453,6 +458,12 @@ public class Clock {
 		}
 	}
 	
+	/**
+	 * Creates a new lap with the current time values and puts
+	 * it in the private list {@link Clock#laps}.
+	 * @return The newly created lap.
+	 * @see #getLaps()
+	 */
 	public Lap newLap() {
 		Lap l = new Lap();
 		l.hours = hours;
@@ -463,6 +474,11 @@ public class Clock {
 		return l;
 	}
 	
+	/**
+	 * Returns the list the current laps are put in.
+	 * @return Unmodifiable List of laps
+	 * @see #newLap()
+	 */
 	public List<Lap> getLaps() {
 		return Collections.unmodifiableList(laps);
 	}

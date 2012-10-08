@@ -3,6 +3,7 @@ package An.stop.widgets;
 import java.text.NumberFormat;
 import java.util.List;
 
+import An.stop.Clock;
 import An.stop.Clock.Lap;
 import An.stop.R;
 import An.stop.util.Util;
@@ -14,8 +15,21 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+/**
+ * An adapter to show a List of {@link Clock.Lap}.
+ * <p>
+ * It uses the {@link R.layout#lap_row} layout to display each row.
+ * The difference between two sequential laps is calculated on the
+ * fly and shown in another little TextView.
+ * @see Clock.Lap
+ * @see ArrayAdapter
+ */
 public class LapAdapter extends ArrayAdapter<Lap> {
 	
+	/**
+	 * View Holder for performance reasons. We can
+	 * easily use convertView with this class!
+	 */
 	private static class ViewHolder {
 		public TextView lapTextView;
 		public TextView previousTextView;
