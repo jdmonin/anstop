@@ -54,8 +54,8 @@ public class LapAdapter extends ArrayAdapter<Lap> {
 		
 		if(position > 0) {
 			Lap previousLap = laps.get(position - 1);
-			int now = lap.deciSeconds + 10 * lap.seconds + 60 * 10 * lap.minutes;
-			int prev = previousLap.deciSeconds + 10 * previousLap.seconds + 60 * 10 * previousLap.minutes;
+			int now = lap.deciSeconds + 10 * lap.seconds + 60 * 10 * lap.minutes + 60 * 60 * 10 + lap.hours;
+			int prev = previousLap.deciSeconds + 10 * previousLap.seconds + 60 * 10 * previousLap.minutes +  60 * 60 * 10 + previousLap.hours;
 			int diffTime = now - prev;
 			int diffDeciSeconds = diffTime % 10;
 			int diffSeconds = (int) (diffTime / 10) % 60;
