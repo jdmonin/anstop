@@ -74,7 +74,7 @@ public class LapAdapter extends ArrayAdapter<Lap> {
 			int diffDeciSeconds = diffTime % 10;
 			int diffSeconds = (int) (diffTime / 10) % 60;
 			int diffMinutes = (int) ((diffTime / (10 * 60)) % 60);
-			int diffHours   = (int) (diffTime / (1000 * 60 * 60));
+			int diffHours   = (int) (diffTime / (10 * 60 * 60));
 
 			holder.previousTextView.setText((lap.hours > 0 ? (diffHours + "h ") : "") + nf.format(diffMinutes) + ":" + nf.format(diffSeconds) + ":" + diffDeciSeconds);
 		} else {
