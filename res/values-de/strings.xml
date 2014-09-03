@@ -41,6 +41,10 @@
     <string name="hours">Stunden:</string>
     <string name="minutes">Minuten:</string>
     <string name="seconds">Sekunden:</string>
+    <string-array name="modes_strings">
+        <item>Stoppuhr</item>
+        <item>Countdown</item>
+    </string-array>
     <string name="first_start">Tipp: Sie können nach links oder rechts mit dem Finger wischen, um den Modus zu ändern!</string>
     <string name="change">Ändern</string>
     <string name="comment">Kommentar</string>
