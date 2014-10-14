@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009-2011 by mj										   *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010-2012 Jeremy Monin            *
+ *   Portions of this file Copyright (C) 2010-2012,2014 Jeremy Monin       *
  *    jeremy@nand.net                                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -71,6 +71,9 @@ import android.widget.LinearLayout.LayoutParams;
  *<P>
  * Many fields' visibility are non-private for use by
  * {@link Clock#fillSaveState(Bundle)} and {@link Clock#restoreFromSaveState(Bundle)}.
+ *<P>
+ * There is a developer flag {@link #DEBUG_LOG_ENABLED} that, when set, adds a Debug Log
+ * which can be viewed on the device as Anstop runs, without connecting to a computer.
  */
 public class Anstop extends Activity implements OnGesturePerformedListener {
 
@@ -97,6 +100,16 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	private static final int MENU_SEND = 12;
 	private static final int SEND_ITEM = 13;
 
+	/**
+	 * If true, show Debug Log in menu; see {@link #addDebugLog(CharSequence)}.
+	 * The log is meant to be viewed on the device as Anstop runs, without connecting to a computer.
+	 * For non-development releases, be sure to set this false.
+	 */
+	private static final boolean DEBUG_LOG_ENABLED = true;
+
+	/** Development menu item for troubleshooting; not meant for releases */
+	private static final int MENU_DEBUG_LOG = 14, DEBUG_LOG_ITEM = 15;
+
 	/** Stopwatch/lap mode (and layout), for {@link Clock#getMode()} */
 	public static final int STOP_LAP = 0;  // STOP,LAP combined after v1.4 (see svn r47)
 
@@ -110,6 +123,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	private static final int SAVE_DIALOG = 1;
 	/** Dialog to set the optional {@link #comment} */
 	private static final int COMMENT_DIALOG = 2;
+	/** Dialog to show scrolling debug log, if {@link #DEBUG_LOG_ENABLED}. */
+	private static final int DEBUG_LOG_DIALOG = 3;
 	
 	private static final int SETTINGS_ACTIVITY = 0;
 	
@@ -129,6 +144,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * used in {@link #updateStartTimeCommentLapsView(boolean)} for "started at:".
 	 */
 	private StringBuffer fmt_dow_meddate_time;
+
+	/** Date formatter for just hh:mm:ss; used in {@link #addDebugLog(CharSequence)}. */
+	private StringBuffer fmt_debuglog_time;
 
 	Clock clock;
 	/** Lap data for {@link #lapView}. */
@@ -192,6 +210,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	private MenuItem modeMenu_itemStop;
 	private MenuItem modeMenu_itemCountdown;
 
+	private StringBuilder debugLog = new StringBuilder();
+
 	/**
 	 * Called when the activity is first created.
 	 * Assumes {@link #STOP_LAP} mode and sets that layout.
@@ -202,6 +222,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        addDebugLog("onCreate");
 
         // Set the default shared pref values, especially for checkboxes.
         // See android bug http://code.google.com/p/android/issues/detail?id=6641
@@ -217,7 +238,10 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         stopwatch();
 
         if (! isInitialStartup)
+        {
+        	addDebugLog("onCreate: not initial startup");
         	return;  // <--- Early return: Already did startup once ---
+        }
 
         // Below here are things that should be done only at
         // initial startup, because they set the current mode.
@@ -239,6 +263,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         	onRestoreInstanceState(settings);
         }
+	addDebugLog("onCreate: after onRestore, mode==" + clock.getMode() + ", isStarted==" + clock.isStarted);
         
         gestureLibrary = GestureLibraries.fromRawResource(this, R.raw.gestures);
         gestureLibrary.load();
@@ -562,6 +587,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 */
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
+		addDebugLog("onSaveInstanceState");
 		clock.fillSaveState(outState);
 	}
 
@@ -573,6 +599,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 */
 	@Override
 	public void onRestoreInstanceState(Bundle inState) {
+		addDebugLog("onRestoreInstanceState(B); inState == " + inState);
 		if (inState == null)
 			return;
 		int newCurrent = inState.getInt("clockAnstopCurrent", STOP_LAP);
@@ -587,8 +614,12 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * @param settings {@link PreferenceManager#getDefaultSharedPreferences(Context)}
 	 */
 	private void onRestoreInstanceState(SharedPreferences settings) {
+		addDebugLog("onRestoreInstanceState(SP); settings == " + settings);
 		if ( ! settings.getBoolean("anstop_in_use", false) )
+		{
+			addDebugLog("onRestoreInstanceState: anstop_in_use==false");
 			return;
+		}
 		int newCurrent = settings.getInt("anstop_state_current", STOP_LAP);
 		if (newCurrent == OBSOL_LAP)
 			newCurrent = STOP_LAP;
@@ -622,6 +653,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	public void onPause()
 	{
 		super.onPause();
+		addDebugLog("onPause; isFinishing == " + isFinishing());
 		if (! isFinishing())
 		{
 			clock.onAppPause();
@@ -641,6 +673,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	public void onResume()
 	{
 		super.onResume();
+		addDebugLog("onResume; isStarted == " + clock.isStarted);
 		if (! clock.isStarted)
 			return;
 
@@ -673,6 +706,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     	
     	//about
     	menu.add(MENU_ABOUT, ABOUT_ITEM, 0, R.string.about).setIcon(android.R.drawable.ic_menu_info_details);
+
+    	// debug
+    	if (DEBUG_LOG_ENABLED)
+    		menu.add(MENU_DEBUG_LOG, DEBUG_LOG_ITEM, 0, R.string.debug_log);
+
         return true;
     }
 
@@ -730,7 +768,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	return true;
         	
         
+        case DEBUG_LOG_ITEM:
+        	showDialog(DEBUG_LOG_DIALOG);
+        	return true;
         }
+
         return false;
     }
 
@@ -832,6 +874,20 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	dialog = commentBuilder.create();
         	break;
 
+        case DEBUG_LOG_DIALOG:
+        	AlertDialog.Builder dldBuilder = new AlertDialog.Builder(this);
+        	dldBuilder.setMessage( (debugLog != null) ? debugLog : "(null)" )  // in testing, message auto-wraps
+        		.setTitle(R.string.debug_log)
+        		.setCancelable(true)
+        		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        			public void onClick(DialogInterface dialog, int id) {
+        				dialog.dismiss();
+        			}
+        		});
+
+        	dialog = dldBuilder.create();
+        	break;
+
         default: dialog = null;
 		}
 		
@@ -857,6 +913,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	addDebugLog("onActivityResult");
     	readSettings(false); // because only settingsactivity is started for
     	// result, we can launch that without checking the parameters.
     }
@@ -920,37 +977,43 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	}
 
 	/**
-	 * Build {@link #fmt_dow_meddate_time}.
+	 * Build {@link #fmt_dow_meddate_time} or {@link #fmt_debuglog_time}.
 	 * @param ctx calling context
+	 * @param timeOnly  If true, wants time of day only (12- or 24-hour per user preferences).
+	 *     If false, also wants day of week, year, month, day (formatted for locale).
 	 * @return a StringBuffer usable in {@link DateFormat#format(CharSequence, long)}
 	 */
-	static StringBuffer buildDateFormatDOWmedium(Context ctx)
+	static StringBuffer buildDateFormat(Context ctx, final boolean timeOnly)
 	{
 		StringBuffer fmt_dow_meddate = new StringBuffer();
-		final char da = DateFormat.DAY;
-		fmt_dow_meddate.append(da);
-		fmt_dow_meddate.append(da);
-		fmt_dow_meddate.append(da);
-		fmt_dow_meddate.append(da);
-		fmt_dow_meddate.append(' ');
 
-		// year-month-date array will be 3 chars: yMd, Mdy, etc
-		final char[] ymd_order = DateFormat.getDateFormatOrder(ctx);
-		for (char c : ymd_order)
+		if (! timeOnly)
 		{
-			fmt_dow_meddate.append(c);
-			fmt_dow_meddate.append(c);
-			if (c == DateFormat.YEAR)
+			final char da = DateFormat.DAY;
+			fmt_dow_meddate.append(da);
+			fmt_dow_meddate.append(da);
+			fmt_dow_meddate.append(da);
+			fmt_dow_meddate.append(da);
+			fmt_dow_meddate.append(' ');
+
+			// year-month-date array will be 3 chars: yMd, Mdy, etc
+			final char[] ymd_order = DateFormat.getDateFormatOrder(ctx);
+			for (char c : ymd_order)
 			{
 				fmt_dow_meddate.append(c);
 				fmt_dow_meddate.append(c);
+				if (c == DateFormat.YEAR)
+				{
+					fmt_dow_meddate.append(c);
+					fmt_dow_meddate.append(c);
+				}
+				else if (c == DateFormat.MONTH)
+					fmt_dow_meddate.append(c);
+				if (c != ymd_order[2])
+					fmt_dow_meddate.append(' ');
 			}
-			else if (c == DateFormat.MONTH)
-				fmt_dow_meddate.append(c);
-			if (c != ymd_order[2])
-				fmt_dow_meddate.append(' ');
+			fmt_dow_meddate.append(' ');
 		}
-		fmt_dow_meddate.append(' ');
 
 		// now hh:mm:ss[ am/pm]
 		final boolean is24 = DateFormat.is24HourFormat(ctx);
@@ -970,6 +1033,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			fmt_dow_meddate.append(DateFormat.AM_PM);
 			fmt_dow_meddate.append(DateFormat.AM_PM);
 		}
+
 		return fmt_dow_meddate;
 	}
 
@@ -1090,7 +1154,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 */
 	void updateStartTimeCommentLapsView(final boolean lapFormatChanged) {
 		if (fmt_dow_meddate_time == null)
-			fmt_dow_meddate_time = buildDateFormatDOWmedium(Anstop.this);
+			fmt_dow_meddate_time = buildDateFormat(Anstop.this, false);
 
 		StringBuffer sb = new StringBuffer();
 
@@ -1427,4 +1491,19 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		
     }
     
+
+    /** Add this to the Debug Log, if {@link #DEBUG_LOG_ENABLED}. */
+    private void addDebugLog(final CharSequence msg)
+    {
+	if (! DEBUG_LOG_ENABLED)
+		return;
+
+	if (fmt_debuglog_time == null)
+		fmt_debuglog_time = buildDateFormat(Anstop.this, true);
+
+	debugLog.append(DateFormat.format(fmt_debuglog_time, System.currentTimeMillis()));
+	debugLog.append(": ");
+	debugLog.append(msg);
+	debugLog.append("\n");
+    }
 }

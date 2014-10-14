@@ -22,6 +22,7 @@
 
 <string name="save">Save</string>
 <string name="load">Load</string>
+<string name="debug_log">Debug Log</string>
 <string name="save_dialog">Please enter a name to save the results</string>
 <string name="no_entry">No Entries!</string>
 <string name="delete">Delete</string>

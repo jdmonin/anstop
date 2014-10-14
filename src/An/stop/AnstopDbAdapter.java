@@ -343,7 +343,7 @@ public class AnstopDbAdapter {
 				// Laps:
 				// lap info
 				if (fmt_dow_meddate_time == null)
-					fmt_dow_meddate_time = Anstop.buildDateFormatDOWmedium(mContext);
+					fmt_dow_meddate_time = Anstop.buildDateFormat(mContext, false);
 				StringBuilder sb = new StringBuilder();
 
 				Clock.LapFormatter lapf = new Clock.LapFormatter();
