@@ -23,6 +23,8 @@
 
 <string name="save">Gorde</string>
 <string name="load">Kargatu</string>
+<string name="debug_log">Arazketa erregistroa</string>
+<string name="copied_to_clipboard">Arbelean kopiatu da.</string>
 <string name="save_dialog">Mesedez sartu izen bat emaitzak gordetzeko</string>
 <string name="no_entry">Sarrerarik ez!</string>
 <string name="delete">Ezabatu</string>

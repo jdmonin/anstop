@@ -879,6 +879,22 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	dldBuilder.setMessage( (debugLog != null) ? debugLog : "(null)" )  // in testing, message auto-wraps
         		.setTitle(R.string.debug_log)
         		.setCancelable(true)
+        		.setNeutralButton(android.R.string.copy, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					if (debugLog == null)
+						return;
+
+					// use android.text.ClipboardManager for compat with API level < 11
+					android.text.ClipboardManager clipboard =
+						(android.text.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+					if (clipboard != null)
+					{
+						clipboard.setText(debugLog);
+						Toast.makeText
+						    (mContext, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
+					}
+				}
+			})
         		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
         			public void onClick(DialogInterface dialog, int id) {
         				dialog.dismiss();
