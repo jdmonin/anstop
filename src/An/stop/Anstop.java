@@ -1360,8 +1360,21 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     	 * append it to {@link #laps} and {@link #lapView}.
     	 */
     	public void onClick(View v) {
+		final boolean wasStarted = clock.wasStarted;  // get value before clock.lap()
+
     		sb.append("\n");
     		clock.lap(sb);  // format: "lap. #h mm:ss:d"
+
+		if (! (wasStarted || wroteStartTime || clock.isStarted))
+		{
+			if (laps == null)
+				laps = new StringBuilder();
+			if (laps.length() == 0)
+				laps.append(getResources().getString(R.string.laps));
+
+			updateStartTimeCommentLapsView(false);
+			wroteStartTime = true;
+		}
         	laps.append(sb);
         	lapView.append(sb);
 
