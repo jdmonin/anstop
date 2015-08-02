@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009-2011 by mj   									   *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010-2012 Jeremy Monin            *
+ *   Portions of this file Copyright (C) 2010-2012,2015 Jeremy Monin       *
  *    jeremy@nand.net                                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -781,6 +781,12 @@ public class Clock {
 
 	/**
 	 * Take a lap now.  Optionally append the current lap time to a buffer.
+	 *<P>
+	 * If not {@link #wasStarted}, sets that flag so the new lap time-of-day info
+	 * won't be lost without UI confirmation if Reset button is pressed.
+	 * If also not {@link #isStarted} and the hh:mm:ss:d fields are all 0,
+	 * sets the start time and stop time to the lap's time of day.
+	 *
 	 * @param sb  Null or a buffer to which the lap info
 	 *    will be appended, in the format "lap. #h mm:ss:d"
 	 *    depending on {@link #lapFormatFlags}.
@@ -807,6 +813,19 @@ public class Clock {
 		}
 		lap_systime[i] = lapNow;
 		lap_elapsed[i] = lapElapsed;
+
+		if (! wasStarted)
+		{
+			wasStarted = true;
+
+			if ((! isStarted) && (hour == 0) && (min == 0)
+			    && (sec == 0) && (dsec == 0))
+			{
+				startTimeActual = lapNow;
+				startTimeAdj = lapNow;
+				stopTime = lapNow;
+			}
+		}
 
 		return lapnum;
 	}
