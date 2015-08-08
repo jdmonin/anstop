@@ -615,9 +615,16 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 */
 	private void onRestoreInstanceState(SharedPreferences settings) {
 		addDebugLog("onRestoreInstanceState(SP); settings == " + settings);
-		final boolean inUse = settings.getBoolean("anstop_in_use", false);
+		if (settings.contains("anstop_in_use"))
+			addDebugLog("onRestoreInstanceState: anstop_in_use=="
+				+ settings.getBoolean("anstop_in_use", false));
+		else
+			addDebugLog("onRestoreInstanceState: anstop_in_use (key not found)");
 
-		addDebugLog("onRestoreInstanceState: anstop_in_use==" + inUse);
+		// To be cautious, also check the two clockActive flags
+		final boolean inUse = settings.getBoolean("anstop_in_use", false)
+			|| settings.getBoolean("anstop_state_clockActive", false)
+			|| settings.getBoolean("anstop_state_clockWasActive", false);
 
 		// temporary code to log some contents if present; based on Clock.restoreSaveState
 		{
