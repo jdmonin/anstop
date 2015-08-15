@@ -24,10 +24,14 @@
 			</LinearLayout>
 		</RelativeLayout>
 
-		<LinearLayout android:id="@+id/LinearLayout01" android:layout_width="wrap_content" android:layout_height="wrap_content">
-			<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/startButton" android:text="@string/start_stop" />
-			<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/resetButton" android:text="@string/reset" />
-			<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/lapButton" android:text="@string/lap" />
+		<!-- 3 buttons together fill activity width; height also increased -->
+		<LinearLayout android:id="@+id/LinearLayout01" android:layout_width="fill_parent" android:layout_height="wrap_content">
+			<Button android:layout_width="0dp" android:layout_height="60dp" android:layout_weight=".34"
+			    android:id="@+id/startButton" android:text="@string/start_stop" />
+			<Button android:layout_width="0dp" android:layout_height="60dp" android:layout_weight=".33"
+			    android:id="@+id/resetButton" android:text="@string/reset" />
+			<Button android:layout_width="0dp" android:layout_height="60dp" android:layout_weight=".33"
+			    android:id="@+id/lapButton" android:text="@string/lap" />
 		</LinearLayout>
 
 		<ScrollView android:id="@+id/lapScrollView" android:layout_width="fill_parent" android:layout_height="fill_parent">
