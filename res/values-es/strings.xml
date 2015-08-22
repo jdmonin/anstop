@@ -11,7 +11,7 @@
 <string name="refresh">Recargar</string>
 <string name="refresh_during_count">¡No se puede recargar contando!</string>
 <string name="start_stop">Iniciar/Parar</string>
-<string name="lap">-  ¡Vuelta!  -</string>
+<string name="lap">¡Vuelta!</string>
 <string name="laps">Vueltas:</string>
 <string name="about">Acerca de</string>
 <string name="stop">Cronómetro</string>
