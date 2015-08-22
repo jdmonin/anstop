@@ -11,7 +11,7 @@
 <string name="refresh">Refresh</string>
 <string name="refresh_during_count">Cannot refresh during count!</string>
 <string name="start_stop">Start/Stop</string>
-<string name="lap">-  Lap!  -</string>
+<string name="lap">Lap!</string>
 <string name="laps">Laps:</string>
 <string name="about">About</string>
 <string name="stop">Stopwatch</string>
