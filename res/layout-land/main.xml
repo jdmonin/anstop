@@ -24,7 +24,7 @@
 
 		<!-- 3 buttons together fill half of landscape width; height also increased -->
 		<LinearLayout android:layout_margin="0dp"
-		    android:layout_width="fill_parent" android:layout_height="wrap_content">
+		    android:layout_width="fill_parent" android:layout_height="fill_parent">
 			<LinearLayout android:id="@+id/LinearLayout01"
 			    android:layout_width="0dp" android:layout_weight=".5" android:layout_height="wrap_content">
 				<Button android:layout_width="0dp" android:layout_height="60dp" android:layout_weight=".34"
@@ -34,16 +34,13 @@
 				<Button android:layout_width="0dp" android:layout_height="60dp" android:layout_weight=".33"
 				    android:id="@+id/lapButton" android:text="@string/lap" />
 			</LinearLayout>
-			<LinearLayout
-			    android:layout_width="0dp" android:layout_weight=".5" android:layout_height="wrap_content">
-				<!-- blank; consider moving laps over here? -->
-				<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" />
-			</LinearLayout>
+			<!-- laps to right of time fields and buttons -->
+			<ScrollView android:id="@+id/lapScrollView"
+			    android:layout_width="0dp" android:layout_weight=".5" android:layout_height="fill_parent">
+				<TextView android:id="@+id/lapView"
+				    android:layout_width="fill_parent" android:layout_height="wrap_content"
+				    android:text="@string/laps" />
+			</ScrollView>
 		</LinearLayout>
-
-		<ScrollView android:id="@+id/lapScrollView" android:layout_width="fill_parent" android:layout_height="fill_parent">
-			<TextView android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/lapView" android:text="@string/laps" />
-		</ScrollView>
-
 	</LinearLayout>
 </LinearLayout>
