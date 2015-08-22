@@ -75,22 +75,28 @@
 
             <LinearLayout
                 android:id="@+id/LinearLayout01"
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content" >
 
                 <Button
                     android:id="@+id/startButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0dp" android:layout_weight=".25"
+                    android:layout_height="60dp"
                     android:text="@string/start_stop" >
                 </Button>
 
                 <Button
                     android:id="@+id/refreshButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0dp" android:layout_weight=".25"
+                    android:layout_height="60dp"
                     android:text="@string/refresh" >
                 </Button>
+
+                <TextView
+                    android:layout_width="0dp" android:layout_weight=".5"
+                    android:layout_height="60dp"
+                    android:text=""
+                    />
             </LinearLayout>
 
             <LinearLayout
