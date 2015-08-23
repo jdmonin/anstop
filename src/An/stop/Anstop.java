@@ -1186,12 +1186,16 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			dbHelper.deleteTemporaryLaps();
 		}
 
-		// Check for an old anstop_in_use flag from previous runs
+		// Clear any old anstop_in_use flags from previous runs
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
-		if(settings.getBoolean("anstop_in_use", false))
+		if (settings.getBoolean("anstop_in_use", false)
+		    || settings.getBoolean("anstop_state_clockActive", false)
+		    || settings.getBoolean("anstop_state_clockWasActive", false))
 		{
 			Editor outPref = settings.edit();
 			outPref.putBoolean("anstop_in_use", false);
+			outPref.putBoolean("anstop_state_clockActive", false);
+			outPref.putBoolean("anstop_state_clockWasActive", false);
 			outPref.commit();
 		}
 	}
