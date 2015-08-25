@@ -168,7 +168,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	TextView dsecondsView;
 	TextView secondsView;
 	TextView minView;
-	TextView hourView;
+	/**
+	 * The hours field and its label, shown or hidden in
+	 * {@link #updateHourVisibility() and {@link Clock.hourhandler} as needed.
+	 */
+	TextView hourView, hourLabelView;
 	/** shows start time and {@link #comment} in the countdown layout, which doesn't contain {@link #lapView} */
 	TextView startTimeView;
 	/** shows start time, {@link #comment}, and {@link #laps}. When <tt>lapView</tt> is non-null, {@link #startTimeView} is null */
@@ -294,9 +298,12 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         else
         	vib = null;
 
-        // Lap Display Format setting
+        // Hour Counter and Lap Display Format settings
         try
         {
+        	final int settingHour =
+        		Integer.parseInt(settings.getString("hour_format", "0"));  // default Clock.HOUR_FMT_HIDE_IF_0
+
         	// read the flags, possibly just changed by user; default is LAP_FMT_FLAG_ELAPSED only
         	int settingLap = readLapFormatPrefFlags(settings);
         	if (settingLap == 0)
@@ -305,13 +312,24 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         		settings.edit().putBoolean("lap_format_elapsed", true).commit();
         		settingLap = Clock.LAP_FMT_FLAG_ELAPSED;
         	}
+
+		boolean needUpdate = false;
+		if (isStartup || (settingHour != clock.lapf.hourFormat))
+		{
+			needUpdate = true;
+			clock.setHourFormat(settingHour);
+			updateHourVisibility();
+		}
         	if (settingLap != clock.lapf.lapFormatFlags)
         	{
         		clock.setLapFormat
         			(settingLap, DateFormat.getTimeFormat(getApplicationContext()));
-        		updateStartTimeCommentLapsView(true);
+			needUpdate = true;
         	}
-        } catch (Throwable e) {}
+
+		if (needUpdate)
+			updateStartTimeCommentLapsView(true);
+        } catch (Throwable e) { e.printStackTrace(); }
 
         if(!isStartup) return; // app was started before, user changed settings
         
@@ -362,6 +380,23 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		if (lapFmtDelta)   settingLap += Clock.LAP_FMT_FLAG_DELTA;
 		if (lapFmtSystime) settingLap += Clock.LAP_FMT_FLAG_SYSTIME;
 		return settingLap;
+	}
+
+	/**
+	 * Show or hide {@link #hourView} and {@link #hourLabelView} if needed,
+	 * based on hour != 0 and current {@link Clock.LapFormatter#hourFormat} setting.
+	 * @since 1.6
+	 */
+	private void updateHourVisibility()
+	{
+		final boolean hourWantVisible = (clock.hour > 0)
+			|| (clock.lapf.hourFormat == Clock.HOUR_FMT_ALWAYS_SHOW);
+		final int hourVis = (hourWantVisible) ? View.VISIBLE : View.INVISIBLE;
+
+		if (hourLabelView != null)
+			hourLabelView.setVisibility(hourVis);
+		if (hourView != null)
+			hourView.setVisibility(hourVis);
 	}
 
     /**
@@ -418,6 +453,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         secondsView = (TextView) findViewById(R.id.secondsView); 
         minView = (TextView) findViewById(R.id.minView);
         hourView = (TextView) findViewById(R.id.hourView);
+        hourLabelView = (TextView) findViewById(R.id.hourLabelView);
         startTimeView = (TextView) findViewById(R.id.countdown_startTimeView);
         setupCommentLongPress(startTimeView);
         lapView = null;
@@ -460,6 +496,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         refreshButton  = (Button) findViewById(R.id.refreshButton);
         refreshButton.setOnClickListener(new refreshButtonListener());
 
+	updateHourVisibility();
+
         // inform clock class to count down now
         clock.changeMode(COUNTDOWN);
 
@@ -494,6 +532,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         secondsView = (TextView) findViewById(R.id.secondsView); 
         minView = (TextView) findViewById(R.id.minView);
         hourView = (TextView) findViewById(R.id.hourView);
+        hourLabelView = (TextView) findViewById(R.id.hourLabelView);
         
         //set the size
         TextView sepView = (TextView) findViewById(R.id.sepView1);
@@ -523,6 +562,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         resetButton.setOnClickListener(new resetButtonListener());
 
         lapScroll = (ScrollView) findViewById(R.id.lapScrollView);
+
+	updateHourVisibility();
 
         // inform clock of the new mode
         clock.changeMode(STOP_LAP);
@@ -644,6 +685,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 					+ settings.getBoolean("anstop_state_clockWasActive", false));
 			else
 				addDebugLog("anstop_state_clockWasActive (not found)");
+			if (settings.contains("anstop_state_hourFormat"))
+				addDebugLog("anstop_state_hourFormat = "
+					+ settings.getInt("anstop_state_hourFormat", -1));
+			else
+				addDebugLog("anstop_state_hourFormat (not found)");
 			addDebugLog("anstop_state_clockStateSaveTime = "
 				+ settings.getLong("anstop_state_clockStateSaveTime", -1L));
 			addDebugLog("current time (millis) = " + System.currentTimeMillis());
@@ -1005,24 +1051,43 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		// Code is not shared because this method doesn't need to re-read
 		// the laps or reformat them.
 
+		final String hoursStr;
+		if ((clock.hour != 0) || (clock.lapf.hourFormat == Clock.HOUR_FMT_ALWAYS_SHOW))
+			hoursStr = "\n" + hourView.getText().toString() + " "
+				+ mContext.getResources().getString(R.string.hour);
+		else
+			hoursStr = "";
+
 		String body;
 		switch(clock.getMode()) {
 		case COUNTDOWN:
+			int spinnerHrs = hourSpinner.getSelectedItemPosition(),
+			    spinnerMin = minSpinner.getSelectedItemPosition();
+			if (clock.lapf.hourFormat == Clock.HOUR_FMT_MINUTES_PAST_60) {
+				spinnerMin += (60 * spinnerHrs);
+				spinnerHrs = 0;
+			}
+			final String spinnerHoursStr;
+			if ((spinnerHrs != 0) || (clock.lapf.hourFormat == Clock.HOUR_FMT_ALWAYS_SHOW))
+				spinnerHoursStr = "\n" + spinnerHrs + " "
+					+ mContext.getResources().getString(R.string.hour);
+			else
+				spinnerHoursStr = "";
+
 			body = mContext.getResources().getString(R.string.mode_was) + " " 
-				+ mContext.getResources().getString(R.string.countdown) + "\n" 
-				+ hourView.getText().toString() + " " + mContext.getResources().getString(R.string.hour)
+				+ mContext.getResources().getString(R.string.countdown)
+				+ hoursStr
 				+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
 				+ ":" + dsecondsView.getText().toString() + "\n" + mContext.getResources().getString(R.string.start_time)
-				+ "\n" + hourSpinner.getSelectedItemPosition() + " "
-				+ mContext.getResources().getString(R.string.hour) + "\n"
+				+ spinnerHoursStr + "\n"
 				+ clock.lapf.nf.format(secSpinner.getSelectedItemPosition()) + ":" 
-				+ clock.lapf.nf.format(minSpinner.getSelectedItemPosition()) + ".0"
+				+ clock.lapf.nf.format(spinnerMin) + ".0"
 				+ "\n" + startTimeView.getText().toString();
 			break;
 		case STOP_LAP:
 			body = mContext.getResources().getString(R.string.mode_was) + " " 
-				+ mContext.getResources().getString(R.string.stop) + "\n" 
-				+ hourView.getText().toString() + " " + mContext.getResources().getString(R.string.hour)
+				+ mContext.getResources().getString(R.string.stop)
+				+ hoursStr
 				+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
 				+ ":" + dsecondsView.getText().toString()
 				+ "\n" + lapView.getText().toString();
@@ -1212,9 +1277,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * code is not shared because that method doesn't need to re-read
 	 * the laps or reformat them.
 	 *
-	 * @param lapFormatChanged  True if the lap format flags have changed
+	 * @param formatChanged  True if the hour counter format or lap format flags have changed
 	 */
-	void updateStartTimeCommentLapsView(final boolean lapFormatChanged) {
+	void updateStartTimeCommentLapsView(final boolean formatChanged) {
 		if (fmt_dow_meddate_time == null)
 			fmt_dow_meddate_time = buildDateFormat(Anstop.this, false);
 
@@ -1237,7 +1302,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
 		if (lapView != null)
 		{
-			if (lapFormatChanged)
+			if (formatChanged)
 			{
 				laps.delete(0, laps.length());  // clear previous contents
 				clock.formatTimeAllLaps(laps);
