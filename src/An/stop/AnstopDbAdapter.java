@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009-2010 by mj                                         *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2012 Jeremy Monin                 *
+ *   Portions of this file Copyright (C) 2012,2015 Jeremy Monin            *
  *     jeremy@nand.net                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,6 +24,7 @@ package An.stop;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -347,6 +348,9 @@ public class AnstopDbAdapter {
 				StringBuilder sb = new StringBuilder();
 
 				Clock.LapFormatter lapf = new Clock.LapFormatter();
+				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
+				lapf.hourFormat = Integer.parseInt(settings.getString("hour_format", "0"));
+					// default Clock.HOUR_FMT_HIDE_IF_0
 
 				// mode
 				sb.append(mContext.getResources().getString(R.string.mode_was));
@@ -394,8 +398,7 @@ public class AnstopDbAdapter {
 					long[] lap_elapsed = new long[lapCount],
 					       lap_systime = new long[lapCount];
 					fetchAllLaps(rowId, lap_elapsed, lap_systime);
-					final int fmtFlags = Anstop.readLapFormatPrefFlags
-						(PreferenceManager.getDefaultSharedPreferences(mContext));
+					final int fmtFlags = Anstop.readLapFormatPrefFlags(settings);
 					if ((fmtFlags != 0) && (fmtFlags != Clock.LAP_FMT_FLAG_ELAPSED))
 						lapf.setLapFormat
 							(fmtFlags, android.text.format.DateFormat.getTimeFormat(mContext));
