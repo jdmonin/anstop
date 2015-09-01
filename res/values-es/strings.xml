@@ -16,6 +16,7 @@
 <string name="about">Acerca de</string>
 <string name="stop">Cronómetro</string>
 <string name="debug_log">Registro de depuración</string>
+<string name="debug_notes">Notas de depuración</string>
 <string name="copied_to_clipboard">Se copiado al portapapeles.</string>
 <string name="countdown">Cuenta regresiva</string>
 <string name="countdown_please_set_hms">Para contar, por favor, seleccione las horas, minutos y segundos.</string>

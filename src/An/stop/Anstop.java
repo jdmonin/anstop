@@ -213,6 +213,12 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	private StringBuilder debugLog = new StringBuilder();
 
 	/**
+	 * Optional notes from Debug Log dialog.
+	 * @since 1.6
+	 */
+	private StringBuilder debugNotes = new StringBuilder();
+
+	/**
 	 * Called when the activity is first created.
 	 * Assumes {@link #STOP_LAP} mode and sets that layout.
 	 * Preferences are read, which calls setCurrentMode.
@@ -918,7 +924,17 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
         case DEBUG_LOG_DIALOG:
         	AlertDialog.Builder dldBuilder = new AlertDialog.Builder(this);
-        	dldBuilder.setMessage( (debugLog != null) ? debugLog : "(null)" )  // in testing, message auto-wraps
+
+		// Include debug log text and optional notes textfield
+		View v = getLayoutInflater().inflate(R.layout.debug_log, null);
+		final TextView tvText = (TextView) v.findViewById(R.id.debugLogText);
+		if (tvText != null)
+			tvText.setText((debugLog != null) ? debugLog : "(null)" );
+		final EditText etNotes = (EditText) v.findViewById(R.id.debugLogNotes);
+		if (etNotes != null)
+			etNotes.setText(debugNotes);
+
+		dldBuilder.setView(v)
         		.setTitle(R.string.debug_log)
         		.setCancelable(true)
         		.setNeutralButton(android.R.string.copy, new DialogInterface.OnClickListener() {
@@ -931,7 +947,23 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 						(android.text.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 					if (clipboard != null)
 					{
-						clipboard.setText(debugLog);
+						CharSequence debugText = debugLog;
+						if (etNotes != null)
+						{
+							debugNotes.setLength(0);
+
+							CharSequence notes = etNotes.getText();
+							if (notes.length() > 0)
+							{
+								debugNotes.append(notes);
+
+								StringBuilder sb = new StringBuilder(debugText);
+								sb.append("\n\n");
+								sb.append(notes);
+								debugText = sb;
+							}
+						}
+						clipboard.setText(debugText);
 						Toast.makeText
 						    (mContext, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
 					}
@@ -939,6 +971,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			})
         		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
         			public void onClick(DialogInterface dialog, int id) {
+					debugNotes.setLength(0);
+					CharSequence notes = etNotes.getText();
+					if (notes.length() > 0)
+						debugNotes.append(notes);
+
         				dialog.dismiss();
         			}
         		});
