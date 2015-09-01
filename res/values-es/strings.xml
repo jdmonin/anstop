@@ -55,6 +55,13 @@
 <string name="confirm_change_mode_message">Cambiar el modo de que reiniciar el cronómetro.</string>
 <string name="confirm_refresh_message">¿Seguro de que desea recargar?</string>
 <string name="confirm_reset_message">¿Seguro de que desea reajustar?</string>
+<string name="hour_counter_format">Formato del mostrador de horas</string>
+<string name="hour_counter_summary">Cuándo mostrar o ocultar el mostrador de horas</string>
+<string-array name="hour_formats_strings">
+	<item>Ocultar si es 0</item>
+	<item>Siempre mostrar</item>
+	<item>Los minutos incrementan más allá de 60, no hay un mostrador de horas</item>
+</string-array>
 <string name="lap_display_format">Formato de visualización de vueltas</string>
 <string name="lap_display_format_must_select_one">Debe seleccionar al menos un formato de visualización.</string>
 <string name="lap_format_delta">Vuelta: (+ h:mm:ss:d)</string>
