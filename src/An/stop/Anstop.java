@@ -713,6 +713,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			newCurrent = STOP_LAP;
 		setCurrentMode(newCurrent);
 		clock.restoreFromSaveState(settings);
+		updateHourVisibility();  // reads clock.hours just set by clock.restoreFromSaveState
 		if (clock.laps > 1)
 		{
 			if (clock.lap_elapsed.length <= clock.laps)
