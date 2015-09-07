@@ -21,7 +21,7 @@
     <string name="save">Speichern</string>
     <string name="load">Laden</string>
     <string name="debug_log">Debugprotokoll</string>
-    <string name="debug_notes">Debug-notizen</string>
+    <string name="debug_notes">Debugnotizen</string>
     <string name="copied_to_clipboard">In die Klemmbrett kopiert.</string>
     <string name="save_dialog">Bitte geben sie einen Namen an um die Zeit zu speichern</string>
     <string name="no_entry">Keine Einträge!</string>
