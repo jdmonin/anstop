@@ -1329,12 +1329,18 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     		if(vib != null)
     			vib.vibrate(50);
     		
-    		if (clock.isStarted && ! wroteStartTime)
-    		{
-    			updateStartTimeCommentLapsView(false);
-    			wroteStartTime = true;
-    		}
-        	
+		if (clock.isStarted)
+		{
+			if (! wroteStartTime)
+			{
+				updateStartTimeCommentLapsView(false);
+				wroteStartTime = true;
+			}
+		} else {
+			// When stopped, backup current state to SharedPreferences
+			clock.fillSaveState
+				(PreferenceManager.getDefaultSharedPreferences(mContext));
+		}
         }
 
     }
