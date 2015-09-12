@@ -3,7 +3,7 @@
  Preference settings for Anstop.
 
  This file Copyright (C) 2009-2010 mj (fakeacc.mj@gmail.com)
- Portions of this file copyright (C) 2010,2012 Jeremy D Monin (jeremy@nand.net)
+ Portions of this file copyright (C) 2010,2012,2015 Jeremy D Monin (jeremy@nand.net)
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,10 @@
      <CheckBoxPreference
             android:key="vibrate" android:summary="@string/vibrate_checkbox" android:title="@string/vibrate" android:defaultValue="true"/>
 <ListPreference android:key="mode" android:title="@string/startup_mode" android:entryValues="@array/modes_ints" android:summary="@string/startup_mode" android:defaultValue="0" android:entries="@array/modes_strings"></ListPreference>
+<ListPreference android:key="hour_format"
+    android:title="@string/hour_counter_format" android:summary="@string/hour_counter_summary"
+    android:entryValues="@array/hour_formats_ints" android:defaultValue="0"
+    android:entries="@array/hour_formats_strings" />
 <PreferenceCategory
     android:title="@string/lap_display_format">
 	<!--

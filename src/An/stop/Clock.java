@@ -31,6 +31,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.View;  // only for hourhandler to hide/show hours views if needed
 
 /**
  * Timer object and thread.
@@ -71,6 +72,25 @@ import android.os.Message;
  */
 public class Clock {
 
+	/**
+	 * Hour field format: Hide hours if 0 (default value).
+	 * Current setting is in {@link LapFormatter#hourFormat}.
+	 */
+	public static final int HOUR_FMT_HIDE_IF_0 = 0;
+
+	/**
+	 * Hour field format: Always show hours, even if 0.
+	 * Current setting is in {@link LapFormatter#hourFormat}.
+	 */
+	public static final int HOUR_FMT_ALWAYS_SHOW = 1;
+
+	/**
+	 * Hour field format: No hours field, {@link #min minutes} keep increasing past 60.
+	 * Current setting is in {@link LapFormatter#hourFormat}.
+	 * When this format is active, {@link #hour} is always 0.
+	 */
+	public static final int HOUR_FMT_MINUTES_PAST_60 = 2;
+
 	// Note: Currently, code and settings.xml both assume that
 	//   the default format has LAP_FMT_FLAG_ELAPSED and no others,
 	//   unless the user changes that preference.
@@ -97,7 +117,7 @@ public class Clock {
 	private int v;
 
 	/**
-	 * Lap formatting flags and fields.
+	 * Hour and Lap formatting flags and fields.
 	 * Read-only from {@link Anstop} class.
 	 * The active format flags are {@link Clock.LapFormatter#lapFormatFlags lapf.lapFormatFlags};
 	 * the default is {@link #LAP_FMT_FLAG_ELAPSED} only.
@@ -123,9 +143,24 @@ public class Clock {
 	minhandler minh;
 	hourhandler hourh;
 	
+	/** Clock's deciseconds field (0.1 sec). */
 	int dsec = 0;
+
+	/** Clock's seconds field. */
 	int sec = 0;
+
+	/**
+	 * Clock's minutes field.
+	 *<P>
+	 * If {@link LapFormatter#hourFormat} == {@link #HOUR_FMT_MINUTES_PAST_60}, this may be 60 or more.
+	 */
 	int min = 0;
+
+	/**
+	 * Clock's hours field.
+	 *<P>
+	 * If {@link LapFormatter#hourFormat} == {@link #HOUR_FMT_MINUTES_PAST_60}, this is always 0.
+	 */
 	int hour = 0;
 
 	/**
@@ -261,6 +296,7 @@ public class Clock {
 		outState.putIntArray("clockDigits", hmsd);
 		outState.putInt("clockActive", isStarted ? 1 : 0);
 		outState.putInt("clockWasActive", wasStarted ? 1 : 0);
+		outState.putInt("clockHourFormat", lapf.hourFormat);
 		outState.putLong("clockStateSaveTime", savedAtTime);
 		if (! isStarted)
 			outState.putLong("clockStopTime", stopTime);
@@ -331,6 +367,7 @@ public class Clock {
 			outPref.putInt("anstop_state_clockDigits_d", dsec);
 			outPref.putBoolean("anstop_state_clockActive", isStarted);
 			outPref.putBoolean("anstop_state_clockWasActive", wasStarted);
+			outPref.putInt("anstop_state_hourFormat", lapf.hourFormat);
 			outPref.putLong("anstop_state_clockStateSaveTime", savedAtTime);
 			if (! isStarted)
 				outPref.putLong("anstop_state_clockStopTime", stopTime);
@@ -450,6 +487,7 @@ public class Clock {
 
 		final boolean bundleClockActive = (1 == inState.getInt("clockActive"));
 		wasStarted = (1 == inState.getInt("clockWasActive"));
+		lapf.hourFormat = inState.getInt("clockHourFormat", HOUR_FMT_HIDE_IF_0);
 		final long savedAtTime = inState.getLong("clockStateSaveTime", restoredAtTime);
 		startTimeActual = inState.getLong("clockStartTimeActual", savedAtTime);
 		startTimeAdj = inState.getLong("clockStartTimeAdj", startTimeActual);
@@ -559,6 +597,7 @@ public class Clock {
 
 		final boolean bundleClockActive = inState.getBoolean("anstop_state_clockActive", false);
 		wasStarted = inState.getBoolean("anstop_state_clockWasActive", false);
+		lapf.hourFormat = inState.getInt("anstop_state_hourFormat", HOUR_FMT_HIDE_IF_0);
 		final long savedAtTime = inState.getLong("anstop_state_clockStateSaveTime", restoredAtTime);
 		startTimeActual = inState.getLong("anstop_state_clockStartTimeActual", savedAtTime);
 		startTimeAdj = inState.getLong("anstop_state_clockStartTimeAdj", startTimeActual);
@@ -626,6 +665,10 @@ public class Clock {
 	 *<P>
 	 * If <tt>adjDisplayOnly</tt> is false, do not call unless {@link #isStarted}.
 	 *<P>
+	 * Be sure these fields are restored from save state before calling:
+	 * {@link #startTimeAdj}, {@link #countdnTotalSeconds},
+	 * {@link Clock.LapFormatter#hourFormat lapf.hourFormat}
+	 *<P>
 	 * Used with {@link #onAppResume()} and {@link #restoreFromSaveState(Bundle)}.
 	 *
 	 * @param adjDisplayOnly  If true, update the display fields based on
@@ -659,9 +702,15 @@ public class Clock {
 			ttotal /= 1000L;
 			sec = (int) (ttotal % 60L);
 			ttotal /= 60L;
-			min = (int) (ttotal % 60L);
-			ttotal /= 60L;
-			hour = (int) ttotal;
+			if (lapf.hourFormat != HOUR_FMT_MINUTES_PAST_60)
+			{
+				min = (int) (ttotal % 60L);
+				ttotal /= 60L;
+				hour = (int) ttotal;
+			} else {
+				min = (int) ttotal;
+				hour = 0;
+			}
 		}
 
 		if (parent.dsecondsView != null)
@@ -683,8 +732,11 @@ public class Clock {
 	public StringBuffer getCurrentValue()
 	{
 		StringBuffer sb = new StringBuffer();
-		sb.append(hour);
-		sb.append("h ");
+		if ((hour > 0) || (lapf.hourFormat == HOUR_FMT_ALWAYS_SHOW))
+		{
+			sb.append(hour);
+			sb.append("h ");
+		}
 		sb.append(lapf.nf.format(min));
 		sb.append(':');
 		sb.append(lapf.nf.format(sec));
@@ -765,6 +817,46 @@ public class Clock {
 	public int getMode() { return v; }
 
 	/**
+	 * Set the clock's {@link LapFormatter#hourFormat}, adjusting {@link #hour} and
+	 * {@link #min} if necessary (minutes past 60 and hours to 0, or reversing that).
+	 * @param newFormat  An hour format: {@link #HOUR_FMT_HIDE_IF_0},
+	 *     {@link #HOUR_FMT_ALWAYS_SHOW}, or {@link #HOUR_FMT_MINUTES_PAST_60}
+	 * @throws IllegalArgumentException if {@code newFormat} isn't a known format constant
+	 * @see #setLapFormat(int, DateFormat)
+	 * @since 1.6
+	 */
+	public void setHourFormat(final int newFormat)
+		throws IllegalArgumentException
+	{
+		final boolean wasMinPast60 = (lapf.hourFormat == HOUR_FMT_MINUTES_PAST_60),
+			      newMinPast60 = (newFormat == HOUR_FMT_MINUTES_PAST_60);
+		lapf.setHourFormat(newFormat);  // throws IllegalArgumentException if out of range
+
+		if (wasMinPast60 != newMinPast60) {
+			boolean wantsRefresh = false;
+
+			if (newMinPast60) {
+				if (hour > 0) {
+					min += (60 * hour);
+					hour = 0;
+					wantsRefresh = true;
+				}
+			} else {
+				if (min >= 60) {
+					hour = (min / 60);
+					min  = (min % 60);
+					wantsRefresh = true;
+				}
+			}
+
+			if (wantsRefresh) {
+				hourh.sendEmptyMessage(Thread.MAX_PRIORITY);
+				minh.sendEmptyMessage(Thread.MAX_PRIORITY);
+			}
+		}
+	}
+
+	/**
 	 * Set the lap format flags.
 	 * @param newFormatFlags  Collection of flags, such as {@link #LAP_FMT_FLAG_DELTA}; not 0
 	 * @param formatForSysTime Short time format in case {@link #LAP_FMT_FLAG_SYSTIME} is used; not null.
@@ -772,6 +864,7 @@ public class Clock {
 	 *    Note that <tt>getTimeFormat</tt> gives hours and minutes, it has no standard way to include the seconds;
 	 *    if more precision is needed, the user can get it from elapsed or delta seconds.
 	 * @throws IllegalArgumentException if flags &lt;= 0, or <tt>formatForSysTime == null</tt> 
+	 * @see #setHourFormat(int)
 	 */
 	public void setLapFormat(final int newFormatFlags, final DateFormat formatForSysTime)
 		throws IllegalArgumentException
@@ -842,7 +935,7 @@ public class Clock {
 	 * @return true if was reset, false if was not reset because {@link #isStarted} is true.
 	 * @see #changeMode(int)
 	 */
-	public boolean reset(final int newMode, final int h, final int m, final int s)
+	public boolean reset(final int newMode, final int h, int m, final int s)
 	{
 		if (isStarted)
 			return false;
@@ -864,7 +957,12 @@ public class Clock {
 			min = 0;
 			sec = 0;
 		} else {  // COUNTDOWN
-			hour = h;
+			if (lapf.hourFormat != HOUR_FMT_MINUTES_PAST_60) {
+				hour = h;
+			} else {
+				m += (60 * h);
+				hour = 0;
+			}
 			min = m;
 			sec = s;
 			countdnTotalSeconds = ((h * 60) + m) * 60 + s;
@@ -981,9 +1079,9 @@ public class Clock {
 						minh.sendEmptyMessage(MAX_PRIORITY);
 						
 						
-						if(min == 60) {
+						if ((min >= 60) && (lapf.hourFormat != HOUR_FMT_MINUTES_PAST_60)) {
 							hour++;
-							min = 0;
+							min -= 60;
 							hourh.sendEmptyMessage(MAX_PRIORITY);
 							minh.sendEmptyMessage(MAX_PRIORITY);
 						}
@@ -1118,18 +1216,40 @@ public class Clock {
 		@Override
 		public void handleMessage (Message msg) {
 			parent.hourView.setText("" + hour);
+
+			// Is hour visibility wanted?
+			final boolean hourIsVis = (parent.hourView.getVisibility() == View.VISIBLE);
+			final boolean hourWantVis = (hour != 0) || (lapf.hourFormat == HOUR_FMT_ALWAYS_SHOW);
+			if (hourIsVis != hourWantVis) {
+				final int hourVis = (hourWantVis) ? View.VISIBLE : View.INVISIBLE;
+
+				if (parent.hourLabelView != null)
+					parent.hourLabelView.setVisibility(hourVis);
+				parent.hourView.setVisibility(hourVis);
+			}
 		}
 	}
 	
 	/**
-	 * Flags, settings, and methods to format laps.
+	 * Flags, settings, and methods to format hours and laps.
 	 * Each {@link Clock} has one <tt>LapFormatter</tt>.
 	 * Used by {@link Clock#lap(StringBuilder)}
 	 * and by {@link AnstopDbAdapter#getRowAndFormat(long)}.
 	 * The currently active flags are {@link #lapFormatFlags}.
 	 * By default, the formatter flags are {@link Clock#LAP_FMT_FLAG_ELAPSED} only.
+	 * The currently active hour format is {@link #hourFormat}.
 	 */
 	public static class LapFormatter {
+
+		/**
+		 * The active hour format; default is {@link Clock#HOUR_FMT_HIDE_IF_0 HOUR_FMT_HIDE_IF_0}.
+		 * Read-only from {@link Anstop} class. To change, call {@link Clock#setHourFormat(int)}.
+		 * Is used to control whether {@link Clock#min} wraps around at 60, whether hours are a field
+		 * in {@link #formatTimeLap(StringBuilder, boolean, int, int, int, int, int, long, long, long[])},
+		 * and anywhere else hours and minutes are formatted or shown.
+		 * @since 1.6
+		 */
+		public int hourFormat = HOUR_FMT_HIDE_IF_0;
 
 		/**
 		 * Any lap format flags, such as {@link Clock#LAP_FMT_FLAG_SYSTIME}, currently
@@ -1166,7 +1286,26 @@ public class Clock {
 		public LapFormatter() {
 			nf = NumberFormat.getInstance();
 			nf.setMinimumIntegerDigits(2);  // The minimum Digits required is 2
-			nf.setMaximumIntegerDigits(2); // The maximum Digits required is 2			
+			nf.setMaximumIntegerDigits(9);  // The maximum Digits required is 9 (allow minutes past 99)
+		}
+
+		/**
+		 * Set the active hour format. Does not adjust hour/minute fields or refresh
+		 * already-formatted lap strings; to adjust fields call {@link Clock#setHourFormat(int)}
+		 * instead of this method.
+		 * @param newFormat  An hour format: {@link #HOUR_FMT_HIDE_IF_0},
+		 *     {@link #HOUR_FMT_ALWAYS_SHOW}, or {@link #HOUR_FMT_MINUTES_PAST_60}
+		 * @throws IllegalArgumentException if {@code newFormat} isn't a known format constant
+		 * @see #setLapFormat(int, DateFormat)
+		 * @since 1.6
+		 */
+		void setHourFormat(final int newFormat)
+			throws IllegalArgumentException
+		{
+			if ((newFormat < HOUR_FMT_HIDE_IF_0) || (newFormat > HOUR_FMT_MINUTES_PAST_60))
+				throw new IllegalArgumentException();
+
+			hourFormat = newFormat;
 		}
 
 		/**
@@ -1177,6 +1316,7 @@ public class Clock {
 		 *    Note that <tt>getTimeFormat</tt> gives hours and minutes, it has no standard way to include the seconds;
 		 *    if more precision is needed, the user can get it from elapsed or delta seconds.
 		 * @throws IllegalArgumentException if flags &lt;= 0, or <tt>formatForSysTime == null</tt> 
+		 * @see Clock#setHourFormat(int)
 		 */
 		public void setLapFormat(final int newFormatFlags, final DateFormat formatForSysTime)
 			throws IllegalArgumentException
@@ -1212,6 +1352,8 @@ public class Clock {
 
 			boolean sbNeedsSpace = false;  // true if appended anything that needs a space afterwards
 
+			final int hourFmt = hourFormat;
+
 			if (withLap)
 			{
 				sb.append(lapNum);
@@ -1226,12 +1368,27 @@ public class Clock {
 					elapsed /= 10L;
 					s = (int) (elapsed % 60);
 					elapsed /= 60L;
-					m = (int) (elapsed % 60);
-					elapsed /= 60L;
-					h = (int) elapsed;
+					if (hourFmt != HOUR_FMT_MINUTES_PAST_60) {
+						m = (int) (elapsed % 60);
+						elapsed /= 60L;
+						h = (int) elapsed;
+					} else {
+						m = (int) elapsed;
+						h = 0;
+					}
 				}
-				sb.append(h);
-				sb.append("h ");
+
+				if ((h > 0) && (hourFmt == HOUR_FMT_MINUTES_PAST_60))
+				{
+					m += (60 * h);
+					h = 0;
+				}
+
+				if ((h > 0) || (hourFmt == HOUR_FMT_ALWAYS_SHOW))
+				{
+					sb.append(h);
+					sb.append("h ");
+				}
 				sb.append(nf.format(m));
 				sb.append(':');
 				sb.append(nf.format(s));
@@ -1248,14 +1405,24 @@ public class Clock {
 				lapDelta /= 10;
 				final int dsec = (int) (lapDelta % 60);
 				lapDelta /= 60;
-				final int dm = (int) (lapDelta % 60);
-				lapDelta /= 60;
+				final int dm;
+				if (hourFmt != HOUR_FMT_MINUTES_PAST_60)
+				{
+					dm = (int) (lapDelta % 60);
+					lapDelta /= 60;
+				} else {
+					dm = (int) lapDelta;
+					lapDelta = 0;
+				}
 
 				if (sbNeedsSpace)
 					sb.append(' ');
 				sb.append("(+");
-				sb.append(lapDelta);
-				sb.append("h ");
+				if ((lapDelta > 0) || (hourFmt == HOUR_FMT_ALWAYS_SHOW))
+				{
+					sb.append(lapDelta);
+					sb.append("h ");
+				}
 				sb.append(nf.format(dm));
 				sb.append(':');
 				sb.append(nf.format(dsec));
