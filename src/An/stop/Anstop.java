@@ -1676,7 +1676,10 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     }
     
 
-    /** Add this to the Debug Log, if {@link #DEBUG_LOG_ENABLED}. */
+    /**
+     * Add this to the Debug Log, if {@link #DEBUG_LOG_ENABLED}.
+     * @since 1.6
+     */
     private void addDebugLog(final CharSequence msg)
     {
 	if (! DEBUG_LOG_ENABLED)

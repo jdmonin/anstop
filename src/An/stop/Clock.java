@@ -75,12 +75,14 @@ public class Clock {
 	/**
 	 * Hour field format: Hide hours if 0 (default value).
 	 * Current setting is in {@link LapFormatter#hourFormat}.
+	 * @since 1.6
 	 */
 	public static final int HOUR_FMT_HIDE_IF_0 = 0;
 
 	/**
 	 * Hour field format: Always show hours, even if 0.
 	 * Current setting is in {@link LapFormatter#hourFormat}.
+	 * @since 1.6
 	 */
 	public static final int HOUR_FMT_ALWAYS_SHOW = 1;
 
@@ -88,6 +90,7 @@ public class Clock {
 	 * Hour field format: No hours field, {@link #min minutes} keep increasing past 60.
 	 * Current setting is in {@link LapFormatter#hourFormat}.
 	 * When this format is active, {@link #hour} is always 0.
+	 * @since 1.6
 	 */
 	public static final int HOUR_FMT_MINUTES_PAST_60 = 2;
 
