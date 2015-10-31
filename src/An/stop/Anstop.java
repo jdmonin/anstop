@@ -1096,10 +1096,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 				+ "\n" + minView.getText().toString() + ":" + secondsView.getText().toString()
 				+ ":" + dsecondsView.getText().toString() + "\n" + mContext.getResources().getString(R.string.start_time)
 				+ spinnerHoursStr + "\n"
-				+ clock.lapf.nf.format(secSpinner.getSelectedItemPosition()) + ":" 
-				+ clock.lapf.nf.format(spinnerMin) + ".0"
+				+ clock.lapf.nf.format(spinnerMin) + ":"
+				+ clock.lapf.nf.format(secSpinner.getSelectedItemPosition()) + ".0"
 				+ "\n" + startTimeView.getText().toString();
 			break;
+
 		case STOP_LAP:
 			body = mContext.getResources().getString(R.string.mode_was) + " " 
 				+ mContext.getResources().getString(R.string.stop)
@@ -1108,10 +1109,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 				+ ":" + dsecondsView.getText().toString()
 				+ "\n" + lapView.getText().toString();
 			break;
+
 		default:
 			body = "ModeError";
-			break;
 		}
+
 		return body;
 	}
 
