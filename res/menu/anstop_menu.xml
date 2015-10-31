@@ -58,7 +58,6 @@
         android:title="@string/about"
         android:icon="@android:R/drawable/ic_menu_info_details"
         />
-    <!-- TODO hide unless Anstop.DEBUG_LOG_ENABLED -->
     <item android:id="@+id/menu_debug_log"
         android:title="@string/debug_log"
         />

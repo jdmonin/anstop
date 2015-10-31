@@ -45,7 +45,6 @@ import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
@@ -78,37 +77,12 @@ import android.widget.LinearLayout.LayoutParams;
 public class Anstop extends Activity implements OnGesturePerformedListener {
 
 
-	private static final int MENU_MODE_GROUP = 0;
-	/** Menu item to choose {@link #STOP_LAP} mode */
-	private static final int MODE_STOP = 1;
-	// private static final int MODE_LAP = 2;  // removed in r47
-	/** Menu item to choose {@link #COUNTDOWN} mode */
-	private static final int MODE_COUNTDOWN = 3;
-	
-	private static final int MENU_SETTINGS = 4;
-	private static final int SETTINGS_ITEM = 5;
-	
-	private static final int MENU_ABOUT = 6;
-	private static final int ABOUT_ITEM = 7;
-	
-	private static final int MENU_SAVE = 8;
-	private static final int SAVE_ITEM = 9;
-	
-	private static final int MENU_LOAD = 10;
-	private static final int LOAD_ITEM = 11;
-
-	private static final int MENU_SEND = 12;
-	private static final int SEND_ITEM = 13;
-
 	/**
 	 * If true, show Debug Log in menu; see {@link #addDebugLog(CharSequence)}.
 	 * The log is meant to be viewed on the device as Anstop runs, without connecting to a computer.
 	 * For non-development releases, be sure to set this false.
 	 */
 	private static final boolean DEBUG_LOG_ENABLED = true;
-
-	/** Development menu item for troubleshooting; not meant for releases */
-	private static final int MENU_DEBUG_LOG = 14, DEBUG_LOG_ITEM = 15;
 
 	/** Stopwatch/lap mode (and layout), for {@link Clock#getMode()} */
 	public static final int STOP_LAP = 0;  // STOP,LAP combined after v1.4 (see svn r47)
@@ -149,6 +123,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	private StringBuffer fmt_debuglog_time;
 
 	Clock clock;
+
 	/** Lap data for {@link #lapView}. */
 	StringBuilder laps;
 	/**
