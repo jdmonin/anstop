@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ This file is part of Anstop, a stopwatch for Android.
+
+ This file Copyright (C) 2015 Jeremy D Monin (jdmonin@nand.net)
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see http://www.gnu.org/licenses/ .
+ -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/menu_save"
+        android:title="@string/save"
+        android:icon="@android:R/drawable/ic_menu_save"
+        />
+    <item android:id="@+id/menu_send"
+        android:title="@string/send"
+        android:icon="@android:R/drawable/ic_menu_send"
+        />
+    <item android:id="@+id/menu_load"
+        android:title="@string/load"
+        android:icon="@android:R/drawable/ic_menu_upload"
+        />
+    <!-- mode submenu -->
+    <item android:id="@+id/menu_mode_submenu"
+        android:title="@string/mode"
+        android:icon="@android:R/drawable/ic_menu_more"
+        android:showAsAction="ifRoom"
+        >
+        <!-- TODO whole-menu checkable, like modeMenu.setGroupCheckable -->
+        <menu>
+	    <item android:id="@+id/menu_mode_stop"
+	        android:title="@string/stop"
+	        android:checkable="true" />
+	    <item android:id="@+id/menu_mode_countdown"
+	        android:title="@string/countdown"
+	        android:checkable="true" />
+        </menu>
+    </item>
+    <item android:id="@+id/menu_settings"
+        android:title="@string/settings"
+        android:icon="@android:R/drawable/ic_menu_preferences"
+        android:showAsAction="ifRoom"
+        />
+    <item android:id="@+id/menu_about"
+        android:title="@string/about"
+        android:icon="@android:R/drawable/ic_menu_info_details"
+        />
+    <!-- TODO hide unless Anstop.DEBUG_LOG_ENABLED -->
+    <item android:id="@+id/menu_debug_log"
+        android:title="@string/debug_log"
+        />
+</menu>

@@ -777,34 +777,31 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-    	
+
+    	getMenuInflater().inflate(R.menu.anstop_menu, menu);
+
     	//Save Send & Load
-    	saveMenuItem = menu.add(MENU_SAVE, SAVE_ITEM, 0, R.string.save).setIcon(android.R.drawable.ic_menu_save);
-    	menu.add(MENU_SEND, SEND_ITEM, 0, R.string.send).setIcon(android.R.drawable.ic_menu_send);
-    	menu.add(MENU_LOAD, LOAD_ITEM, 0, R.string.load).setIcon(android.R.drawable.ic_menu_upload);
-    	
+    	saveMenuItem = menu.findItem(R.id.menu_save);
+
     	//Mode Submenu
-    	SubMenu modeMenu = menu.addSubMenu(R.string.mode).setIcon(android.R.drawable.ic_menu_more);
-    	modeMenu_itemStop = modeMenu.add(MENU_MODE_GROUP, MODE_STOP, 0, R.string.stop);
-    	modeMenu_itemCountdown = modeMenu.add(MENU_MODE_GROUP, MODE_COUNTDOWN, 0, R.string.countdown);
-    	modeMenu.setGroupCheckable(MENU_MODE_GROUP, true, true);
-    	updateModeMenuFromCurrent();
-    	modeMenuItem = modeMenu.getItem();
-    	
+    	///SubMenu modeMenu = menu.addSubMenu(R.string.mode).setIcon(android.R.drawable.ic_menu_more);
+    	///modeMenu_itemStop = modeMenu.add(MENU_MODE_GROUP, MODE_STOP, 0, R.string.stop);
+    	///modeMenu_itemCountdown = modeMenu.add(MENU_MODE_GROUP, MODE_COUNTDOWN, 0, R.string.countdown);
+    	///modeMenu.setGroupCheckable(MENU_MODE_GROUP, true, true);
+    	///updateModeMenuFromCurrent();
+    	modeMenuItem = menu.findItem(R.id.menu_mode_submenu);
+
+    	// TODO api lookup for this, looks like not like modeMenu.setGroupCheckable
+    	//menu.setGroupCheckable(R.id.menu_mode_submenu, true, true);
+
     	if(clock.isStarted) {
     		modeMenuItem.setEnabled(false);
     		saveMenuItem.setEnabled(false);
     	}
 
-    	//Settings Menu
-    	menu.add(MENU_SETTINGS, SETTINGS_ITEM, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
-    	
-    	//about
-    	menu.add(MENU_ABOUT, ABOUT_ITEM, 0, R.string.about).setIcon(android.R.drawable.ic_menu_info_details);
-
     	// debug
-    	if (DEBUG_LOG_ENABLED)
-    		menu.add(MENU_DEBUG_LOG, DEBUG_LOG_ITEM, 0, R.string.debug_log);
+    	if (! DEBUG_LOG_ENABLED)
+    		menu.removeItem(R.id.menu_debug_log);
 
         return true;
     }
@@ -830,40 +827,40 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     	Intent i = new Intent();
     	
     	switch (item.getItemId()) {
-        case SETTINGS_ITEM:
+        case R.id.menu_settings:
         	i.setClass(this, SettingsActivity.class);
         	startActivityForResult(i, SETTINGS_ACTIVITY);
         	  // on result, will call readSettings(false).
         	return true;
 
-        case MODE_STOP:
+        case R.id.menu_mode_stop:
         	changeModeOrPopupConfirm(true, clock.getMode(), STOP_LAP);
             return true;
             
-        case MODE_COUNTDOWN:
+        case R.id.menu_mode_countdown:
         	changeModeOrPopupConfirm(false, clock.getMode(), COUNTDOWN);
         	return true;
 
-        case ABOUT_ITEM:
+        case R.id.menu_about:
         	showDialog(ABOUT_DIALOG);
         	return true;
         	
-        case SAVE_ITEM:
+        case R.id.menu_save:
         	showDialog(SAVE_DIALOG);
         	return true;
         	
-        case SEND_ITEM:
+        case R.id.menu_send:
 	        startSendMailIntent
 	            (this, getResources().getString(R.string.app_name) + ": " + currentModeAsString(), createBodyFromCurrent());
         	return true;
 
-        case LOAD_ITEM:
+        case R.id.menu_load:
         	i.setClass(this, LoadActivity.class);
         	startActivity(i);
         	return true;
         	
         
-        case DEBUG_LOG_ITEM:
+        case R.id.menu_debug_log:
         	showDialog(DEBUG_LOG_DIALOG);
         	return true;
         }
