@@ -766,7 +766,6 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
     	getMenuInflater().inflate(R.menu.anstop_menu, menu);
 
-    	//Save Send & Load
     	saveMenuItem = menu.findItem(R.id.menu_save);
 
     	//Mode Submenu

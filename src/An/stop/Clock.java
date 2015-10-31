@@ -498,7 +498,10 @@ public class Clock {
 		parent.wroteStartTime = inState.getBoolean("clockAnstopWroteStart", false);
 		parent.comment = inState.getString("clockComment");
 		if ((parent.comment != null) && (parent.comment.length() == 0))
+		{
 			parent.comment = null;
+			parent.wroteStartTime = false;
+		}
 		laps = inState.getInt("clockLapCount", 1);
 		if (parent.lapView != null)
 		{
@@ -513,7 +516,7 @@ public class Clock {
 			lap_systime = inState.getLongArray("clockLapsSystime");
 		}
 
-		if ((parent.comment != null) || (parent.lapView != null))
+		if ((parent.comment != null) || (parent.lapView != null) || ! parent.wroteStartTime)
 			parent.updateStartTimeCommentLapsView(false);
 
 		if (parent.hourSpinner != null)
@@ -608,7 +611,10 @@ public class Clock {
 		parent.wroteStartTime = inState.getBoolean("anstop_state_wroteStart", false);
 		parent.comment = inState.getString("anstop_state_clockComment", null);
 		if ((parent.comment != null) && (parent.comment.length() == 0))
+		{
 			parent.comment = null;
+			parent.wroteStartTime = false;
+		}
 		laps = inState.getInt("anstop_state_clockLapCount", 1);
 		if (parent.lapView != null)
 		{
@@ -618,7 +624,7 @@ public class Clock {
 				parent.laps.append(laptext);
 		}
 
-		if ((parent.comment != null) || (parent.lapView != null))
+		if ((parent.comment != null) || (parent.lapView != null) || ! parent.wroteStartTime)
 			parent.updateStartTimeCommentLapsView(false);
 
 		if (parent.hourSpinner != null)
