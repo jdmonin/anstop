@@ -36,14 +36,17 @@
         android:icon="@android:R/drawable/ic_menu_more"
         android:showAsAction="ifRoom"
         >
-        <!-- TODO whole-menu checkable, like modeMenu.setGroupCheckable -->
         <menu>
+            <group android:id="@+id/menu_mode_group"
+                android:checkableBehavior="single"
+                >
 	    <item android:id="@+id/menu_mode_stop"
 	        android:title="@string/stop"
-	        android:checkable="true" />
+	        />
 	    <item android:id="@+id/menu_mode_countdown"
 	        android:title="@string/countdown"
-	        android:checkable="true" />
+	        />
+	    </group>
         </menu>
     </item>
     <item android:id="@+id/menu_settings"

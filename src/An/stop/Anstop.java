@@ -784,15 +784,10 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     	saveMenuItem = menu.findItem(R.id.menu_save);
 
     	//Mode Submenu
-    	///SubMenu modeMenu = menu.addSubMenu(R.string.mode).setIcon(android.R.drawable.ic_menu_more);
-    	///modeMenu_itemStop = modeMenu.add(MENU_MODE_GROUP, MODE_STOP, 0, R.string.stop);
-    	///modeMenu_itemCountdown = modeMenu.add(MENU_MODE_GROUP, MODE_COUNTDOWN, 0, R.string.countdown);
-    	///modeMenu.setGroupCheckable(MENU_MODE_GROUP, true, true);
-    	///updateModeMenuFromCurrent();
     	modeMenuItem = menu.findItem(R.id.menu_mode_submenu);
-
-    	// TODO api lookup for this, looks like not like modeMenu.setGroupCheckable
-    	//menu.setGroupCheckable(R.id.menu_mode_submenu, true, true);
+    	modeMenu_itemStop = menu.findItem(R.id.menu_mode_stop);
+    	modeMenu_itemCountdown = menu.findItem(R.id.menu_mode_countdown);
+    	updateModeMenuFromCurrent();
 
     	if(clock.isStarted) {
     		modeMenuItem.setEnabled(false);
