@@ -750,6 +750,17 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		clock.onAppResume();
 	}
 
+    /**
+     * Add to or inflate the option menu for action bar or android 2.x menu key.
+     * Inflates from {@code res/menu/anstop_menu.xml}.
+     * Also sets {@link #saveMenuItem}, {@link #modeMenuItem}, {@link #modeMenu_itemStop},
+     * and {@link #modeMenu_itemCountdown}.
+     *<P>
+     * Anstop doesn't need {@code onPrepareOptionsMenu(..)} because menu item state changes
+     * are handled as they occur (start or stop clock, change mode, etc).
+     *
+     * @param menu  Add to or inflate into this menu
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
