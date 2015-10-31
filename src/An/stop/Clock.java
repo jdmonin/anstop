@@ -496,25 +496,30 @@ public class Clock {
 		startTimeAdj = inState.getLong("clockStartTimeAdj", startTimeActual);
 		stopTime = inState.getLong("clockStopTime", -1L);
 		parent.wroteStartTime = inState.getBoolean("clockAnstopWroteStart", false);
-		parent.comment = inState.getString("clockComment");
-		if ((parent.comment != null) && (parent.comment.length() == 0))
-		{
-			parent.comment = null;
-			parent.wroteStartTime = false;
-		}
+
+		boolean hadLapText = false;
 		laps = inState.getInt("clockLapCount", 1);
 		if (parent.lapView != null)
 		{
 			parent.laps = new StringBuilder();
 			CharSequence laptext = inState.getCharSequence("clockLaps");
-			if (laptext != null)
+			if ((laptext != null) && (laptext.length() > 0))
+			{
 				parent.laps.append(laptext);
+				hadLapText = true;
+			}
 		}
 		if (laps > 1)
 		{
 			lap_elapsed = inState.getLongArray("clockLapsElapsed");
 			lap_systime = inState.getLongArray("clockLapsSystime");
 		}
+
+		parent.comment = inState.getString("clockComment");
+		if ((parent.comment != null) && (parent.comment.length() == 0))
+			parent.comment = null;
+		if ((parent.comment == null) && ! hadLapText)
+			parent.wroteStartTime = false;
 
 		if ((parent.comment != null) || (parent.lapView != null) || ! parent.wroteStartTime)
 			parent.updateStartTimeCommentLapsView(false);
@@ -609,21 +614,25 @@ public class Clock {
 		startTimeAdj = inState.getLong("anstop_state_clockStartTimeAdj", startTimeActual);
 		stopTime = inState.getLong("anstop_state_clockStopTime", -1L);
 		parent.wroteStartTime = inState.getBoolean("anstop_state_wroteStart", false);
-		parent.comment = inState.getString("anstop_state_clockComment", null);
-		if ((parent.comment != null) && (parent.comment.length() == 0))
-		{
-			parent.comment = null;
-			parent.wroteStartTime = false;
-		}
+
+		boolean hadLapText = false;
 		laps = inState.getInt("anstop_state_clockLapCount", 1);
 		if (parent.lapView != null)
 		{
 			parent.laps = new StringBuilder();
 			String laptext = inState.getString("anstop_state_clockLaps", "");
 			if (laptext.length() > 0)
+			{
 				parent.laps.append(laptext);
+				hadLapText = true;
+			}
 		}
 
+		parent.comment = inState.getString("anstop_state_clockComment", null);
+		if ((parent.comment != null) && (parent.comment.length() == 0))
+			parent.comment = null;
+		if ((parent.comment == null) && ! hadLapText)
+			parent.wroteStartTime = false;
 		if ((parent.comment != null) || (parent.lapView != null) || ! parent.wroteStartTime)
 			parent.updateStartTimeCommentLapsView(false);
 

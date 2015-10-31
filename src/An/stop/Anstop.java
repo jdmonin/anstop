@@ -1286,6 +1286,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * Format and write the start time, {@link #comment},
 	 * and {@link #laps} (if applicable) displayed
 	 * in {@link #startTimeView} or {@link #lapView}.
+	 * Sets {@link #wroteStartTime} flag.
 	 *<P>
 	 * The same formatting is used in {@link AnstopDbAdapter#getRowAndFormat(long)}.
 	 * If you change this method, change that one to match.
@@ -1333,6 +1334,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		{
 			startTimeView.setText(sb);	
 		}
+
+		wroteStartTime = true;
 	}
 
     private class startButtonListener implements OnClickListener {
@@ -1377,10 +1380,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		if (clock.isStarted)
 		{
 			if (! wroteStartTime)
-			{
 				updateStartTimeCommentLapsView(false);
-				wroteStartTime = true;
-			}
 		} else {
 			// When stopped, backup current state to SharedPreferences
 			clock.fillSaveState
@@ -1472,7 +1472,6 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 				laps.append(getResources().getString(R.string.laps));
 
 			updateStartTimeCommentLapsView(false);
-			wroteStartTime = true;
 		}
         	laps.append(sb);
         	lapView.append(sb);
