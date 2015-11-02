@@ -874,7 +874,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	AlertDialog.Builder aboutBuilder = new AlertDialog.Builder(this);
         	aboutBuilder.setMessage(R.string.about_dialog)
         	       .setCancelable(true)
-        	.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+        	.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                      dialog.dismiss();
                 }
@@ -892,7 +892,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	final EditText input = new EditText(this);
         	saveBuilder.setView(input);
         	
-        	saveBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+        	saveBuilder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
         		public void onClick(DialogInterface dialog, int whichButton) {
 		    			
         				if (dbHelper == null)
