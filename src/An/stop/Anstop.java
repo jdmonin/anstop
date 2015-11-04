@@ -1309,6 +1309,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			sb.append(getResources().getText(R.string.started_at));
 			sb.append(" ");
 			sb.append(DateFormat.format(fmt_dow_meddate_time, sttime));
+
+			wroteStartTime = true;
 		}
 
 		if ((comment != null) && (comment.length() > 0))
@@ -1334,8 +1336,6 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		{
 			startTimeView.setText(sb);	
 		}
-
-		wroteStartTime = true;
 	}
 
     private class startButtonListener implements OnClickListener {
