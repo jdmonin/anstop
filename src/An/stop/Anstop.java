@@ -133,7 +133,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * @see #updateStartTimeCommentLapsView(boolean)
 	 */
 	String comment;
-	/** start/stop (resume/pause) */
+	/** start/stop (resume/pause). This button is used in both layouts (Stopwatch and Countdown). */
 	Button startButton;
 	/** in stopwatch/lap mode, reset the count */
 	Button resetButton;
