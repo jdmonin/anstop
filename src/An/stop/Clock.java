@@ -1139,8 +1139,17 @@ public class Clock {
 				isStarted = false;
 				if (parent.modeMenuItem != null)
 				{
-					parent.modeMenuItem.setEnabled(true);
-					parent.saveMenuItem.setEnabled(true);
+					// re-enable menu items, using UI thread
+					// (avoids CalledFromWrongThreadException)
+
+					parent.startButton.post(new Runnable()
+					{
+						public void run()
+						{
+							parent.modeMenuItem.setEnabled(true);
+							parent.saveMenuItem.setEnabled(true);
+						}
+					});
 				}
 				return;
 			}
@@ -1196,8 +1205,16 @@ public class Clock {
 					isStarted = false;
 					if (parent.modeMenuItem != null)
 					{
-						parent.modeMenuItem.setEnabled(true);
-						parent.saveMenuItem.setEnabled(true);
+						// re-enable menu items, using UI thread
+
+						parent.startButton.post(new Runnable()
+						{
+							public void run()
+							{
+								parent.modeMenuItem.setEnabled(true);
+								parent.saveMenuItem.setEnabled(true);
+							}
+						});
 					}
 					return;
 				}
