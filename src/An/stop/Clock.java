@@ -1131,26 +1131,38 @@ public class Clock {
 	private class countDownThread extends Thread {
 		public countDownThread() { setDaemon(true); }
 
+		/**
+		 * Call from run() when countdown reaches 00:00:00.0.
+		 * Clears {@link Clock#isStarted} and re-enables Mode and Save menu items.
+		 * Thread should return after calling this method, it's reached the end of the countdown.
+		 */
+		private void cleanupAt0()
+		{
+			isStarted = false;
+
+			if (parent.modeMenuItem != null)
+			{
+				// re-enable menu items, using UI thread
+				// (avoids CalledFromWrongThreadException)
+
+				parent.startButton.post(new Runnable()
+				{
+					public void run()
+					{
+						parent.modeMenuItem.setEnabled(true);
+						parent.saveMenuItem.setEnabled(true);
+					}
+				});
+			}
+		}
+
 		@Override
 		public void run() {
 			
 			
 			if(hour == 0 && min == 0 && sec == 0 && dsec == 0) {
-				isStarted = false;
-				if (parent.modeMenuItem != null)
-				{
-					// re-enable menu items, using UI thread
-					// (avoids CalledFromWrongThreadException)
+				cleanupAt0();
 
-					parent.startButton.post(new Runnable()
-					{
-						public void run()
-						{
-							parent.modeMenuItem.setEnabled(true);
-							parent.saveMenuItem.setEnabled(true);
-						}
-					});
-				}
 				return;
 			}
 			
@@ -1202,20 +1214,8 @@ public class Clock {
 				
 				
 				if(hour == 0 && min == 0 && sec == 0 && dsec == 0) {
-					isStarted = false;
-					if (parent.modeMenuItem != null)
-					{
-						// re-enable menu items, using UI thread
+					cleanupAt0();
 
-						parent.startButton.post(new Runnable()
-						{
-							public void run()
-							{
-								parent.modeMenuItem.setEnabled(true);
-								parent.saveMenuItem.setEnabled(true);
-							}
-						});
-					}
 					return;
 				}
 					
