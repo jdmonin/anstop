@@ -172,6 +172,13 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	private transient EditText commentEdit;
 
 	Context mContext;
+
+	/**
+	 * Not null if Anstop should vibrate (quick pulse) with button presses.
+	 * ({@code vibrate} preference setting)
+	 *<P>
+	 * Not used by other vibration preferences such as {@code vibrate_countdown_0}.
+	 */
 	Vibrator vib;
 	
 	AccelerometerListener al;

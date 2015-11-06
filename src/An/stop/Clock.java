@@ -27,10 +27,13 @@ package An.stop;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.view.View;  // only for hourhandler to hide/show hours views if needed
 
 /**
@@ -1132,8 +1135,15 @@ public class Clock {
 		public countDownThread() { setDaemon(true); }
 
 		/**
+		 * Vibrate pattern for {@link #cleanupAt0()}.
+		 * Short pulse of 80 ms, wait 50, vibrate 80.
+		 */
+		private final long[] VIB_PATTERN_MS = { 0, 80, 50, 80 };
+
+		/**
 		 * Call from run() when countdown reaches 00:00:00.0.
 		 * Clears {@link Clock#isStarted} and re-enables Mode and Save menu items.
+		 * Vibrate twice if {@code vibrate_countdown_0} preference is set.
 		 * Thread should return after calling this method, it's reached the end of the countdown.
 		 */
 		private void cleanupAt0()
@@ -1153,6 +1163,14 @@ public class Clock {
 						parent.saveMenuItem.setEnabled(true);
 					}
 				});
+			}
+
+			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(parent.mContext);
+			if (settings.getBoolean("vibrate_countdown_0", true))
+			{
+				Vibrator vib = (Vibrator) parent.getSystemService(Context.VIBRATOR_SERVICE);
+				if (vib != null)
+					vib.vibrate(VIB_PATTERN_MS, -1);
 			}
 		}
 
