@@ -41,6 +41,8 @@
 <string name="mode">Modua</string>
 <string name="cancel">Utzi</string>
 <string name="vibrate">Bibratu</string>
+<string name="vibrate_after_countdown">Bibratu atzerako amaitu denean</string>
+<string name="vibrate_after_countdown_checkbox">Bibratu (2 pultsuak) atzerako kontaketa iristen 00:00 denean</string>
 <string name="motion_sensor">Mugimendu-sentsorea</string>
 <string name="send">Bidali...</string>
 <string name="startup_mode">Modua abiaraztean</string>

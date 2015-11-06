@@ -38,6 +38,8 @@
     <string name="mode">Modus</string>
     <string name="cancel">Abbrechen</string>
     <string name="vibrate">Vibrieren</string>
+    <string name="vibrate_after_countdown">Vibrieren am Ende der Countdown</string>
+    <string name="vibrate_after_countdown_checkbox">Vibrieren (2 Impulsen) wenn der Countdown 00:00 erreicht</string>
     <string name="motion_sensor">Beschleunigungssensor</string>
     <string name="send">Senden...</string>
     <string name="startup_mode">Modus beim Start</string>

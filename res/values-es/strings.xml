@@ -40,6 +40,8 @@
 <string name="mode">Modo</string>
 <string name="cancel">Cancelar</string>
 <string name="vibrate">Vibrar</string>
+<string name="vibrate_after_countdown">Vibrar atrás la Cuenta regresiva</string>
+<string name="vibrate_after_countdown_checkbox">Vibrar (2 pulsos) cuando la cuenta regresiva llega a 00:00</string>
 <string name="motion_sensor">Sensor de Movimiento</string>
 <string name="send">Enviar...</string>
 <string name="startup_mode">Modo de inicio</string>
