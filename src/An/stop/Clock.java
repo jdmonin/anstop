@@ -1165,13 +1165,19 @@ public class Clock {
 				});
 			}
 
-			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(parent.mContext);
+			final SharedPreferences settings
+				= PreferenceManager.getDefaultSharedPreferences(parent.mContext);
+
 			if (settings.getBoolean("vibrate_countdown_0", true))
 			{
 				Vibrator vib = (Vibrator) parent.getSystemService(Context.VIBRATOR_SERVICE);
 				if (vib != null)
 					vib.vibrate(VIB_PATTERN_MS, -1);
 			}
+
+			// After stopping, back up current state to SharedPreferences
+			// as when Stop button is pressed
+			fillSaveState(settings);
 		}
 
 		@Override
