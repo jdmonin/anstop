@@ -148,15 +148,20 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * {@link #updateHourVisibility() and {@link Clock.hourhandler} as needed.
 	 */
 	TextView hourView, hourLabelView;
+
 	/** shows start time and {@link #comment} in the countdown layout, which doesn't contain {@link #lapView} */
 	TextView startTimeView;
 	/** shows start time, {@link #comment}, and {@link #laps}. When <tt>lapView</tt> is non-null, {@link #startTimeView} is null */
 	TextView lapView;
-	Spinner secSpinner;
-	Spinner minSpinner;
-	Spinner hourSpinner;
 	/** scrollview containing {@link #lapView} */
 	ScrollView lapScroll;
+
+	/** {@link #COUNTDOWN} spinner to select starting seconds */
+	Spinner secSpinner;
+	/** {@link #COUNTDOWN} spinner to select starting minutes */
+	Spinner minSpinner;
+	/** {@link #COUNTDOWN} spinner to select starting hours */
+	Spinner hourSpinner;
 
 	/** Context menu item for Mode. Null until {@link #onCreateOptionsMenu(Menu)} is called. */
 	MenuItem modeMenuItem;
@@ -390,8 +395,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     /**
      * Set the current mode, if the clock isn't currently started,
      * and load the right Layout for it.
+     * Calls {@link #stopwatch()} or {@link #countdown()}.
      *<P>
-     * Does nothing if {@link Clock#isStarted}, or if current mode is already newCurrent.
+     * Does nothing if {@link Clock#isStarted}, or if current mode is already {@code newCurrent}.
      *
      * @param newCurrent {@link #STOP_LAP} or {@link #COUNTDOWN}
      */
@@ -663,6 +669,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 				+ ", " + settings.getInt("anstop_state_clockDigits_m", -1)
 				+ ", " + settings.getInt("anstop_state_clockDigits_s", -1)
 				+ ", " + settings.getInt("anstop_state_clockDigits_d", -1));
+
 			if (settings.contains("anstop_state_clockActive"))
 				addDebugLog("anstop_state_clockActive = "
 					+ settings.getBoolean("anstop_state_clockActive", false));
@@ -673,16 +680,27 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 					+ settings.getBoolean("anstop_state_clockWasActive", false));
 			else
 				addDebugLog("anstop_state_clockWasActive (not found)");
+
+			if (settings.contains("anstop_state_clockCountHour"))
+				addDebugLog("anstop_state_clockCountHour,Min,Sec = "
+					+ settings.getInt("anstop_state_clockCountHour", -1)
+					+ ", " + settings.getInt("anstop_state_clockCountMin", -1)
+					+ ", " + settings.getInt("anstop_state_clockCountSec", -1));
+			else
+				addDebugLog("anstop_state_clockCountHour (not found)");
+
 			if (settings.contains("anstop_state_hourFormat"))
 				addDebugLog("anstop_state_hourFormat = "
 					+ settings.getInt("anstop_state_hourFormat", -1));
 			else
 				addDebugLog("anstop_state_hourFormat (not found)");
+
 			addDebugLog("anstop_state_clockStateSaveTime = "
 				+ settings.getLong("anstop_state_clockStateSaveTime", -1L));
 			addDebugLog("current time (millis) = " + System.currentTimeMillis());
 			addDebugLog("anstop_state_clockLapCount = "
 				+ settings.getInt("anstop_state_clockLapCount", -1));
+
 			String comment = settings.getString("anstop_state_clockComment", null);
 			if ((comment != null) && (comment.length() >= 0))
 				addDebugLog("comment: " + comment);
