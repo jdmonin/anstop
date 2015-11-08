@@ -339,7 +339,9 @@ public class Clock {
 	 * Save the clock's current state to {@link SharedPreferences} fields.
 	 * Same contents as {@link #fillSaveState(Bundle)} except that
 	 * the key names have "anstop_state_" as a prefix.
-	 * Also sets boolean <tt>"anstop_in_use"</tt> to the value returned by {@link #isInUse()}.
+	 *<P>
+	 * Always sets long {@code "anstop_state_clockStateSaveTime"} to {@link System#currentTimeMillis()}
+	 * and sets boolean {@code "anstop_in_use"} to the value returned by {@link #isInUse()}.
 	 *
 	 * @param outState SharedPreferences to save into
 	 * @return true if clock was running, false otherwise
@@ -354,6 +356,7 @@ public class Clock {
 
 		SharedPreferences.Editor outPref = outState.edit();
 		final long savedAtTime = System.currentTimeMillis();
+		outPref.putLong("anstop_state_clockStateSaveTime", savedAtTime);
 
 		if (notInUse)
 		{
@@ -374,7 +377,6 @@ public class Clock {
 			outPref.putBoolean("anstop_state_clockActive", isStarted);
 			outPref.putBoolean("anstop_state_clockWasActive", wasStarted);
 			outPref.putInt("anstop_state_hourFormat", lapf.hourFormat);
-			outPref.putLong("anstop_state_clockStateSaveTime", savedAtTime);
 			if (! isStarted)
 				outPref.putLong("anstop_state_clockStopTime", stopTime);
 			else

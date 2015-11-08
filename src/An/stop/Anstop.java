@@ -630,6 +630,10 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * Restore our state after an Android pause or stop.
 	 * Happens here (and not <tt>onCreate</tt>) to ensure the
 	 * initialization is complete before this method is called.
+	 *<P>
+	 * Also checks if SharedPreferences were saved more recently,
+	 * if so will directly call {@link #onRestoreInstanceState(SharedPreferences)}.
+	 *
 	 * @see #onSaveInstanceState(Bundle)
 	 */
 	@Override
@@ -637,11 +641,24 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		addDebugLog("onRestoreInstanceState(B); inState == " + inState);
 		if (inState == null)
 			return;
-		int newCurrent = inState.getInt("clockAnstopCurrent", STOP_LAP);
-		if (newCurrent == OBSOL_LAP)
-			newCurrent = STOP_LAP;
-		setCurrentMode(newCurrent);
-		clock.restoreFromSaveState(inState);
+
+		final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
+		final long bundleSavedAt = inState.getLong("clockStateSaveTime"),
+			spSavedAt = (settings != null) ? settings.getLong("anstop_state_clockStateSaveTime", -1L)
+					: -1L;
+		addDebugLog("onRestoreInstanceState(B); bundleSavedAt, spSavedAt == "
+			+ bundleSavedAt + ", " + spSavedAt);
+
+		if ((spSavedAt == -1) || (spSavedAt < bundleSavedAt))
+		{
+			int newCurrent = inState.getInt("clockAnstopCurrent", STOP_LAP);
+			if (newCurrent == OBSOL_LAP)
+				newCurrent = STOP_LAP;
+			setCurrentMode(newCurrent);
+			clock.restoreFromSaveState(inState);
+		} else {
+			onRestoreInstanceState(settings);
+		}
 	}
 
 	/**
