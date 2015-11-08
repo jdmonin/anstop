@@ -978,7 +978,13 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	    				comment = inputComm.getText().toString().trim();
 	    				if (comment.length() == 0)
 	    					comment = null;
+
 	    				updateStartTimeCommentLapsView(false);
+
+					// Back up current state with new comments to SharedPreferences
+					clock.fillSaveState
+						(PreferenceManager.getDefaultSharedPreferences(mContext));
+
         			}
         		});
 
@@ -1423,11 +1429,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		{
 			if (! wroteStartTime)
 				updateStartTimeCommentLapsView(false);
-		} else {
-			// When stopped, backup current state to SharedPreferences
-			clock.fillSaveState
-				(PreferenceManager.getDefaultSharedPreferences(mContext));
 		}
+
+		// Back up current state to SharedPreferences
+		clock.fillSaveState
+			(PreferenceManager.getDefaultSharedPreferences(mContext));
         }
 
     }
@@ -1539,6 +1545,10 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	}
         	dbHelper.createNewLap
         		(0, clock.lap_elapsed[clock.laps - 2], clock.lap_systime[clock.laps - 2]);
+
+		// Back up current state with new lap to SharedPreferences
+		clock.fillSaveState
+			(PreferenceManager.getDefaultSharedPreferences(mContext));
     	}
     }
 

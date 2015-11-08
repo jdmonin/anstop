@@ -1178,7 +1178,7 @@ public class Clock {
 			}
 
 			// After stopping, back up current state to SharedPreferences
-			// as when Stop button is pressed
+			// as when Start/Stop button is pressed
 			fillSaveState(settings);
 		}
 
