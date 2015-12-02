@@ -42,7 +42,10 @@ import android.gesture.GestureOverlayView.OnGesturePerformedListener;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -913,8 +916,17 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         Dialog dialog;
         switch(id) {
         case ABOUT_DIALOG:
+		// dialog text includes clickable URLs
+
+		final TextView tv_about_text = new TextView(this);
+		final SpannableStringBuilder about_str =
+			new SpannableStringBuilder(getText(R.string.about_dialog));
+		Linkify.addLinks(about_str, Linkify.WEB_URLS);
+		tv_about_text.setText(about_str);
+		tv_about_text.setMovementMethod(LinkMovementMethod.getInstance());
+
         	AlertDialog.Builder aboutBuilder = new AlertDialog.Builder(this);
-        	aboutBuilder.setMessage(R.string.about_dialog)
+		aboutBuilder.setView(tv_about_text)
         	       .setCancelable(true)
         	.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
