@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009-2011 by mj										   *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010-2012,2014-2015 Jeremy Monin  *
+ *   Portions of this file Copyright (C) 2010-2012,2014-2016 Jeremy Monin  *
  *    jeremy@nand.net                                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -788,7 +788,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	public void onResume()
 	{
 		super.onResume();
-		addDebugLog("onResume; isStarted == " + clock.isStarted);
+		addDebugLog("onResume; isStarted == " + clock.isStarted + ", wasStarted == " + clock.wasStarted);
 		if (! clock.isStarted)
 			return;
 
