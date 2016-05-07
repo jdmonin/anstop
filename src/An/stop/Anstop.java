@@ -105,6 +105,14 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	
 	private static final int SETTINGS_ACTIVITY = 0;
 	
+	/**
+	 * For {@link #COMMENT_DIALOG}, the minimum change of length of comment text
+	 * which, if dialog is cancelled, will ask user if wish to discard changes.
+	 * @see #commentOrigLen
+	 * @since 1.6.0
+	 */
+	private static final int COMMENT_CHANGE_LEN = 20;
+
 	private static final int VIEW_SIZE = 60;
 
 	// Reminder: If you add or change fields, be sure to update
@@ -175,9 +183,18 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	/**
 	 * Edit text for {@link #comment} in {@link #COMMENT_DIALOG}.
 	 * Null until {@link #onCreateDialog(int)} is called.
-	 * Updated in {@link #onPrepareDialog(int, Dialog)}.
+	 * Updated in {@link #onPrepareDialog(int, Dialog)} along with {@link #commentOrigLen}.
 	 */
 	private transient EditText commentEdit;
+
+	/**
+	 * Original length of text in {@link #commentEdit} before the dialog is shown.
+	 * Used to detect when comment text has been added or removed.
+	 * Updated in {@link #onPrepareDialog(int, Dialog)}.
+	 * @see #COMMENT_CHANGE_LEN
+	 * @since 1.6.0
+	 */
+	private transient int commentOrigLen;
 
 	Context mContext;
 
@@ -981,8 +998,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	commentBuilder.setTitle(R.string.comment);
         	if (commentEdit == null)
         		commentEdit = new EditText(this);
-        	final EditText inputComm = commentEdit;
+
         	// commentEdit contents are set from comment in onPrepareDialog
+        	// which also sets commentOrigLen
+
+        	final EditText inputComm = commentEdit;
         	commentBuilder.setView(inputComm);
 
         	commentBuilder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -1075,7 +1095,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     }
 
     /**
-     * Update {@link #commentEdit} before showing {@link #COMMENT_DIALOG}.
+     * Update {@link #commentEdit} and {@link #commentOrigLen} before showing {@link #COMMENT_DIALOG}.
      */
     protected void onPrepareDialog(final int id, Dialog dialog)
     {
@@ -1086,9 +1106,13 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     	}
 
     	if (comment != null)
+    	{
     		commentEdit.setText(comment);
-    	else
+    		commentOrigLen = comment.length();
+    	} else {
     		commentEdit.setText("");
+    		commentOrigLen = 0;
+    	}
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
