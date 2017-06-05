@@ -12,21 +12,70 @@
 		android:orientation="vertical">
 
 		<RelativeLayout android:id="@+id/RelativeLayout01" android:layout_width="wrap_content" android:layout_height="wrap_content">
-			<LinearLayout android:id="@+id/LinearLayout02" android:layout_width="wrap_content" android:layout_height="wrap_content">
-				<TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-				    android:id="@+id/hourView" android:text="0" />
+
+			<LinearLayout
+				android:id="@+id/LinearLayout02"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content">
+
+				<!-- spacer -->
+				<View
+					android:layout_width="0px"
+					android:layout_height="match_parent"
+					android:layout_weight="1" />
+
 				<TextView
-				    android:id="@+id/hourLabelView"
-				    android:layout_width="wrap_content"
-				    android:layout_height="wrap_content"
-				    android:text="@string/hour" />
+					android:id="@+id/hourView"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="0"/>
+
+				<TextView
+					android:id="@+id/hourLabelView"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/hour"/>
 				<!-- spacer; 3sp is scaled with user's text preferences -->
-				<TextView android:layout_width="3sp" android:layout_height="wrap_content" android:text="" />
-				<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/minView" android:text="00" />
-				<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=":" android:id="@+id/sepView1" />
-				<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/secondsView" android:text="00" />
-				<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=":" android:id="@+id/sepView2" />
-				<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/dsecondsView" android:text="0" />
+				<TextView
+					android:layout_width="3sp"
+					android:layout_height="wrap_content"
+					android:text=""/>
+
+				<TextView
+					android:id="@+id/minView"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="00"/>
+
+				<TextView
+					android:id="@+id/sepView1"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text=":"/>
+
+				<TextView
+					android:id="@+id/secondsView"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="00"/>
+
+				<TextView
+					android:id="@+id/sepView2"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text=":"/>
+
+				<TextView
+					android:id="@+id/dsecondsView"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="0"/>
+
+				<!-- spacer -->
+				<View
+					android:layout_width="0px"
+					android:layout_height="match_parent"
+					android:layout_weight="1" />
 			</LinearLayout>
 		</RelativeLayout>
 
