@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ This file is part of Anstop, a stopwatch for Android.
+
+ This file Copyright (C) 2015 Jeremy D Monin (jdmonin@nand.net)
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see http://www.gnu.org/licenses/ .
+ -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/menu_save"
+        android:title="@string/save"
+        android:icon="@drawable/baseline_save_black_24"
+        />
+    <item android:id="@+id/menu_send"
+        android:title="@string/send"
+        android:icon="@drawable/baseline_send_black_24"
+        />
+    <item android:id="@+id/menu_load"
+        android:title="@string/load"
+        android:icon="@drawable/baseline_cloud_upload_black_24"
+        />
+    <!-- mode submenu -->
+    <item android:id="@+id/menu_mode_submenu"
+        android:title="@string/mode"
+        android:icon="@drawable/baseline_expand_more_black_24"
+        android:showAsAction="ifRoom"
+        >
+        <menu>
+            <group android:id="@+id/menu_mode_group"
+                android:checkableBehavior="single"
+                >
+	    <item android:id="@+id/menu_mode_stop"
+	        android:title="@string/stop"
+	        />
+	    <item android:id="@+id/menu_mode_countdown"
+	        android:title="@string/countdown"
+	        />
+	    </group>
+        </menu>
+    </item>
+    <item android:id="@+id/menu_settings"
+        android:title="@string/settings"
+        android:icon="@drawable/baseline_more_vert_black_24"
+        android:showAsAction="ifRoom"
+        />
+    <item android:id="@+id/menu_about"
+        android:title="@string/about"
+        android:icon="@drawable/baseline_info_black_24"
+        />
+    <item android:id="@+id/menu_debug_log"
+        android:title="@string/debug_log"
+        />
+</menu>
