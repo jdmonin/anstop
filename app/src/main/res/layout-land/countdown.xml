@@ -123,7 +123,7 @@
                 </TextView>
 
                 <Spinner
-                    android:id="@+id/hourSpinner"
+                    android:id="@+id/houPicker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
                 </Spinner>
@@ -136,7 +136,7 @@
                 </TextView>
 
                 <Spinner
-                    android:id="@+id/minSpinner"
+                    android:id="@+id/minPicker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
                 </Spinner>
@@ -149,14 +149,14 @@
                 </TextView>
 
                 <Spinner
-                    android:id="@+id/secSpinner"
+                    android:id="@+id/secPicker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
                 </Spinner>
             </LinearLayout>
 
             <TextView
-                android:id="@+id/countdown_startTimeView"
+                android:id="@+id/startTimeView"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"/>
         </LinearLayout>

@@ -1,8 +1,10 @@
 /***************************************************************************
  *   Copyright (C) 2009-2011 by mj										   *
- *   fakeacc.mj@gmail.com  												   *
+ *    fakeacc.mj@gmail.com  										       *
  *   Portions of this file Copyright (C) 2010-2012,2014-2016 Jeremy Monin  *
  *    jeremy@nand.net                                                      *
+ *   Portions of this file Copyright (C) 2018 Yeshe Santos García          *
+ *    civyshk@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -54,12 +56,11 @@ import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.ScrollView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
@@ -93,7 +94,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	/** Countdown mode (and layout), for {@link Clock#getMode()} */
 	public static final int COUNTDOWN = 1;
 
-	/** Lap mode (and layout), for {@link Clock#getMode(int)} */
+	/** Lap mode (and layout), for {@link Clock#getMode()} */
 	private static final int OBSOL_LAP = 2;  // STOP,LAP combined after v1.4 (see svn r47)
 
 	private static final int ABOUT_DIALOG = 0;
@@ -105,7 +106,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	
 	private static final int SETTINGS_ACTIVITY = 0;
 	
-	private static final int VIEW_SIZE = 60;
+//	private static final int VIEW_SIZE = 60;
 
 	// Reminder: If you add or change fields, be sure to update
 	// Clock.fillSaveState and Clock.restoreFromSaveStateFields
@@ -160,11 +161,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	ScrollView lapScroll;
 
 	/** {@link #COUNTDOWN} spinner to select starting seconds */
-	Spinner secSpinner;
+	NumberPicker secSpinner;
 	/** {@link #COUNTDOWN} spinner to select starting minutes */
-	Spinner minSpinner;
+	NumberPicker minSpinner;
 	/** {@link #COUNTDOWN} spinner to select starting hours */
-	Spinner hourSpinner;
+	NumberPicker hourSpinner;
 
 	/** Context menu item for Mode. Null until {@link #onCreateOptionsMenu(Menu)} is called. */
 	MenuItem modeMenuItem;
@@ -387,7 +388,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	{
 		final boolean hourWantVisible = (clock.hour > 0)
 			|| (clock.lapf.hourFormat == Clock.HOUR_FMT_ALWAYS_SHOW);
-		final int hourVis = (hourWantVisible) ? View.VISIBLE : View.INVISIBLE;
+		final int hourVis = (hourWantVisible) ? View.VISIBLE : View.GONE;
 
 		if (hourLabelView != null)
 			hourLabelView.setVisibility(hourVis);
@@ -451,41 +452,22 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         minView = (TextView) findViewById(R.id.minView);
         hourView = (TextView) findViewById(R.id.hourView);
         hourLabelView = (TextView) findViewById(R.id.hourLabelView);
-        startTimeView = (TextView) findViewById(R.id.countdown_startTimeView);
+        startTimeView = (TextView) findViewById(R.id.startTimeView);
         setupCommentLongPress(startTimeView);
         lapView = null;
         lapScroll = null;
         if (startTimeView.length() == 0)
         	wroteStartTime = false;
 
-        //set the size
-        TextView sepView = (TextView) findViewById(R.id.sepView1);
-        sepView.setTextSize(VIEW_SIZE - 10);
-        
-        sepView = (TextView) findViewById(R.id.sepView2);
-        sepView.setTextSize(VIEW_SIZE - 10);
-        
-        dsecondsView.setTextSize(VIEW_SIZE);
-        secondsView.setTextSize(VIEW_SIZE);
-        minView.setTextSize(VIEW_SIZE);
-        hourView.setTextSize(VIEW_SIZE - 30);
-        startTimeView.setTextSize(VIEW_SIZE - 30);
-        
         //adding spinners
-        secSpinner = (Spinner) findViewById(R.id.secSpinner);
-        minSpinner = (Spinner) findViewById(R.id.minSpinner);
-        hourSpinner = (Spinner) findViewById(R.id.hourSpinner);
-        
-        //creating Adapter for Spinners
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                this, R.array.num, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        
-        //set the adapter to the spinners
-        secSpinner.setAdapter(adapter);
-        minSpinner.setAdapter(adapter);
-        hourSpinner.setAdapter(adapter);
-        
+        secSpinner = (NumberPicker) findViewById(R.id.secPicker);
+        minSpinner = (NumberPicker) findViewById(R.id.minPicker);
+        hourSpinner = (NumberPicker) findViewById(R.id.houPicker);
+
+        secSpinner.setMaxValue(59);
+        minSpinner.setMaxValue(59);
+        hourSpinner.setMaxValue(24*365);
+
         //set onlicklisteners
         startButton = (Button) findViewById(R.id.startButton);
         startButton.setOnClickListener(new startButtonListener());
@@ -530,27 +512,14 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         minView = (TextView) findViewById(R.id.minView);
         hourView = (TextView) findViewById(R.id.hourView);
         hourLabelView = (TextView) findViewById(R.id.hourLabelView);
-        
-        //set the size
-        TextView sepView = (TextView) findViewById(R.id.sepView1);
-        sepView.setTextSize(VIEW_SIZE - 10);
-        
-        sepView = (TextView) findViewById(R.id.sepView2);
-        sepView.setTextSize(VIEW_SIZE - 10);
-        
-        dsecondsView.setTextSize(VIEW_SIZE);
-        secondsView.setTextSize(VIEW_SIZE);
-        minView.setTextSize(VIEW_SIZE);
-        hourView.setTextSize(VIEW_SIZE - 30);
 
-        startTimeView = null;
+        startTimeView = (TextView) findViewById(R.id.startTimeView);;
         lapView = (TextView) findViewById(R.id.lapView);
-        lapView.setTextSize(VIEW_SIZE - 30);
         setupCommentLongPress(lapView);
         wroteStartTime = false;
 
         lapButton = (Button) findViewById(R.id.lapButton);
-        lapButton.setOnClickListener(new lapButtonListener());
+        lapButton.setOnClickListener(new LapButtonListener());
         
         startButton = (Button) findViewById(R.id.startButton);
         startButton.setOnClickListener(new startButtonListener());
@@ -560,7 +529,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
         lapScroll = (ScrollView) findViewById(R.id.lapScrollView);
 
-	updateHourVisibility();
+		updateHourVisibility();
 
         // inform clock of the new mode
         clock.changeMode(STOP_LAP);
@@ -918,27 +887,25 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         case ABOUT_DIALOG:
 		// dialog text includes clickable URLs
 
-		final TextView tv_about_text = new TextView(this);
-		final SpannableStringBuilder about_str =
-			new SpannableStringBuilder(getText(R.string.about_dialog));
-		Linkify.addLinks(about_str, Linkify.WEB_URLS);
-		tv_about_text.setText(about_str);
-		tv_about_text.setMovementMethod(LinkMovementMethod.getInstance());
+            final TextView tv_about_text = new TextView(this);
+            final SpannableStringBuilder about_str =
+                new SpannableStringBuilder(getText(R.string.about_dialog));
+            Linkify.addLinks(about_str, Linkify.WEB_URLS);
+            tv_about_text.setText(about_str);
+            tv_about_text.setMovementMethod(LinkMovementMethod.getInstance());
 
-        	AlertDialog.Builder aboutBuilder = new AlertDialog.Builder(this);
-		aboutBuilder.setView(tv_about_text)
-        	       .setCancelable(true)
-        	.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                     dialog.dismiss();
-                }
-            });
+                AlertDialog.Builder aboutBuilder = new AlertDialog.Builder(this);
+            aboutBuilder.setView(tv_about_text)
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                         dialog.dismiss();
+                    }
+                });
 
-        	       
         	dialog = aboutBuilder.create();
         	break;
-        	
-               
+
         case SAVE_DIALOG:
         	AlertDialog.Builder saveBuilder = new AlertDialog.Builder(this);
         	saveBuilder.setTitle(R.string.save);
@@ -1009,16 +976,16 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         case DEBUG_LOG_DIALOG:
         	AlertDialog.Builder dldBuilder = new AlertDialog.Builder(this);
 
-		// Include debug log text and optional notes textfield
-		View v = getLayoutInflater().inflate(R.layout.debug_log, null);
-		final TextView tvText = (TextView) v.findViewById(R.id.debugLogText);
-		if (tvText != null)
-			tvText.setText((debugLog != null) ? debugLog : "(null)" );
-		final EditText etNotes = (EditText) v.findViewById(R.id.debugLogNotes);
-		if (etNotes != null)
-			etNotes.setText(debugNotes);
+            // Include debug log text and optional notes textfield
+            View v = getLayoutInflater().inflate(R.layout.debug_log, null);
+            final TextView tvText = (TextView) v.findViewById(R.id.debugLogText);
+            if (tvText != null)
+                tvText.setText((debugLog != null) ? debugLog : "(null)" );
+            final EditText etNotes = (EditText) v.findViewById(R.id.debugLogNotes);
+            if (etNotes != null)
+                etNotes.setText(debugNotes);
 
-		dldBuilder.setView(v)
+            dldBuilder.setView(v)
         		.setTitle(R.string.debug_log)
         		.setCancelable(true)
         		.setNeutralButton(android.R.string.copy, new DialogInterface.OnClickListener() {
@@ -1053,23 +1020,22 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 					}
 				}
 			})
-        		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-        			public void onClick(DialogInterface dialog, int id) {
-					debugNotes.setLength(0);
-					CharSequence notes = etNotes.getText();
-					if (notes.length() > 0)
-						debugNotes.append(notes);
+            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                debugNotes.setLength(0);
+                CharSequence notes = etNotes.getText();
+                if (notes.length() > 0)
+                    debugNotes.append(notes);
 
-        				dialog.dismiss();
-        			}
-        		});
+                    dialog.dismiss();
+                }
+            });
 
         	dialog = dldBuilder.create();
         	break;
 
         default: dialog = null;
 		}
-		
 		
         return dialog;
     }
@@ -1136,8 +1102,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		String body;
 		switch(clock.getMode()) {
 		case COUNTDOWN:
-			int spinnerHrs = hourSpinner.getSelectedItemPosition(),
-			    spinnerMin = minSpinner.getSelectedItemPosition();
+			int spinnerHrs = hourSpinner.getValue(),
+			    spinnerMin = minSpinner.getValue();
 			if (clock.lapf.hourFormat == Clock.HOUR_FMT_MINUTES_PAST_60) {
 				spinnerMin += (60 * spinnerHrs);
 				spinnerHrs = 0;
@@ -1156,7 +1122,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 				+ ":" + dsecondsView.getText().toString() + "\n" + mContext.getResources().getString(R.string.start_time)
 				+ spinnerHoursStr + "\n"
 				+ clock.lapf.nf.format(spinnerMin) + ":"
-				+ clock.lapf.nf.format(secSpinner.getSelectedItemPosition()) + ".0"
+				+ clock.lapf.nf.format(secSpinner.getValue()) + ".0"
 				+ "\n" + startTimeView.getText().toString();
 			break;
 
@@ -1260,9 +1226,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			
 			//looking for the selected Item position (is the same as the Item itself)
 			//using the NumberFormat from class clock to format 
-			final int s = secSpinner.getSelectedItemPosition(),
-			          m = minSpinner.getSelectedItemPosition(),
-			          h = hourSpinner.getSelectedItemPosition();
+			final int s = secSpinner.getValue(),
+			          m = minSpinner.getValue(),
+			          h = hourSpinner.getValue();
 			clock.reset(-1, h, m, s);
 			secondsView.setText(clock.lapf.nf.format(s));
 			minView.setText(clock.lapf.nf.format(m));
@@ -1380,6 +1346,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			sb.append(comment);
 		}
 
+		startTimeView.setText(sb);
+
 		if (lapView != null)
 		{
 			if (formatChanged)
@@ -1387,14 +1355,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 				laps.delete(0, laps.length());  // clear previous contents
 				clock.formatTimeAllLaps(laps);
 			}
-			if (sb.length() > 0)
-				sb.append("\n\n");
-			sb.append(laps);
-			lapView.setText(sb);
-		}
-		else if (startTimeView != null)
-		{
-			startTimeView.setText(sb);	
+			lapView.setText(laps);
 		}
 	}
 
@@ -1508,59 +1469,59 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     	}
     }
     
-    private class lapButtonListener implements OnClickListener {
+    private class LapButtonListener implements OnClickListener {
 
-    	/** lap time for {@link #onClick()}; is empty between uses */
+    	/** lap time for {@link #onClick(View)}; is empty between uses */
     	private StringBuilder sb = new StringBuilder();
 
     	/**
     	 * Lap button clicked; get clock time from
-    	 * {@link Clock#lap(StringBuffer)},
+    	 * {@link Clock#lap(StringBuilder)},
     	 * append it to {@link #laps} and {@link #lapView}.
     	 */
     	public void onClick(View v) {
-		final boolean wasStarted = clock.wasStarted;  // get value before clock.lap()
+			final boolean wasStarted = clock.wasStarted;  // get value before clock.lap()
 
-    		sb.append("\n");
-    		clock.lap(sb);  // format: "lap. #h mm:ss:d"
+			sb.append("\n");
+			clock.lap(sb);  // format: "lap. #h mm:ss:d"
 
-		if (! (wasStarted || wroteStartTime || clock.isStarted))
-		{
-			if (laps == null)
-				laps = new StringBuilder();
-			if (laps.length() == 0)
-				laps.append(getResources().getString(R.string.laps));
+			if (! (wasStarted || wroteStartTime || clock.isStarted))
+			{
+				if (laps == null)
+					laps = new StringBuilder();
+				if (laps.length() == 0)
+					laps.append(getResources().getString(R.string.laps));
 
-			updateStartTimeCommentLapsView(false);
-		}
-        	laps.append(sb);
-        	lapView.append(sb);
+				updateStartTimeCommentLapsView(false);
+			}
+			laps.append(sb);
+			lapView.append(sb);
 
-        	if(vib != null)
-        		vib.vibrate(50);
+			if(vib != null)
+				vib.vibrate(50);
 
-        	// clear sb for the next onClick
-        	sb.delete(0, sb.length());
+			// clear sb for the next onClick
+			sb.delete(0, sb.length());
 
-        	// Scroll to bottom of lap times
-        	lapScroll.post(new Runnable() {
-        	    public void run() {
-        	    	lapScroll.fullScroll(ScrollView.FOCUS_DOWN);
-        	    }
-        	});
+			// Scroll to bottom of lap times
+			lapScroll.post(new Runnable() {
+				public void run() {
+					lapScroll.fullScroll(ScrollView.FOCUS_DOWN);
+				}
+			});
 
-        	// Record new lap in the db
-        	if (dbHelper == null)
-        	{
-        		dbHelper = new AnstopDbAdapter(Anstop.this);
-        		dbHelper.open();
-        	}
-        	dbHelper.createNewLap
-        		(0, clock.lap_elapsed[clock.laps - 2], clock.lap_systime[clock.laps - 2]);
+			// Record new lap in the db
+			if (dbHelper == null)
+			{
+				dbHelper = new AnstopDbAdapter(Anstop.this);
+				dbHelper.open();
+			}
+			dbHelper.createNewLap
+				(0, clock.lap_elapsed[clock.laps - 2], clock.lap_systime[clock.laps - 2]);
 
-		// Back up current state with new lap to SharedPreferences
-		clock.fillSaveState
-			(PreferenceManager.getDefaultSharedPreferences(mContext));
+			// Back up current state with new lap to SharedPreferences
+			clock.fillSaveState
+				(PreferenceManager.getDefaultSharedPreferences(mContext));
     	}
     }
 
@@ -1584,7 +1545,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	    				newMode = cprev + 1;
 	    			changeModeOrPopupConfirm(false, cprev, newMode);
 	    		}
-	    		if(prediction.name.equals("SwipeLeft")) {
+	    		else if(prediction.name.equals("SwipeLeft")) {
 	    			final int cprev = clock.getMode();
 	    			final int newMode;
 	    			if(cprev == 0)

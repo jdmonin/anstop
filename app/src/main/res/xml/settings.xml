@@ -13,42 +13,64 @@
 <PreferenceScreen
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:key="first_preferencescreen">
+
     <CheckBoxPreference
-            android:key="use_motion_sensor" android:summary="@string/motion_checkbox" android:title="@string/motion_sensor"/>
-     <CheckBoxPreference
-            android:key="vibrate" android:summary="@string/vibrate_checkbox" android:title="@string/vibrate" android:defaultValue="true"/>
-     <CheckBoxPreference
+            android:key="use_motion_sensor"
+			android:summary="@string/motion_checkbox"
+			android:title="@string/motion_sensor"/>
+
+    <CheckBoxPreference
+            android:key="vibrate"
+		 	android:summary="@string/vibrate_checkbox"
+		 	android:title="@string/vibrate"
+		 	android:defaultValue="true"/>
+
+    <CheckBoxPreference
             android:key="vibrate_countdown_0"
             android:summary="@string/vibrate_after_countdown_checkbox" android:title="@string/vibrate_after_countdown"
             android:defaultValue="true" />
-<ListPreference android:key="mode" android:title="@string/startup_mode" android:entryValues="@array/modes_ints" android:summary="@string/startup_mode" android:defaultValue="0" android:entries="@array/modes_strings"></ListPreference>
-<ListPreference android:key="hour_format"
-    android:title="@string/hour_counter_format" android:summary="@string/hour_counter_summary"
-    android:entryValues="@array/hour_formats_ints" android:defaultValue="0"
-    android:entries="@array/hour_formats_strings" />
-<PreferenceCategory
-    android:title="@string/lap_display_format">
-	<!--
-		Note: code and xml both assume that by default,
-		lap_format_elapsed is the only flag set.
-	 -->
-	<!-- Anstop.LAP_FMT_FLAG_ELAPSED -->
-	<CheckBoxPreference
-		android:key="lap_format_elapsed"
-		android:defaultValue="true"
-		android:title="@string/lap_format_elapsed"
-		android:summary="@string/lap_format_elapsed_summary" />
-	<!-- Anstop.LAP_FMT_FLAG_DELTA -->
-	<CheckBoxPreference
-		android:key="lap_format_delta"
-		android:defaultValue="false"
-		android:title="@string/lap_format_delta"
-		android:summary="@string/lap_format_delta_summary" />
-	<!-- Anstop.LAP_FMT_FLAG_SYSTIME -->
-	<CheckBoxPreference
-		android:key="lap_format_systime"
-		android:defaultValue="false"
-		android:title="@string/lap_format_wallclock"
-		android:summary="@string/lap_format_wallclock_summary" />
-</PreferenceCategory>
-</PreferenceScreen> 
+
+	<ListPreference
+			android:key="mode"
+			android:title="@string/startup_mode"
+			android:entryValues="@array/modes_ints"
+			android:summary="@string/startup_mode"
+			android:defaultValue="0"
+			android:entries="@array/modes_strings"/>
+
+	<ListPreference
+			android:key="hour_format"
+			android:title="@string/hour_counter_format" android:summary="@string/hour_counter_summary"
+			android:entryValues="@array/hour_formats_ints" android:defaultValue="0"
+			android:entries="@array/hour_formats_strings" />
+
+	<PreferenceCategory
+    		android:title="@string/lap_display_format">
+		<!--
+			Note: code and xml both assume that by default,
+			lap_format_elapsed is the only flag set.
+		 -->
+		<!-- Anstop.LAP_FMT_FLAG_ELAPSED -->
+		<CheckBoxPreference
+			android:key="lap_format_elapsed"
+			android:defaultValue="true"
+			android:title="@string/lap_format_elapsed"
+			android:summary="@string/lap_format_elapsed_summary" />
+
+		<!-- Anstop.LAP_FMT_FLAG_DELTA -->
+		<CheckBoxPreference
+			android:key="lap_format_delta"
+			android:defaultValue="false"
+			android:title="@string/lap_format_delta"
+			android:summary="@string/lap_format_delta_summary" />
+
+		<!-- Anstop.LAP_FMT_FLAG_SYSTIME -->
+		<CheckBoxPreference
+			android:key="lap_format_systime"
+			android:defaultValue="false"
+			android:title="@string/lap_format_wallclock"
+			android:summary="@string/lap_format_wallclock_summary" />
+
+	</PreferenceCategory>
+
+</PreferenceScreen>

@@ -327,9 +327,9 @@ public class Clock {
 		if (parent.hourSpinner != null)
 		{
 			// used by restoreFromSaveStateFields to calc countdnTotalSeconds
-			outState.putInt("clockCountHour", parent.hourSpinner.getSelectedItemPosition());
-			outState.putInt("clockCountMin", parent.minSpinner.getSelectedItemPosition());
-			outState.putInt("clockCountSec", parent.secSpinner.getSelectedItemPosition());
+			outState.putInt("clockCountHour", parent.hourSpinner.getValue());
+			outState.putInt("clockCountMin", parent.minSpinner.getValue());
+			outState.putInt("clockCountSec", parent.secSpinner.getValue());
 		}
 
 		return isStarted;
@@ -395,9 +395,9 @@ public class Clock {
 			if (parent.hourSpinner != null)
 			{
 				// used by restoreFromSaveStateFields to calc countdnTotalSeconds
-				outPref.putInt("anstop_state_clockCountHour", parent.hourSpinner.getSelectedItemPosition());
-				outPref.putInt("anstop_state_clockCountMin", parent.minSpinner.getSelectedItemPosition());
-				outPref.putInt("anstop_state_clockCountSec", parent.secSpinner.getSelectedItemPosition());
+				outPref.putInt("anstop_state_clockCountHour", parent.hourSpinner.getValue());
+				outPref.putInt("anstop_state_clockCountMin", parent.minSpinner.getValue());
+				outPref.putInt("anstop_state_clockCountSec", parent.secSpinner.getValue());
 			} else {
 				outPref.putInt("anstop_state_clockCountHour", 0);
 				outPref.putInt("anstop_state_clockCountMin", 0);
@@ -536,9 +536,9 @@ public class Clock {
 			  m = inState.getInt("clockCountMin"),
 			  s = inState.getInt("clockCountSec");
 			countdnTotalSeconds = ((h * 60) + m) * 60 + s;
-			parent.hourSpinner.setSelection(h);
-			parent.minSpinner.setSelection(m);
-			parent.secSpinner.setSelection(s);
+			parent.hourSpinner.setValue(h);
+			parent.minSpinner.setValue(m);
+			parent.secSpinner.setValue(s);
 		} else {
 			countdnTotalSeconds = 0;
 		}
@@ -648,9 +648,9 @@ public class Clock {
 			  m = inState.getInt("anstop_state_clockCountMin", 0),
 			  s = inState.getInt("anstop_state_clockCountSec", 0);
 			countdnTotalSeconds = ((h * 60) + m) * 60 + s;
-			parent.hourSpinner.setSelection(h);
-			parent.minSpinner.setSelection(m);
-			parent.secSpinner.setSelection(s);
+			parent.hourSpinner.setValue(h);
+			parent.minSpinner.setValue(m);
+			parent.secSpinner.setValue(s);
 		} else {
 			countdnTotalSeconds = 0;
 		}

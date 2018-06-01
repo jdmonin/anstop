@@ -51,7 +51,7 @@
     </item>
     <item android:id="@+id/menu_settings"
         android:title="@string/settings"
-        android:icon="@drawable/baseline_more_vert_black_24"
+        android:icon="@drawable/baseline_settings_black_24"
         android:showAsAction="ifRoom"
         />
     <item android:id="@+id/menu_about"
