@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Main Anstop layout, landscape mode. Hour and mm:ss:d time on same line. -->
+<!-- Left column (45% of width) is hh:mm:ss:d and buttons, right (55%) is laps textview. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/stopwatchLayout"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+
+    <!-- TODO Code refers to both stopwatchLayout and mainLayout; see Anstop.setupGesture -->
+    <LinearLayout
+        android:id="@+id/mainLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_margin="0dp"
+            android:layout_weight=".45"
+            android:orientation="vertical"
+            android:weightSum="1">
+
+            <!-- hh hours mm:ss:d -->
+            <LinearLayout
+                android:id="@+id/LinearLayout02"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <!-- spacer -->
+                <View
+                    android:layout_width="0px"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/hourView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:text="0"/>
+
+                <TextView
+                    android:id="@+id/hourLabelView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/hour"/>
+                <!-- spacer; 3sp is scaled with user's text preferences -->
+                <TextView
+                    android:layout_width="3sp"
+                    android:layout_height="wrap_content"
+                    android:text=""/>
+
+                <TextView
+                    android:id="@+id/minView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00"/>
+
+                <TextView
+                    android:id="@+id/sepView1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=":"/>
+
+                <TextView
+                    android:id="@+id/secondsView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00"/>
+
+                <TextView
+                    android:id="@+id/sepView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=":"/>
+
+                <TextView
+                    android:id="@+id/dsecondsView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"/>
+
+                <!-- spacer -->
+                <View
+                    android:layout_width="0px"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <!-- 3 buttons together fill half of landscape width; height also increased -->
+            <LinearLayout
+                android:id="@+id/LinearLayout01"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="0dp"
+                android:layout_weight="1"
+                android:gravity="top"
+                android:orientation="vertical"
+                android:padding="0dp">
+
+                <Button
+                    android:id="@+id/startButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/start_stop"/>
+
+                <Button
+                    android:id="@+id/resetButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/reset"/>
+
+                <Button
+                    android:id="@+id/lapButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/lap"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- laps to right of time fields and buttons -->
+        <ScrollView
+            android:id="@+id/lapScrollView"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight=".55">
+
+            <TextView
+                android:id="@+id/lapView"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/laps"/>
+        </ScrollView>
+    </LinearLayout>
+</LinearLayout>

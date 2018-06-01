@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/stopwatchLayout"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:paddingBottom="@dimen/screen_padding"
+	android:paddingLeft="@dimen/screen_padding"
+	android:paddingRight="@dimen/screen_padding"
+	android:paddingTop="0dp">
+	<!-- TODO Code refers to both stopwatchLayout and mainLayout; see Anstop.setupGesture -->
+	<LinearLayout
+		android:id="@+id/mainLayout"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:orientation="vertical">
+
+		<RelativeLayout
+			android:id="@+id/RelativeLayout01"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<LinearLayout
+				android:id="@+id/LinearLayout02"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content">
+
+				<!-- spacer -->
+				<View
+					android:layout_width="0px"
+					android:layout_height="match_parent"
+					android:layout_weight="1" />
+
+				<TextView
+					android:id="@+id/hourView"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="0"
+					android:textSize="@dimen/clock_font_size_tiny" />
+
+				<TextView
+					android:id="@+id/hourLabelView"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/hour"
+					android:textSize="@dimen/clock_font_size_tiny" />
+				<!-- spacer; 3sp is scaled with user's text preferences -->
+				<TextView
+					android:layout_width="3sp"
+					android:layout_height="wrap_content"
+					android:text="" />
+
+				<TextView
+					android:id="@+id/minView"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="00"
+					android:textSize="@dimen/clock_font_size" />
+
+				<TextView
+					android:id="@+id/sepView1"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text=":"
+					android:textSize="@dimen/clock_font_size_small" />
+
+				<TextView
+					android:id="@+id/secondsView"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="00"
+					android:textSize="@dimen/clock_font_size" />
+
+				<TextView
+					android:id="@+id/sepView2"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text=":"
+					android:textSize="@dimen/clock_font_size_small" />
+
+				<TextView
+					android:id="@+id/dsecondsView"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="0"
+					android:textSize="@dimen/clock_font_size" />
+
+				<!-- spacer -->
+				<View
+					android:layout_width="0px"
+					android:layout_height="match_parent"
+					android:layout_weight="1" />
+			</LinearLayout>
+		</RelativeLayout>
+
+		<!-- 3 buttons together fill activity width; height also increased -->
+		<LinearLayout
+			android:id="@+id/LinearLayout01"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+
+			<Button
+				android:id="@+id/startButton"
+				android:layout_width="0dp"
+				android:layout_height="@dimen/button_big_height"
+				android:layout_weight=".34"
+				android:text="@string/start_stop" />
+
+			<Button
+				android:id="@+id/lapButton"
+				android:layout_width="0dp"
+				android:layout_height="@dimen/button_big_height"
+				android:layout_weight=".33"
+				android:text="@string/lap" />
+		</LinearLayout>
+
+		<TextView
+			android:id="@+id/startTimeView"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:textSize="@dimen/info_font_size" />
+
+		<ScrollView
+			android:id="@+id/lapScrollView"
+			android:layout_width="fill_parent"
+			android:layout_height="match_parent"
+			android:layout_weight="1">
+
+			<TextView
+				android:id="@+id/lapView"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:text="@string/laps"
+				android:textSize="@dimen/lap_font_size" />
+		</ScrollView>
+
+		<Button
+			android:id="@+id/resetButton"
+			android:layout_width="match_parent"
+			android:layout_height="@dimen/button_med_height"
+			android:layout_weight="0"
+			android:text="@string/reset" />
+
+	</LinearLayout>
+</LinearLayout>
