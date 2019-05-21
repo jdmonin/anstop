@@ -1,0 +1,13 @@
+# gitignores for Anstop
+# This file Copyright (C) 2019 Jeremy D Monin (jdmonin@nand.net). License: GPLv3
+
+# android studio / intellij idea
+.idea
+*.iml
+
+# gradle
+/.gradle
+/local.properties
+/build
+/app/build
+
