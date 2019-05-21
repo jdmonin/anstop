@@ -2,7 +2,7 @@
 <!--
  This file is part of Anstop, a stopwatch for Android.
 
- This file Copyright (C) 2015 Jeremy D Monin (jdmonin@nand.net)
+ This file Copyright (C) 2015,2019 Jeremy D Monin (jdmonin@nand.net)
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -20,20 +20,20 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item android:id="@+id/menu_save"
         android:title="@string/save"
-        android:icon="@android:R/drawable/ic_menu_save"
+        android:icon="@android:drawable/ic_menu_save"
         />
     <item android:id="@+id/menu_send"
         android:title="@string/send"
-        android:icon="@android:R/drawable/ic_menu_send"
+        android:icon="@android:drawable/ic_menu_send"
         />
     <item android:id="@+id/menu_load"
         android:title="@string/load"
-        android:icon="@android:R/drawable/ic_menu_upload"
+        android:icon="@android:drawable/ic_menu_upload"
         />
     <!-- mode submenu -->
     <item android:id="@+id/menu_mode_submenu"
         android:title="@string/mode"
-        android:icon="@android:R/drawable/ic_menu_more"
+        android:icon="@android:drawable/ic_menu_more"
         android:showAsAction="ifRoom"
         >
         <menu>
@@ -51,12 +51,12 @@
     </item>
     <item android:id="@+id/menu_settings"
         android:title="@string/settings"
-        android:icon="@android:R/drawable/ic_menu_preferences"
+        android:icon="@android:drawable/ic_menu_preferences"
         android:showAsAction="ifRoom"
         />
     <item android:id="@+id/menu_about"
         android:title="@string/about"
-        android:icon="@android:R/drawable/ic_menu_info_details"
+        android:icon="@android:drawable/ic_menu_info_details"
         />
     <item android:id="@+id/menu_debug_log"
         android:title="@string/debug_log"
