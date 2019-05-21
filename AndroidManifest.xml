@@ -3,7 +3,7 @@
  This file is part of Anstop, a stopwatch for Android.
 
  This file Copyright (C) 2009-2012 by mj (fakeacc.mj@gmail.com)
- Portions of this file Copyright (C) 2012,2015 Jeremy D Monin (jdmonin@nand.net)
+ Portions of this file Copyright (C) 2012,2015,2019 Jeremy D Monin (jdmonin@nand.net)
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="An.stop"
-    android:versionCode="11"
-    android:versionName="1.6" >
+    android:versionCode="170"
+    android:versionName="1.7" >
 
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

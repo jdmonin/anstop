@@ -17,7 +17,7 @@
     <string name="countdown">Countdown</string>
     <string name="countdown_please_set_hms">Bitte wählen Sie die Stunden, Minuten und Sekunden.</string>
     <string name="countdown_completed_please_refresh">Der Countdown ist beendet.\nBitte drücken Sie auf Start, um ihn erneut zu starten.</string>
-    <string name="about_dialog">Anstop v1.6, Eine kleine Anwendung zum Stoppen der Zeit.\nCopyright (C) 2009-2012,2014-2015 MJ und Jeremy Monin \n\nFür Quellcode, besuchen Sie https://github.com/jdmonin/anstop</string>
+    <string name="about_dialog">Anstop v1.7, Eine kleine Anwendung zum Stoppen der Zeit.\nCopyright (C) 2009-2012,2014-2015,2019 MJ und Jeremy Monin \n\nFür Quellcode, besuchen Sie https://github.com/jdmonin/anstop</string>
     <string name="save">Speichern</string>
     <string name="load">Laden</string>
     <string name="debug_log">Debugprotokoll</string>
