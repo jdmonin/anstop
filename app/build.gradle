@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 14
+    compileSdkVersion 19
     buildToolsVersion "28.0.3"
 
     defaultConfig {
         applicationId "An.stop"
         minSdkVersion 8
-        targetSdkVersion 14
+        targetSdkVersion 19
         compileOptions {
             sourceCompatibility JavaVersion.VERSION_1_5
             targetCompatibility JavaVersion.VERSION_1_5
