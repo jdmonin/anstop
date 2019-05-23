@@ -146,7 +146,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	TextView minView;
 	/**
 	 * The hours field and its label, shown or hidden in
-	 * {@link #updateHourVisibility() and {@link Clock.hourhandler} as needed.
+	 * {@link #updateHourVisibility()} and {@link Clock.hourhandler} as needed.
 	 */
 	TextView hourView, hourLabelView;
 
@@ -1262,10 +1262,18 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			          m = minSpinner.getSelectedItemPosition(),
 			          h = hourSpinner.getSelectedItemPosition();
 			clock.reset(-1, h, m, s);
+
+			updateHourVisibility();
 			secondsView.setText(clock.lapf.nf.format(s));
-			minView.setText(clock.lapf.nf.format(m));
-			hourView.setText(Integer.toString(h));
-	
+			if (hourView.getVisibility() == View.VISIBLE) {
+				minView.setText(clock.lapf.nf.format(m));
+				hourView.setText(Integer.toString(h));
+			} else {
+				// hour is 0 and/or hourFormat == Clock.HOUR_FMT_MINUTES_PAST_60
+				minView.setText(clock.lapf.nf.format(h * 60 + m));
+				hourView.setText(Integer.toString(h));
+			}
+
 			wroteStartTime = false;
 			if (comment == null)
 				startTimeView.setText("");

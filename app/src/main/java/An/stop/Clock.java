@@ -965,7 +965,9 @@ public class Clock {
 	 * and <tt>h</tt>, <tt>m</tt>, <tt>s</tt> are ignored.
 	 *
 	 * @param newMode  new mode to set, or -1 to leave as is
-	 * @param h  for countdown mode, hour to reset the clock to
+	 * @param h  for countdown mode, hour to reset the clock to.
+	 *       If current {@link Clock.LapFormatter#hourFormat} is {@link #HOUR_FMT_MINUTES_PAST_60},
+	 *       will instead be added to minutes as {@code h * 60}.
 	 * @param m  minute to reset the clock to
 	 * @param s  second to reset the clock to
 	 * @return true if was reset, false if was not reset because {@link #isStarted} is true.
