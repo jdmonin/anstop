@@ -64,7 +64,7 @@ import android.view.View;  // only for hourhandler to hide/show hours views if n
  * firing every 100ms.  The {@link #parent}'s hour:minute:second.dsec displays are updated
  * through {@link #hourh} and the rest of the handlers here.
  *<P>
- * To lap, call {@link #lap(StringBuffer)}.  Note that persisting the lap data arrays
+ * To lap, call {@link #lap(StringBuilder)}.  Note that persisting the lap data arrays
  * at Activity.onStop must be done in {@link Anstop}, not here.
  * {@link #fillSaveState(Bundle)} stores the lap data arrays, but there's no corresponding
  * method to save long arrays to {@link SharedPreferences}.
@@ -206,7 +206,7 @@ public class Clock {
 	 * from {@link System#currentTimeMillis()}.
 	 * Read-only outside this class, please.
 	 * The highest occupied index is ({@link #laps} - 2).
-	 * If this array is about to be filled, {@link #lap(StringBuffer)} will extend it.
+	 * If this array is about to be filled, {@link #lap(StringBuilder)} will extend it.
 	 *<P>
 	 * Not persisted in {@link #fillSaveState(Bundle)} or {@link #fillSaveState(SharedPreferences)}.
 	 * Instead, current laps must be stored in the database.
@@ -761,13 +761,13 @@ public class Clock {
 
 	/**
 	 * Get the current value of this timer.
-	 * @return a stringbuffer of the form "#h mm:ss:d"
+	 * @return a StringBuilder of the form "#h mm:ss:d"
 	 * @since 1.3
 	 * @see #getCurrentValueMillis()
 	 */
-	public StringBuffer getCurrentValue()
+	public StringBuilder getCurrentValue()
 	{
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		if ((hour > 0) || (lapf.hourFormat == HOUR_FMT_ALWAYS_SHOW))
 		{
 			sb.append(hour);
@@ -783,10 +783,10 @@ public class Clock {
 
 	/**
 	 * Get the current value of this timer, in milliseconds.
-	 * @param sb  Optional StringBuffer, or null;
+	 * @param sb  Optional StringBuilder, or null;
 	 *    current value in the format "#h mm:ss:d" will be appended to sb
-	 *    depending on {@link #lapFormatFlags}.
-	 *    if {@link #lapFormatFlags} includes {@link #LAP_FMT_FLAG_DELTA},
+	 *    depending on {@link LapFormatter#lapFormatFlags}.
+	 *    if {@link LapFormatter#lapFormatFlags} includes {@link #LAP_FMT_FLAG_DELTA},
 	 *    and {@link #laps} &gt; 1, then {@link #lap_elapsed}[{@link #laps} - 2]
 	 *    must be accurate to calculate the delta.
 	 * @param withLap  If true, sb will have the lap number too;
@@ -814,7 +814,7 @@ public class Clock {
 	/**
 	 * Write all laps into <tt>sb</tt> using the current format flags.
 	 * If {@link #laps} is 1, do nothing.
-	 * @param sb  StringBuffer to write into; not null
+	 * @param sb  StringBuilder to write into; not null
 	 */
 	public void formatTimeAllLaps(StringBuilder sb)
 		throws IllegalArgumentException
@@ -1338,7 +1338,7 @@ public class Clock {
 		public int lapFormatFlags = LAP_FMT_FLAG_ELAPSED;
 
 		/**
-		 * Time-of-day format used in {@link Clock#getCurrentValueMillis(StringBuffer, boolean)}
+		 * Time-of-day format used in {@link Clock#getCurrentValueMillis(StringBuilder, boolean)}
 		 * for lap format, when {@link Clock#LAP_FMT_FLAG_SYSTIME} is used.
 		 *<P>
 		 * This is null initially; {@link Clock#LAP_FMT_FLAG_ELAPSED} doesn't need it.
@@ -1519,7 +1519,7 @@ public class Clock {
 		/**
 		 * Write all laps into <tt>sb</tt> using the current format flags.
 		 * If <tt>laps</tt> is 1, do nothing.
-		 * @param sb  StringBuffer to write into; not null
+		 * @param sb  StringBuilder to write into; not null
 		 * @param laps  Lap count + 1, same as {@link Clock#laps} field
 		 * @param lap_elapsed  Elapsed times, same format as {@link Clock#lap_elapsed}
 		 * @param lap_systime  System times, same format as {@link Clock#lap_systime}

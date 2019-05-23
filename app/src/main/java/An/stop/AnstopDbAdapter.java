@@ -150,7 +150,7 @@ public class AnstopDbAdapter {
      * Date formatter for day of week + user's medium date format + hh:mm:ss;
      * used in {@link #getRowAndFormat(long)} for "started at:".
      */
-    private StringBuffer fmt_dow_meddate_time;
+    private StringBuilder fmt_dow_meddate_time;
 
     private static class DataBaseHelper extends SQLiteOpenHelper {
 

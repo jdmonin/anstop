@@ -116,15 +116,16 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * Date formatter for day of week + user's medium date format + hh:mm:ss;
 	 * used in {@link #updateStartTimeCommentLapsView(boolean)} for "started at:".
 	 */
-	private StringBuffer fmt_dow_meddate_time;
+	private StringBuilder fmt_dow_meddate_time;
 
 	/** Date formatter for just hh:mm:ss; used in {@link #addDebugLog(CharSequence)}. */
-	private StringBuffer fmt_debuglog_time;
+	private StringBuilder fmt_debuglog_time;
 
 	Clock clock;
 
 	/** Lap data for {@link #lapView}. */
 	StringBuilder laps;
+
 	/**
 	 * Optional comment, or null.
 	 * In the layout, Start time, <tt>comment</tt>, and {@link #laps}
@@ -132,6 +133,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * @see #updateStartTimeCommentLapsView(boolean)
 	 */
 	String comment;
+
 	/** start/stop (resume/pause). This button is used in both layouts (Stopwatch and Countdown). */
 	Button startButton;
 	/** in stopwatch/lap mode, reset the count */
@@ -1177,11 +1179,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 * @param ctx calling context
 	 * @param timeOnly  If true, wants time of day only (12- or 24-hour per user preferences).
 	 *     If false, also wants day of week, year, month, day (formatted for locale).
-	 * @return a StringBuffer usable in {@link DateFormat#format(CharSequence, long)}
+	 * @return a StringBuilder usable in {@link DateFormat#format(CharSequence, long)}
 	 */
-	static StringBuffer buildDateFormat(Context ctx, final boolean timeOnly)
+	static StringBuilder buildDateFormat(Context ctx, final boolean timeOnly)
 	{
-		StringBuffer fmt_dow_meddate = new StringBuffer();
+		StringBuilder fmt_dow_meddate = new StringBuilder();
 
 		if (! timeOnly)
 		{
@@ -1357,7 +1359,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		if (fmt_dow_meddate_time == null)
 			fmt_dow_meddate_time = buildDateFormat(Anstop.this, false);
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 
 		final long sttime = clock.getStartTimeActual();
 		if (sttime != -1L)
@@ -1506,12 +1508,12 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     
     private class lapButtonListener implements OnClickListener {
 
-    	/** lap time for {@link #onClick()}; is empty between uses */
+    	/** lap time for {@link #onClick(View)}; is empty between uses */
     	private StringBuilder sb = new StringBuilder();
 
     	/**
     	 * Lap button clicked; get clock time from
-    	 * {@link Clock#lap(StringBuffer)},
+    	 * {@link Clock#lap(StringBuilder)},
     	 * append it to {@link #laps} and {@link #lapView}.
     	 */
     	public void onClick(View v) {
@@ -1732,4 +1734,5 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	debugLog.append(msg);
 	debugLog.append("\n");
     }
+
 }
