@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009-2010 by mj                                         *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2012,2015 Jeremy Monin            *
+ *   Portions of this file Copyright (C) 2012,2015,2019 Jeremy Monin       *
  *     jeremy@nand.net                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -231,7 +231,7 @@ public class AnstopDbAdapter {
      * If there are laps, add them afterwards by calling {@link #createNewLaps(long, int, long[], long[])}.
      * @param title  Title
      * @param comment   Comment, or null. In v2 this body text also included the start time and laps.
-     * @param mode   Stopwatch mode used: {@link Anstop#STOP_LAP} or {@link Anstop#COUNTDOWN}
+     * @param mode   Stopwatch mode used: {@link Clock#STOP_LAP} or {@link Clock#COUNTDOWN}
      * @param startTime  Start time (milliseconds), or -1L if never started.
      *    This same convention is returned by {@link Clock#getStartTimeActual()}.
      * @param stopTime   Stop time (milliseconds), or -1L for none
@@ -355,7 +355,7 @@ public class AnstopDbAdapter {
 				// mode
 				sb.append(mContext.getResources().getString(R.string.mode_was));
 				sb.append(' ');
-				if (Anstop.COUNTDOWN == time.getInt(col_mode))
+				if (Clock.COUNTDOWN == time.getInt(col_mode))
 					sb.append(mContext.getResources().getString(R.string.countdown));
 				else
 					sb.append(mContext.getResources().getString(R.string.stop));

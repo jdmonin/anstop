@@ -1,8 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009-2011 by mj										   *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010-2012,2014-2016 Jeremy Monin  *
- *    jeremy@nand.net                                                      *
+ *   Portions of this file Copyright (C) 2010-2012,2014-2016,2019 Jeremy Monin  jeremy@nand.net  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -69,7 +68,7 @@ import android.widget.LinearLayout.LayoutParams;
  *<P>
  * Uses either of 2 layouts, depending on the {@link Clock#getMode() current mode}:
  * <tt>main</tt> or <tt>countdown</tt>.
- * Main implements {@link #STOP_LAP} which includes Lap mode.
+ * Main implements {@link Clock#STOP_LAP} which includes Lap mode.
  *<P>
  * Many fields' visibility are non-private for use by
  * {@link Clock#fillSaveState(Bundle)} and {@link Clock#restoreFromSaveState(Bundle)}.
@@ -87,14 +86,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	 */
 	private static final boolean DEBUG_LOG_ENABLED = true;
 
-	/** Stopwatch/lap mode (and layout), for {@link Clock#getMode()} */
-	public static final int STOP_LAP = 0;  // STOP,LAP combined after v1.4 (see svn r47)
-
-	/** Countdown mode (and layout), for {@link Clock#getMode()} */
-	public static final int COUNTDOWN = 1;
-
-	/** Lap mode (and layout), for {@link Clock#getMode(int)} */
-	private static final int OBSOL_LAP = 2;  // STOP,LAP combined after v1.4 (see svn r47)
+	/**
+	 * Obsolete mode constant for Lap mode, kept for upgrades from old versions.
+	 * After v1.4 this mode was combined into {@link Clock#STOP_LAP}.
+	 */
+	private static final int OBSOL_LAP = 2;  // STOP,LAP combined at r47 aee1c29
 
 	private static final int ABOUT_DIALOG = 0;
 	private static final int SAVE_DIALOG = 1;
@@ -159,11 +155,13 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	/** scrollview containing {@link #lapView} */
 	ScrollView lapScroll;
 
-	/** {@link #COUNTDOWN} spinner to select starting seconds */
+	/** {@link Clock#COUNTDOWN}-mode spinner to select starting seconds */
 	Spinner secSpinner;
-	/** {@link #COUNTDOWN} spinner to select starting minutes */
+
+	/** {@link Clock#COUNTDOWN}-mode spinner to select starting minutes */
 	Spinner minSpinner;
-	/** {@link #COUNTDOWN} spinner to select starting hours */
+
+	/** {@link Clock#COUNTDOWN}-mode spinner to select starting hours */
 	Spinner hourSpinner;
 
 	/** Context menu item for Mode. Null until {@link #onCreateOptionsMenu(Menu)} is called. */
@@ -214,9 +212,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
 	/**
 	 * Called when the activity is first created.
-	 * Assumes {@link #STOP_LAP} mode and sets that layout.
+	 * Assumes {@link Clock#STOP_LAP} mode and sets that layout.
 	 * Preferences are read, which calls setCurrentMode.
-	 * Also called later, to set the mode/layout back to {@link #STOP_LAP}.
+	 * Also called later, to set the mode/layout back to {@link Clock#STOP_LAP}.
 	 */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -335,7 +333,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	        int settingMode = Integer.parseInt(settings.getString("mode", "0")); // 0 == STOP_LAP
 	        if (settingMode == OBSOL_LAP)
 	        {
-	        	settingMode = STOP_LAP;
+	        	settingMode = Clock.STOP_LAP;
 	        	Editor outPref = settings.edit();
 	        	outPref.putString("mode", "0");
 	        	outPref.commit();
@@ -402,7 +400,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
      *<P>
      * Does nothing if {@link Clock#isStarted}, or if current mode is already {@code newCurrent}.
      *
-     * @param newCurrent {@link #STOP_LAP} or {@link #COUNTDOWN}
+     * @param newCurrent {@link Clock#STOP_LAP} or {@link Clock#COUNTDOWN}
      */
 	private void setCurrentMode(final int newCurrent)
 	{
@@ -411,22 +409,20 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
 		switch (newCurrent)
 		{
-		case STOP_LAP:
+        case OBSOL_LAP:
+            // fallthrough
+		case Clock.STOP_LAP:
 			stopwatch();
 			break;
 
-		case COUNTDOWN:
+		case Clock.COUNTDOWN:
 			countdown();
-			break;
-
-		case OBSOL_LAP: // STOP,LAP combined after v1.4 (see svn r47)
-			stopwatch();
 			break;
 		}
 	}
 
     /**
-     * Set the layout to {@link #COUNTDOWN}, and
+     * Set the layout to {@link Clock#COUNTDOWN}, and
      * inform clock class to count down now.
      */
     public void countdown() {
@@ -496,13 +492,13 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	updateHourVisibility();
 
         // inform clock class to count down now
-        clock.changeMode(COUNTDOWN);
+        clock.changeMode(Clock.COUNTDOWN);
 
         setupGesture();
     }
 
     /**
-     * Set the layout to {@link #STOP_LAP}, and reset clock to 0:0:0.0.
+     * Set the layout to {@link Clock#STOP_LAP}, and reset clock to 0:0:0.0.
      * inform clock class to count laps now (same clock-action as STOP).
      */
     public void stopwatch() {
@@ -563,7 +559,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	updateHourVisibility();
 
         // inform clock of the new mode
-        clock.changeMode(STOP_LAP);
+        clock.changeMode(Clock.STOP_LAP);
 
         setupGesture();
     }
@@ -609,10 +605,10 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
      */
     private ViewGroup getLayout(final int index) {
     	switch(index) {
-		case COUNTDOWN:
+		case Clock.COUNTDOWN:
 			return (ViewGroup) findViewById(R.id.countDownLayout);
 			
-		case STOP_LAP:
+		case Clock.STOP_LAP:
 			return (ViewGroup) findViewById(R.id.stopwatchLayout);
 			
 		}
@@ -654,9 +650,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
 		if ((spSavedAt == -1) || (spSavedAt < bundleSavedAt))
 		{
-			int newCurrent = inState.getInt("clockAnstopCurrent", STOP_LAP);
+			int newCurrent = inState.getInt("clockAnstopCurrent", Clock.STOP_LAP);
 			if (newCurrent == OBSOL_LAP)
-				newCurrent = STOP_LAP;
+				newCurrent = Clock.STOP_LAP;
 			setCurrentMode(newCurrent);
 			clock.restoreFromSaveState(inState);
 		} else {
@@ -734,9 +730,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			return;
 		}
 
-		int newCurrent = settings.getInt("anstop_state_current", STOP_LAP);
+		int newCurrent = settings.getInt("anstop_state_current", Clock.STOP_LAP);
 		if (newCurrent == OBSOL_LAP)
-			newCurrent = STOP_LAP;
+			newCurrent = Clock.STOP_LAP;
 		setCurrentMode(newCurrent);
 		clock.restoreFromSaveState(settings);
 		updateHourVisibility();  // reads clock.hours just set by clock.restoreFromSaveState
@@ -838,10 +834,10 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	private void updateModeMenuFromCurrent() {
 		switch (clock.getMode())
 	    	{
-    		case STOP_LAP:
+    		case Clock.STOP_LAP:
     			if(modeMenu_itemStop != null)
     				modeMenu_itemStop.setChecked(true);  break;
-	    	case COUNTDOWN:
+	    	case Clock.COUNTDOWN:
 	    		if(modeMenu_itemStop != null)
 	    			modeMenu_itemCountdown.setChecked(true);  break;
 	    	}
@@ -859,11 +855,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	return true;
 
         case R.id.menu_mode_stop:
-        	changeModeOrPopupConfirm(true, clock.getMode(), STOP_LAP);
+        	changeModeOrPopupConfirm(true, clock.getMode(), Clock.STOP_LAP);
             return true;
             
         case R.id.menu_mode_countdown:
-        	changeModeOrPopupConfirm(false, clock.getMode(), COUNTDOWN);
+        	changeModeOrPopupConfirm(false, clock.getMode(), Clock.COUNTDOWN);
         	return true;
 
         case R.id.menu_about:
@@ -1104,9 +1100,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     private String currentModeAsString() {
     	int modus;
     	switch(clock.getMode()) {
-		case COUNTDOWN:
+		case Clock.COUNTDOWN:
 			modus = R.string.countdown;  break;
-		case STOP_LAP:
+		case Clock.STOP_LAP:
 			modus = R.string.stop;  break;
     	default:
     		return "(unknown)";
@@ -1135,7 +1131,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
 		String body;
 		switch(clock.getMode()) {
-		case COUNTDOWN:
+		case Clock.COUNTDOWN:
 			int spinnerHrs = hourSpinner.getSelectedItemPosition(),
 			    spinnerMin = minSpinner.getSelectedItemPosition();
 			if (clock.lapf.hourFormat == Clock.HOUR_FMT_MINUTES_PAST_60) {
@@ -1160,7 +1156,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 				+ "\n" + startTimeView.getText().toString();
 			break;
 
-		case STOP_LAP:
+		case Clock.STOP_LAP:
 			body = mContext.getResources().getString(R.string.mode_was) + " " 
 				+ mContext.getResources().getString(R.string.stop)
 				+ hoursStr
@@ -1406,14 +1402,14 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     		// If starting to count in countdown mode, but 'refresh' hasn't
     		// been clicked, the clock shows 0:0:0 and nothing will happen.
     		// Refresh automatically.
-    		if ((currentMode == COUNTDOWN) && (! clock.isStarted) && (! clock.wasStarted))
+    		if ((currentMode == Clock.COUNTDOWN) && (! clock.isStarted) && (! clock.wasStarted))
     		{
     			clickRefreshCountdownTime(true);
     		}
 
     		// If starting to count in countdown mode, but the clock has 0:0:0,
     		// nothing will happen.  Let the user know.
-    		if ((currentMode == COUNTDOWN) && (! clock.isStarted) &&     		
+    		if ((currentMode == Clock.COUNTDOWN) && (! clock.isStarted) &&
 				(clock.hour == 0) && (clock.min == 0) && (clock.sec == 0) && (clock.dsec == 0))
     		{
     			final int resId;
@@ -1623,7 +1619,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			{
 				animateSwitch(animateToLeft, currMode);
 			} else {
-				if (newMode == STOP_LAP)
+				if (newMode == Clock.STOP_LAP)
 					stopwatch();
 				else
 					countdown();
@@ -1660,7 +1656,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 				{
 					animateSwitch(toRight, currMode);
 				} else {
-					if (newMode == STOP_LAP)
+					if (newMode == Clock.STOP_LAP)
 						stopwatch();
 					else
 						countdown();
@@ -1701,10 +1697,11 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 			//@Override
 			public void onAnimationEnd(Animation animation) {
 				switch(clock.getMode()) {
-				case COUNTDOWN:
+				case Clock.COUNTDOWN:
 					countdown();
 					break;
-				case STOP_LAP:
+
+				case Clock.STOP_LAP:
 					stopwatch();
 					break;
 				}

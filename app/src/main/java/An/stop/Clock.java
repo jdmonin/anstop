@@ -1,8 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009-2011 by mj   									   *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010-2012,2015 Jeremy Monin       *
- *    jeremy@nand.net                                                      *
+ *   Portions of this file Copyright (C) 2010-2012,2015,2019 Jeremy Monin  jeremy@nand.net  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -39,7 +38,7 @@ import android.view.View;  // only for hourhandler to hide/show hours views if n
 /**
  * Timer object and thread.
  *<P>
- * Has two modes ({@link Anstop#STOP_LAP} and {@link Anstop#COUNTDOWN}); clock's mode field is {@link #v}.
+ * Has two modes ({@link #STOP_LAP} and {@link #COUNTDOWN}); clock's mode field is {@link #v}.
  * Has accessible fields for the current {@link #hour}, {@link #min}, {@link #sec}, {@link #dsec}.
  * Has a link to the {@link #parent} Anstop, and will sometimes read or set parent's text field contents.
  *<P>
@@ -111,10 +110,24 @@ public class Clock {
 	public static final int LAP_FMT_FLAG_SYSTIME = 4;
 
 	/**
+	 * Stopwatch/lap mode, for {@link #getMode()} and {@link Anstop} layout.
+	 * Before v1.7 this field was in {@link Anstop}.
+	 * @see #COUNTDOWN
+	 */
+	public static final int STOP_LAP = 0;
+
+	/**
+	 * Countdown mode, for {@link #getMode()} and {@link Anstop} layout.
+	 * Before v1.7 this field was in {@link Anstop}.
+	 * @see #STOP_LAP
+	 */
+	public static final int COUNTDOWN = 1;
+
+	/**
 	 * Counting mode. Two possibilities:
 	 *<UL>
-	 *<LI> {@link Anstop#STOP_LAP} (0), counting up from 0
-	 *<LI> {@link Anstop#COUNTDOWN} (1), counting down from a time set by the user
+	 *<LI> {@link #STOP_LAP} (0), counting up from 0
+	 *<LI> {@link #COUNTDOWN} (1), counting down from a time set by the user
 	 *</UL>
 	 * @see #getMode()
 	 * @see #changeMode(int)
@@ -443,7 +456,7 @@ public class Clock {
 		if (appPauseTime > appStateRestoreTime)
 			adjClockOnAppResume(false, System.currentTimeMillis());
 
-		if(v == Anstop.STOP_LAP) {
+		if(v == STOP_LAP) {
 			if((threadS != null) && threadS.isAlive())
 				threadS.interrupt();
 			threadS = new clockThread();
@@ -601,7 +614,7 @@ public class Clock {
 
 		// set v to ensure consistent state; should be set already
 		// by changeMode before this method was called.
-		v = inState.getInt("anstop_state_current", Anstop.STOP_LAP);
+		v = inState.getInt("anstop_state_current", STOP_LAP);
 
 		// read the counting fields
 		{
@@ -710,7 +723,7 @@ public class Clock {
 			// based on our mode, adjust dsec, sec, min, hour:
 			switch (v)
 			{
-			case Anstop.STOP_LAP:
+			case STOP_LAP:
 				ttotal = resumedAtTime - startTimeAdj;
 				break;
 	
@@ -833,7 +846,7 @@ public class Clock {
 
 	/**
 	 * Get the clock's current counting mode.
-	 * @return  the mode; {@link Anstop#STOP_LAP} or {@link Anstop#COUNTDOWN}
+	 * @return  the mode; {@link #STOP_LAP} or {@link #COUNTDOWN}
 	 * @see #changeMode(int)
 	 * @see #reset(int, int, int, int)
 	 */
@@ -948,7 +961,7 @@ public class Clock {
 
 	/**
 	 * Reset the clock while stopped, and maybe change modes.  {@link #isStarted} must be false.
-	 * If <tt>newMode</tt> is {@link Anstop#STOP_LAP}, the clock will be reset to 0,
+	 * If <tt>newMode</tt> is {@link #STOP_LAP}, the clock will be reset to 0,
 	 * and <tt>h</tt>, <tt>m</tt>, <tt>s</tt> are ignored.
 	 *
 	 * @param newMode  new mode to set, or -1 to leave as is
@@ -974,7 +987,7 @@ public class Clock {
 		startTimeAdj = -1L;
 
 		laps = 1;
-		if (v == Anstop.STOP_LAP)
+		if (v == STOP_LAP)
 		{
 			hour = 0;
 			min = 0;
@@ -1001,7 +1014,7 @@ public class Clock {
 	 * If the current mode is already <tt>newMode</tt>, change it anyway;
 	 * calls <tt>reset</tt> to update all fields.
 	 * @see #reset(int, int, int, int)
-	 * @param newMode  The new mode; {@link Anstop#STOP_LAP} or {@link Anstop#COUNTDOWN}
+	 * @param newMode  The new mode; {@link #STOP_LAP} or {@link #COUNTDOWN}
 	 */
 	public void changeMode(final int newMode)
 	{
@@ -1038,7 +1051,7 @@ public class Clock {
 
 			isStarted = true;
 			wasStarted = true;
-			if(v == Anstop.STOP_LAP) {
+			if(v == STOP_LAP) {
 				if((threadS != null) && threadS.isAlive())
 					threadS.interrupt();
 				threadS = new clockThread();
@@ -1064,7 +1077,7 @@ public class Clock {
 			isStarted = false;
 			stopTime = now;
 			
-			if(v == Anstop.STOP_LAP) {
+			if(v == STOP_LAP) {
 				if(threadS.isAlive())
 					threadS.interrupt();
 			}
