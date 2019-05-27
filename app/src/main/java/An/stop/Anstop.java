@@ -934,6 +934,8 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
         	       
         	dialog = aboutBuilder.create();
+        	// override default 0 spacing between text and edge of dialog
+        	((AlertDialog) dialog).setView(tv_about_text, 9, 9, 9, 9);
         	break;
         	
                
