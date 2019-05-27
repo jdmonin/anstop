@@ -3,9 +3,10 @@
 <!-- Main Anstop layout, landscape mode. Hour and mm:ss:d time on same line. -->
 <!-- Left column (45% of width) is hh:mm:ss:d and buttons, right (55%) is laps textview. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/stopwatchLayout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:id="@+id/stopwatchLayout">
+    android:padding="4sp" >
 
     <!-- TODO Code refers to both stopwatchLayout and mainLayout; see Anstop.setupGesture -->
     <LinearLayout

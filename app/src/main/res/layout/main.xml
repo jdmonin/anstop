@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/stopwatchLayout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:id="@+id/stopwatchLayout">
+    android:padding="4sp" >
     <!-- TODO Code refers to both stopwatchLayout and mainLayout; see Anstop.setupGesture -->
     <LinearLayout
 		android:id="@+id/mainLayout"
