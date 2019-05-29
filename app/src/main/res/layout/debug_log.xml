@@ -7,7 +7,7 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	    android:orientation="vertical"
-	    android:padding="4sp" >
+	    android:padding="?an_activity_padding" >
 
 	    <TextView
 		android:id="@+id/debugLogText"

@@ -3,7 +3,7 @@
 	android:orientation="vertical"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
-	android:padding="4sp" >
+	android:padding="?an_activity_padding" >
 
     <ListView android:id="@+id/android:list"
           android:layout_width="fill_parent"

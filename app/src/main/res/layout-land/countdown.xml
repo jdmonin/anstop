@@ -15,7 +15,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:orientation="vertical"
-            android:padding="4sp" >
+            android:padding="?an_activity_padding" >
 
             <LinearLayout
                 android:id="@+id/LinearLayout02"

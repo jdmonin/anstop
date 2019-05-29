@@ -2,7 +2,7 @@
 <!--
  This file is part of Anstop, a stopwatch for Android.
 
- This file Copyright (C) 2015 Jeremy D Monin (jdmonin@nand.net)
+ This file Copyright (C) 2015,2019 Jeremy D Monin (jdmonin@nand.net)
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,6 @@
 		 Note that android:Theme.Light isn't guaranteed to be usable or consistent,
 		 depending on vendor skin, so we'll just go with the dark default theme on 2.x.
 		-->
-		<!-- Currently no customizations -->
+		<item name="an_activity_padding">4sp</item>
 	</style>
 </resources>

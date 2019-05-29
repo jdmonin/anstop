@@ -4,7 +4,7 @@
     android:id="@+id/stopwatchLayout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:padding="4sp" >
+    android:padding="?an_activity_padding" >
     <!-- TODO Code refers to both stopwatchLayout and mainLayout; see Anstop.setupGesture -->
     <LinearLayout
 		android:id="@+id/mainLayout"
