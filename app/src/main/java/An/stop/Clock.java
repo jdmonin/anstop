@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009-2011 by mj   									   *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010-2012,2015,2019 Jeremy Monin  jeremy@nand.net  *
+ *   Portions of this file Copyright (C) 2010-2012,2015,2019,2021 Jeremy Monin  jeremy@nand.net  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -1078,13 +1078,13 @@ public class Clock {
 			stopTime = now;
 			
 			if(v == STOP_LAP) {
-				if(threadS.isAlive())
+				if ((threadS != null) && threadS.isAlive())
 					threadS.interrupt();
 			}
 				
 			else {
 				// Anstop.COUNTDOWN
-				if(threadC.isAlive())
+				if ((threadC != null) && threadC.isAlive())
 					threadC.interrupt();
 			}
 		}
