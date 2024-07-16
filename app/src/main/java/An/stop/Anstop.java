@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009-2011 by mj										   *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010-2012,2014-2016,2019 Jeremy Monin  jeremy@nand.net  *
+ *   Portions of this file Copyright (C) 2010-2012,2014-2016,2019,2024 Jeremy Monin  jeremy@nand.net  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -113,6 +113,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	/**
 	 * Date formatter for day of week + user's medium date format + hh:mm:ss;
 	 * used in {@link #updateStartTimeCommentLapsView(boolean)} for "started at:".
+	 * Uses pattern characters of {@link java.text.SimpleDateFormat}.
 	 */
 	private StringBuilder fmt_dow_meddate_time;
 
@@ -1176,6 +1177,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
 	/**
 	 * Build {@link #fmt_dow_meddate_time} or {@link #fmt_debuglog_time}.
+	 * Uses pattern characters of {@link java.text.SimpleDateFormat}.
 	 * @param ctx calling context
 	 * @param timeOnly  If true, wants time of day only (12- or 24-hour per user preferences).
 	 *     If false, also wants day of week, year, month, day (formatted for locale).
@@ -1187,25 +1189,21 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
 		if (! timeOnly)
 		{
-			final char da = DateFormat.DAY;
-			fmt_dow_meddate.append(da);
-			fmt_dow_meddate.append(da);
-			fmt_dow_meddate.append(da);
-			fmt_dow_meddate.append(da);
-			fmt_dow_meddate.append(' ');
+			fmt_dow_meddate.append("EEEE ");  // day of week
 
 			// year-month-date array will be 3 chars: yMd, Mdy, etc
+			// (the same chars used in java.text.SimpleDateFormat patterns)
 			final char[] ymd_order = DateFormat.getDateFormatOrder(ctx);
 			for (char c : ymd_order)
 			{
 				fmt_dow_meddate.append(c);
 				fmt_dow_meddate.append(c);
-				if (c == DateFormat.YEAR)
+				if (c == 'y')
 				{
 					fmt_dow_meddate.append(c);
 					fmt_dow_meddate.append(c);
 				}
-				else if (c == DateFormat.MONTH)
+				else if (c == 'M')
 					fmt_dow_meddate.append(c);
 				if (c != ymd_order[2])
 					fmt_dow_meddate.append(' ');
@@ -1215,22 +1213,13 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
 		// now hh:mm:ss[ am/pm]
 		final boolean is24 = DateFormat.is24HourFormat(ctx);
-		final char hh = is24 ? DateFormat.HOUR_OF_DAY : DateFormat.HOUR;
+		final char hh = is24 ? 'H' : 'h';
 		fmt_dow_meddate.append(hh);
 		if (is24)
 			fmt_dow_meddate.append(hh);
-		fmt_dow_meddate.append(':');
-		fmt_dow_meddate.append(DateFormat.MINUTE);
-		fmt_dow_meddate.append(DateFormat.MINUTE);
-		fmt_dow_meddate.append(':');
-		fmt_dow_meddate.append(DateFormat.SECONDS);
-		fmt_dow_meddate.append(DateFormat.SECONDS);
+		fmt_dow_meddate.append(":mm:ss");
 		if (! is24)
-		{
-			fmt_dow_meddate.append(' ');
-			fmt_dow_meddate.append(DateFormat.AM_PM);
-			fmt_dow_meddate.append(DateFormat.AM_PM);
-		}
+			fmt_dow_meddate.append(" aa");
 
 		return fmt_dow_meddate;
 	}
