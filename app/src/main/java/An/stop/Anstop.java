@@ -1404,17 +1404,19 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 
 	/**
 	 * Briefly vibrate when the Start/Stop or Lap button is tapped/clicked.
-	 * Uses max amplitude because user might be moving and exercising.
-	 * In device's system settings, Vibration and Haptics must be on
-	 * and (android 14+) Touch Feedback slider must be nonzero.
+	 *<P>
+	 * In device's system settings, Vibration and Haptics must be on.
+	 * Uses a similar pattern as {@link Clock.countDownThread} so that
+	 * (in android 14+) vibrates even when Touch Feedback system setting is zero.
 	 * @since 1.7
 	 */
 	private void vibrateForClick() {
 		if (vib != null) {
+			final long[] VIB_PATTERN_MS = { 0, 50, 20, 30 };  // needs 2 pulses, or doesn't vibe when Touch Feedback is 0
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-				vib.vibrate(VibrationEffect.createOneShot(50, 255));
+				vib.vibrate(VibrationEffect.createWaveform(VIB_PATTERN_MS, -1));
 			else
-				vib.vibrate(50);
+				vib.vibrate(VIB_PATTERN_MS, -1);
 		}
 	}
     private class startButtonListener implements OnClickListener {
