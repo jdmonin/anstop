@@ -36,8 +36,11 @@ import android.gesture.GestureLibrary;
 import android.gesture.GestureOverlayView;
 import android.gesture.Prediction;
 import android.gesture.GestureOverlayView.OnGesturePerformedListener;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorManager;
 import android.preference.PreferenceManager;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
@@ -287,11 +290,17 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	if(al != null)
         		al.stop();
         }
-        
-        if( settings.getBoolean("vibrate", true) ) 
-        	vib = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
-        else
-        	vib = null;
+
+        if (settings.getBoolean("vibrate", true)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                VibratorManager vm = (VibratorManager) getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
+                vib = (vm != null) ? vm.getDefaultVibrator() : null;
+            } else {
+                vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            }
+        } else {
+            vib = null;
+        }
 
         // Hour Counter and Lap Display Format settings
         try
@@ -1393,6 +1402,21 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		}
 	}
 
+	/**
+	 * Briefly vibrate when the Start/Stop or Lap button is tapped/clicked.
+	 * Uses max amplitude because user might be moving and exercising.
+	 * In device's system settings, Vibration and Haptics must be on
+	 * and (android 14+) Touch Feedback slider must be nonzero.
+	 * @since 1.7
+	 */
+	private void vibrateForClick() {
+		if (vib != null) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+				vib.vibrate(VibrationEffect.createOneShot(50, 255));
+			else
+				vib.vibrate(50);
+		}
+	}
     private class startButtonListener implements OnClickListener {
     	
     	public void onClick(View v) {
@@ -1427,10 +1451,9 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     			modeMenuItem.setEnabled(!clock.isStarted);
     			saveMenuItem.setEnabled(!clock.isStarted);
     		}
-    		
-    		
-    		if(vib != null)
-    			vib.vibrate(50);
+
+
+    		vibrateForClick();
     		
 		if (clock.isStarted)
 		{
@@ -1531,8 +1554,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
         	laps.append(sb);
         	lapView.append(sb);
 
-        	if(vib != null)
-        		vib.vibrate(50);
+        	vibrateForClick();
 
         	// clear sb for the next onClick
         	sb.delete(0, sb.length());
