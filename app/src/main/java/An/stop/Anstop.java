@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009-2011 by mj										   *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010-2012,2014-2016,2019,2024 Jeremy Monin  jeremy@nand.net  *
+ *   Portions of this file Copyright (C) 2010-2012,2014-2016,2019,2024,2026 Jeremy Monin  jeremy@nand.net  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -367,6 +367,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
      *<UL>
      *<LI> <tt>lap_format_elapsed</tt> -&gt; {@link Clock#LAP_FMT_FLAG_ELAPSED}
      *<LI> <tT>lap_format_delta</tt> -&gt; {@link Clock#LAP_FMT_FLAG_DELTA}
+     *<LI> <tt>lap_format_seconds_deci</tt> -&gt; {@link Clock#LAP_FMT_FLAG_SECONDS_DECI}
      *<LI> <tt>lap_format_systime</tt> -&gt; {@link Clock#LAP_FMT_FLAG_SYSTIME}
      *</UL>
      * @param settings  Shared preferences, from
@@ -378,10 +379,12 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 	public static int readLapFormatPrefFlags(SharedPreferences settings) {
 		final boolean lapFmtElapsed = settings.getBoolean("lap_format_elapsed", true),
 		              lapFmtDelta   = settings.getBoolean("lap_format_delta", false),
+		              lapFmtSecondsDeci = settings.getBoolean("lap_format_seconds_deci", false),
 		              lapFmtSystime = settings.getBoolean("lap_format_systime", false);
 		int settingLap = 0;
 		if (lapFmtElapsed) settingLap += Clock.LAP_FMT_FLAG_ELAPSED;
 		if (lapFmtDelta)   settingLap += Clock.LAP_FMT_FLAG_DELTA;
+		if (lapFmtSecondsDeci) settingLap += Clock.LAP_FMT_FLAG_SECONDS_DECI;
 		if (lapFmtSystime) settingLap += Clock.LAP_FMT_FLAG_SYSTIME;
 		return settingLap;
 	}

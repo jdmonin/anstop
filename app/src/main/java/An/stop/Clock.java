@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009-2011 by mj   									   *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2010-2012,2015,2019,2021 Jeremy Monin  jeremy@nand.net  *
+ *   Portions of this file Copyright (C) 2010-2012,2015,2019,2021,2026 Jeremy Monin  jeremy@nand.net  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -22,7 +22,9 @@ package An.stop;
 
 
 import java.text.DateFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.util.Locale;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -106,6 +108,12 @@ public class Clock {
 
 	/** Lap time format flag: System time. <tt>@hh:mm</tt> */
 	public static final int LAP_FMT_FLAG_SYSTIME = 4;
+
+	/**
+	 * Lap time format flag: Deciseconds with decimal. <tt>.d</tt> not </tt>:d</tt>
+	 * @since 1.7
+	 */
+	public static final int LAP_FMT_FLAG_SECONDS_DECI = 8;
 
 	/**
 	 * Stopwatch/lap mode, for {@link #getMode()} and {@link Anstop} layout.
@@ -252,8 +260,7 @@ public class Clock {
 	 * Used by {@link #onAppResume()}, to prevent 2 adjustments after a restore.
 	 */
 	private long appStateRestoreTime;
-	
-	
+
 	public Clock(Anstop parent) {
 		this.parent = parent;
 		lapf = new LapFormatter();
@@ -1338,6 +1345,13 @@ public class Clock {
 		public int lapFormatFlags = LAP_FMT_FLAG_ELAPSED;
 
 		/**
+		 * Decimal separator for seconds, normally ':'.
+		 * If {@link Clock#LAP_FMT_FLAG_SECONDS_DECI} is set, is '.' or ',' per locale.
+		 * @since 1.7
+		 */
+		public char deciSecondSep = ':';
+
+		/**
 		 * Time-of-day format used in {@link Clock#getCurrentValueMillis(StringBuilder, boolean)}
 		 * for lap format, when {@link Clock#LAP_FMT_FLAG_SYSTIME} is used.
 		 *<P>
@@ -1399,6 +1413,10 @@ public class Clock {
 				throw new IllegalArgumentException();
 			lapFormatFlags = newFormatFlags;
 			lapFormatTimeOfDay = formatForSysTime;
+			deciSecondSep =
+				(0 != (lapFormatFlags & LAP_FMT_FLAG_SECONDS_DECI))
+				? DecimalFormatSymbols.getInstance(Locale.getDefault()).getDecimalSeparator()
+				: ':';
 		}
 
 		/**
@@ -1466,7 +1484,7 @@ public class Clock {
 				sb.append(nf.format(m));
 				sb.append(':');
 				sb.append(nf.format(s));
-				sb.append(':');
+				sb.append(deciSecondSep);
 				sb.append(ds);
 				sbNeedsSpace = true;
 			}
@@ -1500,7 +1518,7 @@ public class Clock {
 				sb.append(nf.format(dm));
 				sb.append(':');
 				sb.append(nf.format(dsec));
-				sb.append(':');
+				sb.append(deciSecondSep);
 				sb.append(dds);
 				sb.append(')');
 				sbNeedsSpace = true;

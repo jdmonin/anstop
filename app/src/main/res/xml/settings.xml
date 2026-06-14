@@ -3,7 +3,7 @@
  Preference settings for Anstop.
 
  This file Copyright (C) 2009-2010 mj (fakeacc.mj@gmail.com)
- Portions of this file copyright (C) 2010,2012,2015 Jeremy D Monin (jeremy@nand.net)
+ Portions of this file copyright (C) 2010,2012,2015,2026 Jeremy D Monin (jeremy@nand.net)
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -44,6 +44,12 @@
 		android:defaultValue="false"
 		android:title="@string/lap_format_delta"
 		android:summary="@string/lap_format_delta_summary" />
+	<!-- Anstop.LAP_FMT_FLAG_SECONDS_DECI -->
+	<CheckBoxPreference
+		android:key="lap_format_seconds_deci"
+		android:defaultValue="false"
+		android:title="@string/lap_format_seconds_deci"
+		android:summary="@string/lap_format_seconds_deci_summary" />
 	<!-- Anstop.LAP_FMT_FLAG_SYSTIME -->
 	<CheckBoxPreference
 		android:key="lap_format_systime"
@@ -51,4 +57,4 @@
 		android:title="@string/lap_format_wallclock"
 		android:summary="@string/lap_format_wallclock_summary" />
 </PreferenceCategory>
-</PreferenceScreen> 
+</PreferenceScreen>
