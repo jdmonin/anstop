@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "An.stop"
-        minSdkVersion 8
+        minSdkVersion 19
         targetSdkVersion 19
         compileOptions {
             sourceCompatibility JavaVersion.VERSION_1_8

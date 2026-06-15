@@ -326,8 +326,7 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		}
         	if (settingLap != clock.lapf.lapFormatFlags)
         	{
-        		clock.setLapFormat
-        			(settingLap, DateFormat.getTimeFormat(getApplicationContext()));
+        		clock.setLapFormat(settingLap, getApplicationContext());
 			needUpdate = true;
         	}
 
@@ -363,12 +362,13 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
     /**
      * Read the boolean lap format flags from shared preferences,
      * and add them together in the format used by
-     * {@link Clock#setLapFormat(int, java.text.DateFormat)}.
+     * {@link Clock#setLapFormat(int, Context)}.
      *<UL>
      *<LI> <tt>lap_format_elapsed</tt> -&gt; {@link Clock#LAP_FMT_FLAG_ELAPSED}
      *<LI> <tT>lap_format_delta</tt> -&gt; {@link Clock#LAP_FMT_FLAG_DELTA}
      *<LI> <tt>lap_format_seconds_deci</tt> -&gt; {@link Clock#LAP_FMT_FLAG_SECONDS_DECI}
      *<LI> <tt>lap_format_systime</tt> -&gt; {@link Clock#LAP_FMT_FLAG_SYSTIME}
+	 *<LI> <tt>lap_format_systime_seconds</tt> -&gt; {@link Clock#LAP_FMT_FLAG_SYSTIME_SECONDS}
      *</UL>
      * @param settings  Shared preferences, from
      *    {@link PreferenceManager#getDefaultSharedPreferences(Context)}
@@ -380,12 +380,15 @@ public class Anstop extends Activity implements OnGesturePerformedListener {
 		final boolean lapFmtElapsed = settings.getBoolean("lap_format_elapsed", true),
 		              lapFmtDelta   = settings.getBoolean("lap_format_delta", false),
 		              lapFmtSecondsDeci = settings.getBoolean("lap_format_seconds_deci", false),
-		              lapFmtSystime = settings.getBoolean("lap_format_systime", false);
+		              lapFmtSystime = settings.getBoolean("lap_format_systime", false),
+		              lapFmtSystimeSeconds = settings.getBoolean("lap_format_systime_seconds", false);
 		int settingLap = 0;
 		if (lapFmtElapsed) settingLap += Clock.LAP_FMT_FLAG_ELAPSED;
 		if (lapFmtDelta)   settingLap += Clock.LAP_FMT_FLAG_DELTA;
 		if (lapFmtSecondsDeci) settingLap += Clock.LAP_FMT_FLAG_SECONDS_DECI;
 		if (lapFmtSystime) settingLap += Clock.LAP_FMT_FLAG_SYSTIME;
+		if (lapFmtSystimeSeconds) settingLap += Clock.LAP_FMT_FLAG_SYSTIME_SECONDS;
+
 		return settingLap;
 	}
 

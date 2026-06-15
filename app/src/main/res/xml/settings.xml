@@ -56,5 +56,11 @@
 		android:defaultValue="false"
 		android:title="@string/lap_format_wallclock"
 		android:summary="@string/lap_format_wallclock_summary" />
+	<!-- Anstop.LAP_FMT_FLAG_SYSTIME_SECONDS -->
+	<CheckBoxPreference
+		android:key="lap_format_systime_seconds"
+		android:defaultValue="false"
+		android:title="@string/lap_format_wallclock_seconds"
+		android:summary="@string/lap_format_wallclock_seconds_summary" />
 </PreferenceCategory>
 </PreferenceScreen>

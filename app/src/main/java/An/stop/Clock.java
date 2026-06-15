@@ -24,6 +24,7 @@ package An.stop;
 import java.text.DateFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 import android.content.Context;
@@ -106,14 +107,23 @@ public class Clock {
 	/** Lap time format flag: Delta. <tt>(+h mm:ss:d)</tt> */
 	public static final int LAP_FMT_FLAG_DELTA = 2;
 
-	/** Lap time format flag: System time. <tt>@hh:mm</tt> */
+	/**
+	 * Lap time format flag: System time. <tt>@hh:mm</tt>
+	 * @see #LAP_FMT_FLAG_SYSTIME_SECONDS
+	 */
 	public static final int LAP_FMT_FLAG_SYSTIME = 4;
+
+	/**
+	 * Lap time format flag: System time (if {@link #LAP_FMT_FLAG_SYSTIME} used) includes seconds. <tt>@hh:mm:ss</tt>
+	 * @since 1.7
+	 */
+	public static final int LAP_FMT_FLAG_SYSTIME_SECONDS = 8;
 
 	/**
 	 * Lap time format flag: Deciseconds with decimal. <tt>.d</tt> not </tt>:d</tt>
 	 * @since 1.7
 	 */
-	public static final int LAP_FMT_FLAG_SECONDS_DECI = 8;
+	public static final int LAP_FMT_FLAG_SECONDS_DECI = 16;
 
 	/**
 	 * Stopwatch/lap mode, for {@link #getMode()} and {@link Anstop} layout.
@@ -146,7 +156,7 @@ public class Clock {
 	 * Read-only from {@link Anstop} class.
 	 * The active format flags are {@link Clock.LapFormatter#lapFormatFlags lapf.lapFormatFlags};
 	 * the default is {@link #LAP_FMT_FLAG_ELAPSED} only.
-	 * To change, call {@link #setLapFormat(int, DateFormat)}.
+	 * To change, call {@link #setLapFormat(int, Context)}.
 	 */
 	public LapFormatter lapf;
 
@@ -900,17 +910,15 @@ public class Clock {
 	/**
 	 * Set the lap format flags.
 	 * @param newFormatFlags  Collection of flags, such as {@link #LAP_FMT_FLAG_DELTA}; not 0
-	 * @param formatForSysTime Short time format in case {@link #LAP_FMT_FLAG_SYSTIME} is used; not null.
-	 *    Value should be <tt>android.text.format.DateFormat.getTimeFormat(getApplicationContext())</tt>.
-	 *    Note that <tt>getTimeFormat</tt> gives hours and minutes, it has no standard way to include the seconds;
-	 *    if more precision is needed, the user can get it from elapsed or delta seconds.
-	 * @throws IllegalArgumentException if flags &lt;= 0, or <tt>formatForSysTime == null</tt> 
+	 * @param mContext  Context to get locale and short time format in case {@link #LAP_FMT_FLAG_SYSTIME} is used; not null.
+	 *    Value can be <tt>getApplicationContext()</tt>.
+	 * @throws IllegalArgumentException if flags &lt;= 0, or <tt>mContext == null</tt>
 	 * @see #setHourFormat(int)
 	 */
-	public void setLapFormat(final int newFormatFlags, final DateFormat formatForSysTime)
+	public void setLapFormat(final int newFormatFlags, final Context mContext)
 		throws IllegalArgumentException
 	{
-		lapf.setLapFormat(newFormatFlags, formatForSysTime);
+		lapf.setLapFormat(newFormatFlags, mContext);
 	}
 
 	/**
@@ -1336,7 +1344,7 @@ public class Clock {
 		 * Any lap format flags, such as {@link Clock#LAP_FMT_FLAG_SYSTIME}, currently
 		 * active; the default is {@link Clock#LAP_FMT_FLAG_ELAPSED} only.
 		 * Read-only from {@link Anstop} class.
-		 * To change, call {@link #setLapFormat(int, DateFormat)}.
+		 * To change, call {@link #setLapFormat(int, Context)}.
 		 *<P>
 		 * <b>Note:</b> Currently, code and settings.xml both assume that
 		 * the default format has LAP_FMT_FLAG_ELAPSED and no others,
@@ -1356,7 +1364,7 @@ public class Clock {
 		 * for lap format, when {@link Clock#LAP_FMT_FLAG_SYSTIME} is used.
 		 *<P>
 		 * This is null initially; {@link Clock#LAP_FMT_FLAG_ELAPSED} doesn't need it.
-		 * If {@link #setLapFormat(int, DateFormat)} changes {@link #lapFormatFlags} to
+		 * If {@link #setLapFormat(int, Context)} changes {@link #lapFormatFlags} to
 		 * anything else, it's a required parameter, so it would be non-null when needed.
 		 */
 		private java.text.DateFormat lapFormatTimeOfDay;
@@ -1399,20 +1407,24 @@ public class Clock {
 		/**
 		 * Set the lap format flags.
 		 * @param newFormatFlags  Collection of flags, such as {@link Clock#LAP_FMT_FLAG_DELTA}; not 0
-		 * @param formatForSysTime Short time format in case {@link Clock#LAP_FMT_FLAG_SYSTIME} is used; not null.
-		 *    Value should be <tt>android.text.format.DateFormat.getTimeFormat(getApplicationContext())</tt>.
-		 *    Note that <tt>getTimeFormat</tt> gives hours and minutes, it has no standard way to include the seconds;
-		 *    if more precision is needed, the user can get it from elapsed or delta seconds.
-		 * @throws IllegalArgumentException if flags &lt;= 0, or <tt>formatForSysTime == null</tt> 
+		 * @param mContext  Context to get locale and short time format in case {@link Clock#LAP_FMT_FLAG_SYSTIME} is used; not null.
+		 *    Value can be <tt>getApplicationContext()</tt>.
+		 * @throws IllegalArgumentException if flags &lt;= 0, or <tt>mContext == null</tt>
 		 * @see Clock#setHourFormat(int)
 		 */
-		public void setLapFormat(final int newFormatFlags, final DateFormat formatForSysTime)
+		public void setLapFormat(final int newFormatFlags, final Context mContext)
 			throws IllegalArgumentException
 		{
-			if ((newFormatFlags <= 0) || (formatForSysTime == null))
+			if ((newFormatFlags <= 0) || (mContext == null))
 				throw new IllegalArgumentException();
 			lapFormatFlags = newFormatFlags;
-			lapFormatTimeOfDay = formatForSysTime;
+			lapFormatTimeOfDay =
+				(0 != (lapFormatFlags & LAP_FMT_FLAG_SYSTIME_SECONDS))
+				? new SimpleDateFormat
+					(android.text.format.DateFormat.getBestDateTimePattern
+					    (Locale.getDefault(), "jms"), // "hh:mm:ss"
+					 Locale.getDefault())
+				: android.text.format.DateFormat.getTimeFormat(mContext);
 			deciSecondSep =
 				(0 != (lapFormatFlags & LAP_FMT_FLAG_SECONDS_DECI))
 				? DecimalFormatSymbols.getInstance(Locale.getDefault()).getDecimalSeparator()

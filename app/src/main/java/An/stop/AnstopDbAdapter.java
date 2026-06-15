@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2009-2010 by mj                                         *
  *   fakeacc.mj@gmail.com  												   *
- *   Portions of this file Copyright (C) 2012,2015,2019 Jeremy Monin       *
+ *   Portions of this file Copyright (C) 2012,2015,2019,2026 Jeremy Monin  *
  *     jeremy@nand.net                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -398,8 +398,7 @@ public class AnstopDbAdapter {
 					fetchAllLaps(rowId, lap_elapsed, lap_systime);
 					final int fmtFlags = Anstop.readLapFormatPrefFlags(settings);
 					if ((fmtFlags != 0) && (fmtFlags != Clock.LAP_FMT_FLAG_ELAPSED))
-						lapf.setLapFormat
-							(fmtFlags, android.text.format.DateFormat.getTimeFormat(mContext));
+						lapf.setLapFormat(fmtFlags, mContext);
 					lapf.formatTimeAllLaps(sb, lapCount + 1, lap_elapsed, lap_systime);
 				}
 

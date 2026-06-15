@@ -75,4 +75,6 @@
 <string name="lap_format_seconds_deci_summary">Tenth of seconds as .d, not :d</string>
 <string name="lap_format_wallclock">Wall clock: @ hh:mm</string>
 <string name="lap_format_wallclock_summary">Time of day</string>
+<string name="lap_format_wallclock_seconds">Wall clock includes seconds: hh:mm:ss</string>
+<string name="lap_format_wallclock_seconds_summary">If format uses time of day, that includes :ss</string>
 </resources>
