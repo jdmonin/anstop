@@ -1422,7 +1422,9 @@ public class Clock {
 				(0 != (lapFormatFlags & LAP_FMT_FLAG_SYSTIME_SECONDS))
 				? new SimpleDateFormat
 					(android.text.format.DateFormat.getBestDateTimePattern
-					    (Locale.getDefault(), "jms"), // "hh:mm:ss"
+						(Locale.getDefault(),
+						 (android.text.format.DateFormat.is24HourFormat(mContext))
+						 ? "Hms" : "hms"), // "hh:mm:ss [am/pm]"
 					 Locale.getDefault())
 				: android.text.format.DateFormat.getTimeFormat(mContext);
 			deciSecondSep =
